@@ -19,4 +19,21 @@ config.resolver.nodeModulesPaths = [
 // is used across the workspace.
 config.resolver.disableHierarchicalLookup = true;
 
+// expo-sqlite ships its web implementation as a WebAssembly build of SQLite,
+// which Metro will not resolve unless `wasm` is a known asset extension.
+// Without this, any web bundle that reaches src/lib/offline/database.ts fails
+// on `./wa-sqlite/wa-sqlite.wasm` even though the file is present.
+config.resolver.assetExts.push('wasm');
+
+// That same web build stores the database in a SharedArrayBuffer, which
+// browsers only expose to cross-origin isolated pages. The dev server has to
+// send these headers or the worker cannot start.
+config.server.enhanceMiddleware = (middleware) => {
+  return (req, res, next) => {
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    middleware(req, res, next);
+  };
+};
+
 module.exports = config;
