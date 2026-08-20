@@ -2,6 +2,7 @@ export { ActivityRow, type ActivityRowProps } from './activity-row';
 export { AppointmentCard, type AppointmentCardProps } from './appointment-card';
 export { Button, type ButtonProps, type ButtonVariant } from './button';
 export { Card } from './card';
+export { GoogleButton, type GoogleButtonProps } from './google-button';
 export { MedicationCard, type MedicationCardProps } from './medication-card';
 export { OptionCard, type OptionCardProps } from './option-card';
 export { PermissionToggle, type PermissionToggleProps } from './permission-toggle';

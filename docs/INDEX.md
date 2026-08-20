@@ -44,4 +44,6 @@
                             18 Future roadmap        15-v2-v3-v4-roadmap.md
 
                             19 Agent instructions    16-agent-development-guide.md
+
+                            20 Google authentication 19-google-authentication.md
   -----------------------------------------------------------------------------------------

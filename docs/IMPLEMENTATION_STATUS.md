@@ -1,12 +1,18 @@
 # Implementation Status
 
-Last updated: 2026-08-19
+Last updated: 2026-08-20
 
 ## Current Phase
 
-**Phase 9 — Final MVP Integration & Production Readiness: complete.**
+**Phase 10 — Google Social Authentication: code complete, blocked on console
+configuration.**
 
-**The MeraCare MVP is complete.** Nothing beyond it has been started.
+The MVP (Phases 1–9) is complete. Phase 10 adds "Continue with Google" beside
+email sign-in on iOS, Android, and web. Every code path, test, and platform
+build is done and verified; the end-to-end sign-in is **not** verified, because
+the Google provider is not enabled in the Supabase project and enabling it needs
+Google Cloud and Supabase dashboard access. See Blocker 6 and
+`docs/19-google-authentication.md`.
 
 ## Verification Is Local
 
@@ -486,6 +492,51 @@ coordination to somebody else is now just granting them the permission.
   blank space, and a raw server error (`SQLSTATE …`) never reaches the screen.
 
 
+## Completed — Phase 10
+
+**Google sign-in, behind the existing authentication abstraction.** Screens call
+`useAuthActions()`; nothing outside `src/features/auth` touches
+`supabase.auth.signInWithOAuth`, and nothing downstream of the session knows
+which provider was used. `SessionProvider`, session persistence, token refresh,
+and sign-out are untouched.
+
+- `src/features/auth/google.ts` (iOS, Android) opens Google with
+  `WebBrowser.openAuthSessionAsync`, reads the authorization code off the
+  `meracare://auth/callback` deep link, and exchanges it with the PKCE verifier
+  the client stored. `google.web.ts` navigates the page instead and lets
+  `detectSessionInUrl` do the exchange. The two share a result type; the public
+  interface is identical, and Metro picks the right file per platform — verified
+  by exporting all three bundles and confirming `openAuthSessionAsync` is absent
+  from the web bundle.
+- `flowType: 'pkce'` is now explicit in `src/lib/supabase.ts`. No token is ever
+  returned in a redirect URL.
+- `src/app/auth/callback.tsx` is where the redirect lands; it waits for the
+  session and hands over to `/home`, or to `/sign-in` if the exchange failed.
+- `src/components/ui/google-button.tsx` uses Google's own mark, keeps the 48dp
+  touch target, and carries pressed, loading, and disabled states.
+  `useAuthActions` tracks *which* action is pending, so one tap starts exactly
+  one flow and the email button never spins for a Google sign-in.
+- Cancellation is a distinct outcome from failure throughout: backing out of the
+  Google screen, dismissing the sheet, and declining consent all return the
+  person to sign-in with no error and no account.
+
+**The Go API was not changed**, which was the point. It keys application users to
+`auth.users.id`, so a Google identity linked to an existing account resolves to
+the same `users.id` and the same care data. A test now pins that a
+Google-provider token verifies on the same path as any other
+(`internal/auth/token_test.go`). No Google verification, no Google tokens in
+Postgres, no `google_users` table, no email matching in the API.
+
+**Tests:** 6 native-flow cases (success, dismissal, declined consent, provider
+error, malformed callback, failed exchange, failed start), 5 hook cases
+(success, cancellation, failure, an unexpected throw replaced with a message
+that leaks nothing, single-flight), and 5 screen cases. Mobile 263 passing (246
+before this phase), Go suite green with `-race`, typecheck and lint clean, all
+three bundles export.
+
+**Not verified:** the genuine Google sign-in and the `GET /v1/me` call that
+follows it. Blocker 6.
+
 ## Architectural Decisions Taken in Phase 1
 
 These are implementation choices within the locked architecture — nothing in
@@ -686,12 +737,41 @@ docs/12 or docs/17 was changed.
    unDraw/Storyset illustrations are needed, along with `ASSET_LICENSES.md`
    (docs/18).
 
+6. **Google sign-in cannot be exercised — the provider is not enabled.** The
+   client is complete and the failure is confirmed to be configuration, not
+   code. The project's own settings endpoint reports it:
+
+   ```bash
+   curl -s "$SUPABASE_URL/auth/v1/settings" -H "apikey: $SUPABASE_ANON_KEY"
+   # → "external": { ..., "google": false, ... }
+   ```
+
+   and the authorize endpoint the app calls answers 400
+   `Unsupported provider: provider is not enabled` — which is exactly the
+   message the button surfaces today. Enabling it needs two consoles this
+   environment has no access to: a Google Cloud OAuth client, and the Supabase
+   dashboard to hold its secret. `docs/19-google-authentication.md` has the
+   exact settings for both, including the redirect URLs.
+
+   **Therefore unverified, and not claimed:** a real Google sign-in on any
+   platform, the session it produces, `GET /v1/me` with that session, and the
+   account-linking behaviour when a Google address matches an existing
+   email/password account. The linking behaviour follows from Supabase's
+   automatic identity linking and from the API keying users to `auth.users.id`
+   rather than to an email, and the reasoning is written down — but it has not
+   been observed. `docs/19-google-authentication.md` ends with the seven-step
+   manual test to run once the consoles are configured.
+
+   Note this compounds Blocker 1: even with Google enabled, a *linked* sign-in
+   needs a confirmed email/password account to link to.
+
 ## Pending
 
 Near-term, before or alongside Phase 2:
 
-- **Apple and Google sign-in** once the Supabase project has the providers
-  configured (docs/12).
+- **Apple sign-in** once the Supabase project has the provider configured
+  (docs/12). Google is implemented (Phase 10) and slots in beside it in
+  `use-auth-actions.ts`; Apple is the same shape.
 - **OpenAPI document** for `/v1` (docs/05 lists OpenAPI as the contract format).
   Deferred until there are enough endpoints for it to be worth maintaining.
 - **Inter typography** — the type scale is in place, but the Inter font files are

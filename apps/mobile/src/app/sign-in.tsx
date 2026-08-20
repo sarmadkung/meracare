@@ -2,7 +2,7 @@ import { Redirect } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Button, Card, Screen, Text, TextField } from '@/components/ui';
+import { Button, Card, GoogleButton, Screen, Text, TextField } from '@/components/ui';
 import { useSession } from '@/features/auth/session-provider';
 import { useAuthActions } from '@/features/auth/use-auth-actions';
 import { useTheme } from '@/theme';
@@ -10,14 +10,16 @@ import { useTheme } from '@/theme';
 /**
  * Email sign-in and sign-up.
  *
- * Phase 1 establishes the authentication foundation end to end. The full
- * welcome/onboarding flow, and Apple/Google sign-in, arrive with the screen map
- * in docs/13-mvp-screen-map.md.
+ * Email and Google both end in the same Supabase session, so everything past
+ * this screen is provider-agnostic (plans/phase10.md §26). The full
+ * welcome/onboarding flow, and Apple sign-in, arrive with the screen map in
+ * docs/13-mvp-screen-map.md.
  */
 export default function SignInScreen() {
   const theme = useTheme();
   const { isSignedIn } = useSession();
-  const { signIn, signUp, isSubmitting, error, clearError } = useAuthActions();
+  const { signIn, signUp, signInWithGoogle, pending, isSubmitting, error, clearError } =
+    useAuthActions();
 
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
   const [email, setEmail] = useState('');
@@ -29,6 +31,11 @@ export default function SignInScreen() {
   }
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
+
+  async function handleGoogle() {
+    setNotice(null);
+    await signInWithGoogle();
+  }
 
   async function handleSubmit() {
     setNotice(null);
@@ -99,15 +106,28 @@ export default function SignInScreen() {
           label={mode === 'signIn' ? 'Sign in' : 'Create account'}
           onPress={handleSubmit}
           disabled={!canSubmit}
-          loading={isSubmitting}
+          loading={pending === 'email'}
         />
 
         <Button
           variant="ghost"
           label={mode === 'signIn' ? 'New here? Create an account' : 'I already have an account'}
           onPress={switchMode}
+          disabled={isSubmitting}
         />
       </Card>
+
+      <View style={{ gap: theme.spacing.md }}>
+        <Text variant="secondary" color="secondary" style={{ textAlign: 'center' }}>
+          or
+        </Text>
+
+        <GoogleButton
+          onPress={handleGoogle}
+          loading={pending === 'google'}
+          disabled={isSubmitting}
+        />
+      </View>
     </Screen>
   );
 }

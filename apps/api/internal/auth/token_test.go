@@ -27,6 +27,7 @@ type tokenOverrides struct {
 	method    jwt.SigningMethod
 	secret    string
 	omitExp   bool
+	provider  string
 }
 
 func signToken(t *testing.T, o tokenOverrides) string {
@@ -53,13 +54,16 @@ func signToken(t *testing.T, o tokenOverrides) string {
 	if o.secret == "" {
 		o.secret = testSecret
 	}
+	if o.provider == "" {
+		o.provider = "apple"
+	}
 
 	claims := jwt.MapClaims{
 		"sub":          o.subject,
 		"aud":          o.audience,
 		"iss":          o.issuer,
 		"iat":          o.issuedAt.Unix(),
-		"app_metadata": map[string]any{"provider": "apple"},
+		"app_metadata": map[string]any{"provider": o.provider},
 	}
 	if o.email != "" {
 		claims["email"] = o.email
@@ -199,5 +203,33 @@ func TestBearerToken(t *testing.T) {
 		if ok != tc.wantOK || token != tc.wantToken {
 			t.Errorf("BearerToken(%q) = (%q, %v), want (%q, %v)", tc.header, token, ok, tc.wantToken, tc.wantOK)
 		}
+	}
+}
+
+// The API treats every Supabase provider the same: a Google-issued token is
+// verified on exactly the same path as an Apple or email one, and the provider
+// is recorded rather than gated on (plans/phase10.md §15).
+func TestVerifyAcceptsGoogleProvider(t *testing.T) {
+	t.Parallel()
+
+	subject := uuid.NewString()
+	token := signToken(t, tokenOverrides{
+		subject:  subject,
+		email:    "person@example.com",
+		provider: "google",
+	})
+
+	claims, err := newVerifier(t).Verify(context.Background(), token)
+	if err != nil {
+		t.Fatalf("Verify() error = %v, want nil", err)
+	}
+	if claims.AuthUserID.String() != subject {
+		t.Errorf("AuthUserID = %q, want %q", claims.AuthUserID, subject)
+	}
+	if claims.Provider != "google" {
+		t.Errorf("Provider = %q, want google", claims.Provider)
+	}
+	if claims.Email != "person@example.com" {
+		t.Errorf("Email = %q, want person@example.com", claims.Email)
 	}
 }

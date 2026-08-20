@@ -15,8 +15,14 @@ export const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
     storage: sessionStorage,
     autoRefreshToken: true,
     persistSession: true,
-    // There is no URL to parse on native; deep-link sessions are handled
-    // explicitly when social sign-in is added.
+    // Authorization code + PKCE: no OAuth flow returns tokens in a redirect URL,
+    // and the code is worthless without the verifier this client holds
+    // (docs/09-security-privacy.md).
+    flowType: 'pkce',
+    // There is no URL to parse on native: the Google deep link is read back by
+    // the in-app browser session and exchanged explicitly
+    // (src/features/auth/google.ts). On web the callback lands on the page URL,
+    // so the client picks it up itself.
     detectSessionInUrl: Platform.OS === 'web',
   },
 });
