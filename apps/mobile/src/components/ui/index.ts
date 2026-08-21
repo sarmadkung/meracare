@@ -4,6 +4,7 @@ export { Button, type ButtonProps, type ButtonVariant } from './button';
 export { Card } from './card';
 export { GoogleButton, type GoogleButtonProps } from './google-button';
 export { MedicationCard, type MedicationCardProps } from './medication-card';
+export { NotificationRow, type NotificationRowProps } from './notification-row';
 export { OptionCard, type OptionCardProps } from './option-card';
 export { PermissionToggle, type PermissionToggleProps } from './permission-toggle';
 export { Screen, type ScreenProps } from './screen';

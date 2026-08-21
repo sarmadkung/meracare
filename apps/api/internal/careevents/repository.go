@@ -146,6 +146,77 @@ func (r *Repository) List(
 	}, nil
 }
 
+// RecentEvent is one care event, with the actor's name resolved, as the
+// notification scheduler needs it.
+//
+// A separate shape from Event because it is a different question: Event answers
+// "what is this senior's history?", this answers "what has just happened
+// anywhere, and who did it?" — across every senior, with the name joined in so
+// a sweep does not make one query per event.
+type RecentEvent struct {
+	ID          uuid.UUID
+	SeniorID    uuid.UUID
+	Type        Type
+	ActorUserID *uuid.UUID
+	ActorName   string
+	OccurredAt  time.Time
+}
+
+// ListRecent returns events of the given types that occurred in [from, to),
+// across every senior.
+//
+// Read after commit, which is what makes it safe for the scheduler to notify
+// from: an event that rolled back was never visible, so there is no notification
+// to undo (plans/phase11.md §52).
+func (r *Repository) ListRecent(
+	ctx context.Context,
+	types []Type,
+	from, to time.Time,
+) ([]RecentEvent, error) {
+	if len(types) == 0 {
+		return nil, nil
+	}
+
+	names := make([]string, 0, len(types))
+	for _, eventType := range types {
+		names = append(names, string(eventType))
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT e.id, e.senior_id, e.event_type, e.actor_user_id,
+		       COALESCE(u.display_name, ''), e.occurred_at
+		  FROM care_events e
+		  LEFT JOIN users u ON u.id = e.actor_user_id
+		 WHERE e.event_type = ANY($1)
+		   AND e.occurred_at >= $2 AND e.occurred_at < $3
+		 ORDER BY e.occurred_at`,
+		names, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("list recent care events: %w", err)
+	}
+	defer rows.Close()
+
+	found := make([]RecentEvent, 0)
+	for rows.Next() {
+		var (
+			event     RecentEvent
+			eventType string
+		)
+		if err := rows.Scan(
+			&event.ID, &event.SeniorID, &eventType, &event.ActorUserID,
+			&event.ActorName, &event.OccurredAt,
+		); err != nil {
+			return nil, fmt.Errorf("read recent care events: %w", err)
+		}
+		event.Type = Type(eventType)
+		found = append(found, event)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("read recent care events: %w", err)
+	}
+	return found, nil
+}
+
 // cleaned drops empty values, so an absent title is an absent key rather than
 // an empty string the renderer has to special-case.
 func cleaned(metadata Metadata) Metadata {

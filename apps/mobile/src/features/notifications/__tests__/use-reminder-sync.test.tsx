@@ -133,3 +133,47 @@ it('survives a device that refuses to schedule', async () => {
 
   await waitFor(() => expect(mockSync).toHaveBeenCalled());
 });
+
+/**
+ * Phase 11 gave the server a push path, which means exactly one of the two must
+ * schedule each reminder. Two would show every dose twice
+ * (plans/phase11.md §35).
+ */
+
+/** Answers the devices endpoint separately from the plan. */
+function respondWith(registration: unknown) {
+  mockApiRequest.mockImplementation((path: string) =>
+    path === '/notifications/devices' ? Promise.resolve(registration) : Promise.resolve(plan),
+  );
+}
+
+it('does not schedule locally when the server can push to this device', async () => {
+  respondWith({ pushTokenRegistered: true });
+
+  renderHook(() => useReminderSync(true, false), { wrapper: wrapper() });
+
+  await waitFor(() => expect(mockClear).toHaveBeenCalled());
+  expect(mockSync).not.toHaveBeenCalled();
+});
+
+it('schedules locally when the server holds no token for this device', async () => {
+  respondWith({ pushTokenRegistered: false });
+
+  renderHook(() => useReminderSync(true, false), { wrapper: wrapper() });
+
+  await waitFor(() => expect(mockSync).toHaveBeenCalledWith(plan));
+});
+
+it('falls back to local scheduling when registration fails', async () => {
+  // Offline, or the server is down. The reminders still have to happen, and the
+  // device is the only party that can make them happen without a network.
+  mockApiRequest.mockImplementation((path: string) =>
+    path === '/notifications/devices'
+      ? Promise.reject(new Error('offline'))
+      : Promise.resolve(plan),
+  );
+
+  renderHook(() => useReminderSync(true, false), { wrapper: wrapper() });
+
+  await waitFor(() => expect(mockSync).toHaveBeenCalledWith(plan));
+});

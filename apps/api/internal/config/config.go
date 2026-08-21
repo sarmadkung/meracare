@@ -59,6 +59,22 @@ type Config struct {
 	SupabaseJWTLeeway   time.Duration
 	ShutdownGracePeriod time.Duration
 	RequestTimeout      time.Duration
+
+	// Notification delivery (Phase 11).
+	//
+	// The scheduler runs by default because the notification inbox depends on
+	// it: without a pass, nothing is ever materialised and the inbox stays
+	// empty. Push is off by default because it needs credentials this
+	// repository deliberately does not hold, and an API that refused to start
+	// without them would be broken for a feature it is not yet using
+	// (plans/phase11.md §§43, 68).
+	NotificationSchedulerEnabled  bool
+	NotificationSchedulerInterval time.Duration
+	NotificationRetention         time.Duration
+	PushEnabled                   bool
+	// ExpoAccessToken is a secret. It belongs in the environment and never in
+	// the repository.
+	ExpoAccessToken string
 }
 
 // Load reads configuration from the environment, applying defaults and
@@ -75,6 +91,7 @@ func Load() (*Config, error) {
 		SupabaseJWTAudience: getEnvDefault("SUPABASE_JWT_AUDIENCE", "authenticated"),
 		ShutdownGracePeriod: 15 * time.Second,
 		RequestTimeout:      30 * time.Second,
+		ExpoAccessToken:     strings.TrimSpace(os.Getenv("EXPO_ACCESS_TOKEN")),
 	}
 
 	var errs []error
@@ -99,6 +116,36 @@ func Load() (*Config, error) {
 		errs = append(errs, err)
 	}
 	cfg.SupabaseJWTLeeway = leeway
+
+	schedulerEnabled, err := getEnvBool("NOTIFICATION_SCHEDULER_ENABLED", true)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	cfg.NotificationSchedulerEnabled = schedulerEnabled
+
+	interval, err := getEnvDuration("NOTIFICATION_SCHEDULER_INTERVAL", time.Minute)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	if interval < time.Second {
+		errs = append(errs, errors.New("NOTIFICATION_SCHEDULER_INTERVAL must be at least 1s"))
+	}
+	cfg.NotificationSchedulerInterval = interval
+
+	retention, err := getEnvDuration("NOTIFICATION_RETENTION", 30*24*time.Hour)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	if retention < 24*time.Hour {
+		errs = append(errs, errors.New("NOTIFICATION_RETENTION must be at least 24h"))
+	}
+	cfg.NotificationRetention = retention
+
+	pushEnabled, err := getEnvBool("PUSH_ENABLED", false)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	cfg.PushEnabled = pushEnabled
 
 	switch cfg.Env {
 	case EnvDevelopment, EnvTest, EnvStaging, EnvProduction:
@@ -223,4 +270,22 @@ func splitAndTrim(raw string) []string {
 		}
 	}
 	return result
+}
+
+// getEnvBool reads a boolean setting.
+//
+// Refused rather than guessed when unreadable: PUSH_ENABLED=yes silently
+// meaning false is the kind of configuration mistake that is discovered by
+// nobody's phone ringing.
+func getEnvBool(key string, fallback bool) (bool, error) {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return fallback, nil
+	}
+
+	value, err := strconv.ParseBool(raw)
+	if err != nil {
+		return fallback, fmt.Errorf("%s must be true or false (got %q)", key, raw)
+	}
+	return value, nil
 }

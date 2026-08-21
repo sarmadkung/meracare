@@ -1,18 +1,21 @@
 # Implementation Status
 
-Last updated: 2026-08-20
+Last updated: 2026-08-21
 
 ## Current Phase
 
-**Phase 10 — Google Social Authentication: code complete, blocked on console
-configuration.**
+**Phase 11 — Notifications & Reminders: code complete; push delivery unverified.**
 
-The MVP (Phases 1–9) is complete. Phase 10 adds "Continue with Google" beside
-email sign-in on iOS, Android, and web. Every code path, test, and platform
-build is done and verified; the end-to-end sign-in is **not** verified, because
-the Google provider is not enabled in the Supabase project and enabling it needs
-Google Cloud and Supabase dashboard access. See Blocker 6 and
-`docs/19-google-authentication.md`.
+The MVP (Phases 1–9) is complete. Phase 10 added Google sign-in. Phase 11 adds
+the server-side notification system: a persisted inbox, five notification types,
+a scheduler that materialises and delivers, an Expo push provider behind an
+interface, retries, and the mobile inbox with an unread badge. Everything below
+the push provider is built and tested; **no real push has ever been sent**,
+because MeraCare has no EAS project and no push credentials. See Blocker 7 and
+`docs/20-notifications-delivery.md`.
+
+Phase 10's Google sign-in remains code complete and blocked on console
+configuration — Blocker 6 and `docs/19-google-authentication.md`.
 
 ## Verification Is Local
 
@@ -537,6 +540,63 @@ three bundles export.
 **Not verified:** the genuine Google sign-in and the `GET /v1/me` call that
 follows it. Blocker 6.
 
+## Completed — Phase 11
+
+**A notification is now a record, not only a consequence.** Phase 8 deliberately
+stored no reminders: a reminder follows from care, and recomputing it is always
+right where a stored copy goes stale. That reasoning still holds, and the device
+plan is unchanged. What changed is that a *delivered* notification is not a
+consequence — it happened, to a person, at a time, and "already sent" is the
+only thing that stops sending it twice. `0009_notification_delivery.sql` writes
+that down: one `notifications` table carrying its own delivery state, plus the
+two preference columns (`overdue_task_alerts`, `care_activity`) that 0008
+refused to add while nothing could deliver them.
+
+- **Five types.** The three Phase 8 reminder categories, plus the two only a
+  server can know about: `TASK_OVERDUE` and `CARE_ACTIVITY`. There is still no
+  missed-medication type — that would mean inventing the sweep Phases 4 and 5
+  refused. Appointments gained a 24-hour reminder beside the existing 1-hour one;
+  every other offset is Phase 8's, so a dose reminds at the same moment whichever
+  path delivers it.
+- **One scheduler**, started and stopped explicitly by `cmd/api`. A pass decides,
+  inserts, delivers, and occasionally forgets — then returns. Deciding is a pure
+  function of roster, preferences, and domain state, which is why "run it twice,
+  nothing changes" is readable off the code rather than trusted to the database.
+- **Safe for more than one instance.** Materialisation collides on a unique
+  dedupe key; delivery claims with `FOR UPDATE SKIP LOCKED` and a two-minute
+  lease. No in-memory lock anywhere. Both are tested with concurrent workers
+  against a real database.
+- **Expo behind `PushSender`**, with `DisabledSender` as the default. Three
+  attempts backing off 1 → 5 → 15 minutes; `DeviceNotRegistered` retires the
+  token immediately; no reachable device is `skipped`, not `failed`.
+- **The inbox** pages on the shared keyset cursor, returns the unread count with
+  every page so the badge cannot drift from the list, and exposes no delivery
+  state. Somebody else's notification id and an invented one both answer 404.
+- **Care activity is read after commit**, from `care_events`. That gives the
+  "never notify for an action that rolled back" guarantee without threading a
+  notification write through four domains.
+- **Exactly one party schedules each reminder.** The device asks the server
+  whether it holds a push token for this install; if it does, the device clears
+  its local schedule. Otherwise it schedules locally, which is what happens
+  everywhere today. Without this, Phase 8 and Phase 11 would each announce every
+  dose.
+
+**Privacy is structural.** `wording.go` is the only place a notification
+sentence is composed, and it is never given a medicine, a dosage, a condition,
+or a task description to compose with — the adapters do not pass them. A test
+pins the policy against the material that would actually leak.
+
+**Tests:** 29 new backend tests (materialisation across every type, preference
+and permission filtering, assignee addressing, professional multi-client,
+self-care, the DST boundary, the wording policy, the Expo sender's five answers,
+and eight scheduler cases against a real database including two concurrency
+races) and 24 new mobile tests (inbox screen, read/mark-all, routing for all
+four entity types, `readPushPayload`, and the double-delivery guard). Backend
+green with `-race`; mobile 287 passing; migrations applied to a fresh database
+with the whole suite re-run against it.
+
+**Not verified:** real push delivery on any platform. Blocker 7.
+
 ## Architectural Decisions Taken in Phase 1
 
 These are implementation choices within the locked architecture — nothing in
@@ -764,6 +824,37 @@ docs/12 or docs/17 was changed.
 
    Note this compounds Blocker 1: even with Google enabled, a *linked* sign-in
    needs a confirmed email/password account to link to.
+
+7. **No push notification has ever been delivered to a real device.** The
+   whole path exists and is tested up to the provider boundary — the scheduler,
+   the claim, the retry, the token retirement, and the Expo wire format against
+   a stand-in server — but the provider itself has never been called, and no
+   phone has ever buzzed. Three things are missing, none of them code:
+
+   - **An EAS project.** `eas init` writes `extra.eas.projectId` into
+     `apps/mobile/app.json`. Without it `getExpoPushTokenAsync` cannot return a
+     token, so `pushTokenRegistered` is false on every install and every
+     notification is delivered as `skipped`.
+   - **Push credentials** — an Apple push key and an FCM service account — which
+     belong in EAS and deliberately not in this repository.
+   - **A physical iPhone and Android phone**, on a development build. Expo Go
+     cannot receive push on Android at all.
+
+   Until then `PUSH_ENABLED` stays false, and turning it on would be worse than
+   leaving it off: the app would stop scheduling its own local reminders in
+   favour of pushes that go nowhere.
+
+   **Therefore unverified, and not claimed:** push registration, push delivery,
+   and push deep-linking on iOS or Android. What *is* verified on all three
+   platforms is the in-app inbox, the unread badge, read and mark-all-read, and
+   tapping through to the destination.
+
+   **Browser push is not implemented at all**, and that is a decision rather
+   than an omission: Web Push needs a service worker and VAPID keys, which is
+   its own phase. Web gets the full inbox.
+
+   `docs/20-notifications-delivery.md` has the setup steps and the seven-step
+   manual test to run once a device build exists.
 
 ## Pending
 
@@ -1338,21 +1429,22 @@ string cannot reach the dashboard.
   → notify assignee → optionally notify family. The first step exists; the rest
   is push, and the "overdue" and "missed" signals are still derived at read time
   rather than emitted, exactly as Phases 4, 5, and 7 left them.
-- **The four other preference categories** (Phase 8). Activity, messages,
-  invitations, and escalation alerts, from docs/08. Each arrives with the
-  delivery path that makes it mean something, as a column on the existing table.
+- **The four other preference categories** (Phase 8). Phase 11 delivered two of
+  them — overdue task alerts and care activity — as columns on the existing
+  table, each with the delivery path that makes it mean something. Messages and
+  invitations remain, and arrive the same way when they have one.
 - **Configurable reminder offsets** (Phase 8). Lead times are fixed. §12 forbids
   inventing options beyond the documented MVP, and the documentation defines
   none, so "remind me 30 minutes before instead" is a product decision rather
   than an omission.
-- **A notification inbox** (Phase 8). docs/03 defines a `Notification` entity
-  with `read_at`, which is an in-app list of things that were sent. Nothing is
-  sent from the server yet, so the table would have no rows and the screen no
-  content. It belongs with push.
-- **Server-side background jobs** (Phase 8). None were added. With reminders
-  scheduled on the device from a plan computed on request, there is nothing for
-  a worker to do, and §30 asks for the minimum. The first genuine need for one
-  is push delivery retries.
+- **A notification inbox** (Phase 8, delivered in Phase 11). docs/03 defines a
+  `Notification` entity with `read_at`; Phase 8 deferred it because nothing was
+  sent from the server, so the table would have had no rows. Phase 11 added the
+  scheduler that fills it.
+- **Server-side background jobs** (Phase 8, delivered in Phase 11). Phase 8 added
+  none, correctly: with reminders scheduled on the device there was nothing for a
+  worker to do. Push delivery retries were named there as the first genuine need,
+  and are exactly what the Phase 11 scheduler exists for.
 
 ## After the MVP
 
@@ -1365,12 +1457,16 @@ email confirmation) so the real sign-in round trip can be verified, and putting
 the database password in place so the migrations reach the hosted project. Both
 are in Blockers with the exact steps.
 
-The most valuable next piece of engineering is **push notifications**. It is
-already scaffolded: `TASK_MISSED` and `MEDICATION_MISSED` sit in the care-event
-vocabulary deliberately unemitted, `notification_devices` holds the tokens, and
-adding a sender would also close the residual revocation window recorded in
-Blockers. docs/08's escalation flow — reminder, grace period, overdue, notify
-the assignee, optionally notify the family — is the shape it should take.
+**Push notifications** were the most valuable next piece of engineering, and
+Phase 11 built them: docs/08's escalation flow — reminder, grace period,
+overdue, notify the assignee — is what the scheduler now implements, and the
+residual revocation window in Blocker 4 is narrowed for anyone the server
+delivers to, because a revoked caregiver leaves the roster the instant they are
+revoked. `TASK_MISSED` and `MEDICATION_MISSED` remain deliberately unemitted:
+Phase 11 alerts on overdue tasks without writing a "missed" state anywhere.
+
+What still needs doing before push is real is **configuration, not code** —
+an EAS project, push credentials, and a device build (Blocker 7).
 
 Everything else in the product documentation (messaging, notes, an activity
 inbox, the Next.js web app) is post-MVP by the roadmap's own ordering.

@@ -21,6 +21,7 @@ import (
 	"github.com/meracare/api/internal/auth"
 	"github.com/meracare/api/internal/config"
 	"github.com/meracare/api/internal/database"
+	"github.com/meracare/api/internal/notifications"
 	"github.com/meracare/api/internal/server"
 	"github.com/meracare/api/pkg/logging"
 )
@@ -69,12 +70,28 @@ func run() error {
 		return err
 	}
 
-	handler := server.New(server.Dependencies{
+	deps := server.Dependencies{
 		Config:   cfg,
 		Logger:   logger,
 		Pool:     pool,
 		Verifier: verifier,
-	})
+	}
+	handler := server.New(deps)
+
+	// The notification scheduler. Started before the listener so a restart
+	// delivers whatever fell due while the process was down, and stopped before
+	// the pool closes so a pass in flight finishes rather than failing on a
+	// closed connection (plans/phase11.md §36).
+	var scheduler *notifications.Scheduler
+	if cfg.NotificationSchedulerEnabled {
+		scheduler = server.NewNotificationScheduler(deps)
+		if err := scheduler.Start(ctx); err != nil {
+			return fmt.Errorf("start notification scheduler: %w", err)
+		}
+	} else {
+		logger.Warn("notification scheduler is disabled; " +
+			"no notification will be created or delivered")
+	}
 
 	httpServer := &http.Server{
 		Addr:              cfg.Addr(),
@@ -109,6 +126,16 @@ func run() error {
 	if err := httpServer.Shutdown(shutdownCtx); err != nil {
 		return fmt.Errorf("graceful shutdown: %w", err)
 	}
+
+	// A scheduler that does not stop cleanly leaves claimed notifications
+	// leased, which delays them rather than losing them — but only a crash
+	// should cost that, not a deploy.
+	if scheduler != nil {
+		if err := scheduler.Stop(shutdownCtx); err != nil {
+			logger.Warn("notification scheduler did not stop cleanly", slog.Any("error", err))
+		}
+	}
+
 	logger.Info("api stopped")
 	return nil
 }

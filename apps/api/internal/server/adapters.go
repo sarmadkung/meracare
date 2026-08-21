@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/meracare/api/internal/appointments"
+	"github.com/meracare/api/internal/careevents"
 	"github.com/meracare/api/internal/invitations"
 	"github.com/meracare/api/internal/medications"
 	"github.com/meracare/api/internal/notifications"
@@ -203,4 +204,147 @@ func (a appointmentSource) Upcoming(
 		})
 	}
 	return due, nil
+}
+
+// The three adapters below are Phase 11's: the roster the scheduler sweeps, the
+// overdue tasks it alerts about, and the care events it turns into activity
+// notifications. Like the four above, they live here so internal/notifications
+// keeps depending on "things fall due" and "things happened" rather than on
+// tasks, care events, or relationships (plans/phase11.md §4).
+
+// roster adapts the seniors repository to the scheduler's view of who exists.
+type roster struct {
+	repo *seniors.Repository
+}
+
+// ActiveMemberships returns every active relationship, with its permissions.
+//
+// Permissions come from the stored relationship, never from anything the
+// notification carries — which is why a revoked caregiver stops being
+// materialised for at the same instant they lose access, rather than when their
+// device next checks in (plans/phase11.md §31).
+func (r roster) ActiveMemberships(ctx context.Context) ([]notifications.UserMembership, error) {
+	found, err := r.repo.ListAllActive(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	memberships := make([]notifications.UserMembership, 0, len(found))
+	for _, membership := range found {
+		if !membership.Relationship.IsActive() {
+			continue
+		}
+
+		memberships = append(memberships, notifications.UserMembership{
+			UserID: membership.Relationship.UserID,
+			Senior: notifications.Senior{
+				ID:          membership.Senior.ID,
+				DisplayName: membership.Senior.DisplayName,
+				Timezone:    membership.Senior.Timezone,
+			},
+			Permissions: membership.Relationship.Permissions,
+		})
+	}
+	return memberships, nil
+}
+
+// overdueSource adapts the task service to the overdue alert.
+type overdueSource struct {
+	service *tasks.Service
+}
+
+// Overdue returns the senior's task occurrences that were due in the window and
+// are still outstanding.
+//
+// It asks the tasks domain what is still pending rather than computing overdue
+// itself. tasks.Instance.EffectiveStatus is the single definition of overdue in
+// MeraCare and stays that way: a still-stored-pending occurrence whose time has
+// passed is exactly what that method calls overdue, and a second definition
+// here is how two parts of an app start disagreeing about whether Amma took her
+// tablets (plans/phase11.md §17).
+func (o overdueSource) Overdue(
+	ctx context.Context,
+	seniorID uuid.UUID,
+	from, to time.Time,
+) ([]notifications.Due, error) {
+	instances, err := o.service.List(ctx, tasks.ListInput{
+		SeniorID: seniorID,
+		Scope:    tasks.ScopeWindow,
+		From:     from,
+		To:       to,
+	}, to)
+	if err != nil {
+		return nil, err
+	}
+
+	due := make([]notifications.Due, 0, len(instances))
+	for _, instance := range instances {
+		// Anything completed, skipped, or cancelled needs no alert. Only a
+		// still-pending occurrence in a window that has already passed is
+		// overdue, which is the domain's own rule read back.
+		if instance.Status != tasks.StatusPending {
+			continue
+		}
+
+		due = append(due, notifications.Due{
+			EntityID:   instance.ID,
+			At:         instance.ScheduledFor,
+			AssigneeID: instance.AssignedUserID,
+		})
+	}
+	return due, nil
+}
+
+// activitySource adapts the care-event timeline to activity notifications.
+type activitySource struct {
+	repo *careevents.Repository
+}
+
+// notifiableActivity maps the few care events worth interrupting somebody for
+// onto the notification vocabulary.
+//
+// Four of the fifteen event types. A care event is a record and a notification
+// is an interruption, and most records are not worth one: creating a task,
+// inviting a member, or cancelling an appointment all belong in the timeline
+// and none of them needs to make a phone buzz (plans/phase11.md §§19, 45).
+var notifiableActivity = map[careevents.Type]notifications.ActivityKind{
+	careevents.TypeMedicationTaken:      notifications.ActivityMedicationRecorded,
+	careevents.TypeMedicationSkipped:    notifications.ActivityMedicationRecorded,
+	careevents.TypeTaskCompleted:        notifications.ActivityTaskCompleted,
+	careevents.TypeAppointmentCompleted: notifications.ActivityAppointmentCompleted,
+	careevents.TypeMemberJoined:         notifications.ActivityMemberJoined,
+}
+
+// RecentActivity returns the notification-worthy events in the window.
+func (a activitySource) RecentActivity(
+	ctx context.Context,
+	from, to time.Time,
+) ([]notifications.Activity, error) {
+	types := make([]careevents.Type, 0, len(notifiableActivity))
+	for eventType := range notifiableActivity {
+		types = append(types, eventType)
+	}
+
+	events, err := a.repo.ListRecent(ctx, types, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	activities := make([]notifications.Activity, 0, len(events))
+	for _, event := range events {
+		kind, ok := notifiableActivity[event.Type]
+		if !ok {
+			continue
+		}
+
+		activities = append(activities, notifications.Activity{
+			EventID:     event.ID,
+			SeniorID:    event.SeniorID,
+			Kind:        kind,
+			ActorUserID: event.ActorUserID,
+			ActorName:   event.ActorName,
+			OccurredAt:  event.OccurredAt,
+		})
+	}
+	return activities, nil
 }

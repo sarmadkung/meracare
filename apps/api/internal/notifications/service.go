@@ -39,9 +39,9 @@ const (
 // Service answers the two questions this package exists for: what may we
 // remind this user about, and where would we send a push if we sent one.
 type Service struct {
-	preferences *Repository
-	circle      CircleSource
-	sources     map[ReminderType]ScheduleSource
+	repository *Repository
+	circle     CircleSource
+	sources    map[ReminderType]ScheduleSource
 }
 
 // NewService wires the service to its sources.
@@ -55,8 +55,8 @@ func NewService(
 	tasks, medications, appointments ScheduleSource,
 ) *Service {
 	return &Service{
-		preferences: repository,
-		circle:      circle,
+		repository: repository,
+		circle:     circle,
 		sources: map[ReminderType]ScheduleSource{
 			ReminderTaskReminder:        tasks,
 			ReminderMedicationReminder:  medications,
@@ -67,7 +67,7 @@ func NewService(
 
 // Preferences returns one user's settings.
 func (s *Service) Preferences(ctx context.Context, userID uuid.UUID) (Preferences, error) {
-	return s.preferences.GetPreferences(ctx, userID)
+	return s.repository.GetPreferences(ctx, userID)
 }
 
 // UpdatePreferences applies a change to one user's settings.
@@ -81,7 +81,7 @@ func (s *Service) UpdatePreferences(
 	userID uuid.UUID,
 	update PreferenceUpdate,
 ) (Preferences, error) {
-	return s.preferences.SavePreferences(ctx, userID, update)
+	return s.repository.SavePreferences(ctx, userID, update)
 }
 
 // ErrInvalidDevice is returned when a registration cannot be understood. The
@@ -112,12 +112,12 @@ func (s *Service) RegisterDevice(ctx context.Context, params RegisterParams) (De
 		return Device{}, ErrInvalidDevice{Field: "appVersion", Message: "is too long"}
 	}
 
-	return s.preferences.Register(ctx, params)
+	return s.repository.Register(ctx, params)
 }
 
 // DeactivateDevice stops MeraCare reaching one of the caller's installations.
 func (s *Service) DeactivateDevice(ctx context.Context, userID uuid.UUID, deviceID string) error {
-	return s.preferences.Deactivate(ctx, userID, deviceID)
+	return s.repository.Deactivate(ctx, userID, deviceID)
 }
 
 // Plan returns the reminders this user's device should schedule.
@@ -126,7 +126,7 @@ func (s *Service) DeactivateDevice(ctx context.Context, userID uuid.UUID, device
 // this returns, and a full list is the only version of that which is correct
 // after a reinstall, a restore, or a month offline.
 func (s *Service) Plan(ctx context.Context, userID uuid.UUID, now time.Time) ([]Reminder, error) {
-	preferences, err := s.preferences.GetPreferences(ctx, userID)
+	preferences, err := s.repository.GetPreferences(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,4 +137,49 @@ func (s *Service) Plan(ctx context.Context, userID uuid.UUID, now time.Time) ([]
 	}
 
 	return planFor(ctx, s.sources, memberships, userID, preferences, now, now.Add(horizon))
+}
+
+// Inbox pagination bounds. Sized like the activity timeline it sits beside:
+// docs/11 puts the expected working set at a screenful of recent items, and a
+// client that could ask for a whole history in one request eventually does
+// (plans/phase11.md §§41, 56).
+const (
+	defaultInboxPage = 30
+	maxInboxPage     = 100
+)
+
+// Inbox returns one page of the caller's notifications, newest first.
+//
+// The user is the authenticated caller and reaches the query directly. There is
+// no path by which somebody else's id could arrive here, which is what makes
+// recipient isolation structural rather than a check (plans/phase11.md §8).
+func (s *Service) Inbox(
+	ctx context.Context,
+	userID uuid.UUID,
+	cursor string,
+	limit int,
+	now time.Time,
+) (Page, error) {
+	if limit <= 0 || limit > maxInboxPage {
+		limit = defaultInboxPage
+	}
+	return s.repository.List(ctx, userID, cursor, limit, now)
+}
+
+// MarkRead marks one of the caller's notifications as read.
+func (s *Service) MarkRead(
+	ctx context.Context,
+	userID, notificationID uuid.UUID,
+) (Notification, error) {
+	return s.repository.MarkRead(ctx, userID, notificationID)
+}
+
+// MarkAllRead marks every arrived notification of the caller's as read.
+func (s *Service) MarkAllRead(ctx context.Context, userID uuid.UUID, now time.Time) (int, error) {
+	return s.repository.MarkAllRead(ctx, userID, now)
+}
+
+// UnreadCount is what the badge shows.
+func (s *Service) UnreadCount(ctx context.Context, userID uuid.UUID, now time.Time) (int, error) {
+	return s.repository.UnreadCount(ctx, userID, now)
 }

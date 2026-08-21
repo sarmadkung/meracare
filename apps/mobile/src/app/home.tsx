@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { useSession } from '@/features/auth/session-provider';
 import { useAuthActions } from '@/features/auth/use-auth-actions';
+import { useUnreadCount } from '@/features/notifications/use-notifications';
 import { useSeniors } from '@/features/seniors/use-seniors';
 import { useOfflineSync } from '@/features/sync/use-sync';
 import { useMyTasks } from '@/features/tasks/use-tasks';
@@ -30,6 +31,9 @@ export default function HomeScreen() {
   const { signOut, isSubmitting } = useAuthActions();
   const seniors = useSeniors(isSignedIn);
   const myTasks = useMyTasks();
+  // Read off the inbox itself, so the badge and the list cannot disagree
+  // (plans/phase11.md §61).
+  const unread = useUnreadCount(isSignedIn);
 
   // Anything recorded while offline is sent as soon as the app is usable.
   useOfflineSync();
@@ -40,7 +44,17 @@ export default function HomeScreen() {
 
   return (
     <Screen scrollable>
-      <Text variant="pageHeading">Today</Text>
+      <View
+        style={{
+          alignItems: 'center',
+          flexDirection: 'row',
+          gap: theme.spacing.md,
+          justifyContent: 'space-between',
+        }}
+      >
+        <Text variant="pageHeading">Today</Text>
+        <NotificationsButton unread={unread} />
+      </View>
 
       {(myTasks.data ?? []).length > 0 ? (
         <AssignedToMe tasks={myTasks.data ?? []} seniors={seniors.data ?? []} />
@@ -93,6 +107,65 @@ export default function HomeScreen() {
 
       <Button variant="ghost" label="Sign out" onPress={signOut} loading={isSubmitting} />
     </Screen>
+  );
+}
+
+/**
+ * The way into the notification inbox, with the unread count on it.
+ *
+ * A count rather than a dot, because the number is the useful part for somebody
+ * who has been away from the phone — and it is spoken as words to a screen
+ * reader, since a numeral in a coloured circle says nothing on its own
+ * (plans/phase11.md §§57, 61).
+ */
+function NotificationsButton({ unread }: { unread: number }) {
+  const theme = useTheme();
+  const capped = unread > 99 ? '99+' : String(unread);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={
+        unread === 0
+          ? 'Notifications'
+          : `Notifications, ${unread} unread ${unread === 1 ? 'notification' : 'notifications'}`
+      }
+      onPress={() => router.push('/notifications')}
+      style={({ pressed }) => ({
+        alignItems: 'center',
+        borderColor: theme.colors.border,
+        borderRadius: theme.radii.pill,
+        borderWidth: 1,
+        flexDirection: 'row',
+        gap: theme.spacing.sm,
+        minHeight: theme.minTouchTarget,
+        opacity: pressed ? 0.85 : 1,
+        paddingHorizontal: theme.spacing.lg,
+      })}
+    >
+      <Text variant="bodyStrong" style={{ color: theme.colors.primary }}>
+        Alerts
+      </Text>
+
+      {unread > 0 ? (
+        <View
+          accessible={false}
+          style={{
+            alignItems: 'center',
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.radii.pill,
+            justifyContent: 'center',
+            minWidth: 24,
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+          }}
+        >
+          <Text variant="secondary" style={{ color: theme.colors.onPrimary }}>
+            {capped}
+          </Text>
+        </View>
+      ) : null}
+    </Pressable>
   );
 }
 

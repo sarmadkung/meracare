@@ -69,7 +69,7 @@ export interface ReminderPlan {
 }
 
 /**
- * Which categories of reminder a user wants.
+ * Which categories of notification a user wants.
  *
  * Per user, not per senior: two caregivers looking after the same person
  * routinely want different things (plans/phase8.md §§3, 4).
@@ -78,6 +78,10 @@ export interface NotificationPreferences {
   taskReminders: boolean;
   medicationReminders: boolean;
   appointmentReminders: boolean;
+  /** Phase 11: a task whose time has passed with nothing recorded. */
+  overdueTaskAlerts: boolean;
+  /** Phase 11: something somebody else did. */
+  careActivity: boolean;
   updatedAt: string;
 }
 
@@ -109,7 +113,17 @@ export const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
   {
     key: 'appointmentReminders',
     label: 'Appointment reminders',
-    description: 'A reminder an hour before an appointment starts.',
+    description: 'A reminder the day before, and an hour before it starts.',
+  },
+  {
+    key: 'overdueTaskAlerts',
+    label: 'Overdue task alerts',
+    description: 'A nudge when a care task has passed its time with nothing recorded.',
+  },
+  {
+    key: 'careActivity',
+    label: 'Care activity',
+    description: 'When someone else records care — a dose given, a task completed.',
   },
 ];
 
@@ -141,4 +155,125 @@ export interface RegisteredDevice {
   active: boolean;
   lastSeenAt: string;
   pushTokenRegistered: boolean;
+}
+
+/**
+ * The kinds of notification MeraCare delivers and keeps.
+ *
+ * A superset of `REMINDER_TYPES`: the three a device can schedule for itself,
+ * plus the two only a server can know about. Mirrors
+ * `internal/notifications.Types` and the CHECK constraint on
+ * `notifications.notification_type` (plans/phase11.md §5).
+ */
+export const NOTIFICATION_TYPES = [
+  'MEDICATION_REMINDER',
+  'APPOINTMENT_REMINDER',
+  'TASK_REMINDER',
+  'TASK_OVERDUE',
+  'CARE_ACTIVITY',
+] as const;
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+/** What a notification points at, so the app can open the right screen. */
+export const NOTIFICATION_ENTITIES = [
+  'task_instance',
+  'medication_dose',
+  'appointment',
+  'care_event',
+] as const;
+export type NotificationEntity = (typeof NOTIFICATION_ENTITIES)[number];
+
+/**
+ * One row of the notification inbox.
+ *
+ * Unlike a `Reminder`, this one *does* carry its words — because they are the
+ * words that were sent. A reminder is a plan the device renders; a notification
+ * is a record of something that happened, and re-composing its sentence later
+ * would make yesterday's inbox change when an appointment moves
+ * (plans/phase11.md §6).
+ *
+ * The wording still says nothing medical: the same lock-screen privacy policy
+ * produced it, on the server, in `internal/notifications/wording.go`
+ * (plans/phase11.md §48).
+ */
+export interface Notification {
+  id: string;
+  type: NotificationType;
+
+  title: string;
+  body: string;
+
+  seniorId: string;
+  entityType: NotificationEntity;
+  entityId: string;
+
+  /** What the notification is for, ISO-8601. Also the inbox's sort order. */
+  occurredAt: string;
+  read: boolean;
+  /** Empty while unread. */
+  readAt: string;
+}
+
+/** One page of the inbox, newest first. */
+export interface NotificationInbox {
+  items: Notification[];
+  nextCursor: string | null;
+  /**
+   * Every unread notification, not just the ones on this page — it travels with
+   * the page so a badge and the list it labels cannot disagree
+   * (plans/phase11.md §61).
+   */
+  unreadCount: number;
+}
+
+/** What marking everything read changed. */
+export interface MarkAllReadResult {
+  markedRead: number;
+  unreadCount: number;
+}
+
+/**
+ * The identifiers a push notification carries.
+ *
+ * Identifiers only, and never treated as permission. Tapping a notification
+ * opens a screen, and that screen asks the server for the thing under the
+ * reader's own authorization — so a notification that outlived somebody's
+ * access opens nothing (plans/phase11.md §§31, 58).
+ */
+export interface PushPayload {
+  notificationId: string;
+  type: NotificationType;
+  seniorId: string;
+  entityType: NotificationEntity;
+  entityId: string;
+}
+
+/**
+ * Reads a payload off a push notification the user tapped.
+ *
+ * Returns null rather than throwing for anything unrecognised, for the same
+ * reason `readReminderPayload` does: a notification can outlive the app version
+ * that sent it, and a crash on opening a stale one is a worse bug than a tap
+ * that does nothing.
+ */
+export function readPushPayload(data: unknown): PushPayload | null {
+  if (typeof data !== 'object' || data === null) return null;
+
+  const candidate = data as Record<string, unknown>;
+  const required = ['notificationId', 'type', 'seniorId', 'entityType', 'entityId'] as const;
+
+  for (const key of required) {
+    if (typeof candidate[key] !== 'string' || candidate[key] === '') return null;
+  }
+
+  if (!NOTIFICATION_TYPES.includes(candidate.type as NotificationType)) return null;
+  if (!NOTIFICATION_ENTITIES.includes(candidate.entityType as NotificationEntity)) return null;
+
+  return {
+    notificationId: candidate.notificationId as string,
+    type: candidate.type as NotificationType,
+    seniorId: candidate.seniorId as string,
+    entityType: candidate.entityType as NotificationEntity,
+    entityId: candidate.entityId as string,
+  };
 }

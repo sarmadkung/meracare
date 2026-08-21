@@ -46,4 +46,6 @@
                             19 Agent instructions    16-agent-development-guide.md
 
                             20 Google authentication 19-google-authentication.md
+
+                            21 Notification delivery  20-notifications-delivery.md
   -----------------------------------------------------------------------------------------

@@ -1,12 +1,12 @@
-import { readReminderPayload } from '@meracare/contracts';
+import { readPushPayload, readReminderPayload } from '@meracare/contracts';
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
 import { useUIStore } from '@/stores/ui-store';
 
-import { reminderDestination } from './routes';
+import { notificationDestination, reminderDestination } from './routes';
 import { clearReminders, syncReminders } from './scheduler';
 import { notificationPermission, permissionAllowsDelivery } from './permission';
 import { notificationKeys, useRegisterDevice, useReminderPlan } from './use-notifications';
@@ -38,15 +38,42 @@ export function useReminderSync(isSignedIn: boolean, isRestoring: boolean) {
     registerRef.current();
   }, [isSignedIn]);
 
+  // Whether the server can reach this installation.
+  //
+  // This is what decides who schedules the reminders, and it has to be decided
+  // by exactly one of them. Phase 11 gave the server a push path; leaving the
+  // device's local scheduling switched on as well would show every reminder
+  // twice — once from the OS, once from the push (plans/phase11.md §35).
+  //
+  // The server wins when it can: a push reflects the care as it is at the
+  // moment it is sent, where a locally scheduled reminder reflects the plan as
+  // it was when the app was last open. Local scheduling remains the fallback,
+  // and today it is the only path that works at all, because MeraCare holds no
+  // push credentials yet.
+  const registrationSettled = register.isSuccess || register.isError;
+  const serverCanPush = register.data?.pushTokenRegistered === true;
+
   // Apply each plan as it arrives.
   useEffect(() => {
     if (!isSignedIn || plan.data === undefined) return;
+    // Until registration has answered, neither party knows who is responsible.
+    // Scheduling now and cancelling a moment later would show a reminder and
+    // then take it away.
+    if (!registrationSettled) return;
 
     let cancelled = false;
 
     const current = plan.data;
 
     void (async () => {
+      if (serverCanPush) {
+        // The server is delivering these. Anything this device scheduled
+        // earlier — before permission was granted, or before it had a token —
+        // has to go, or the next dose is announced twice.
+        await clearReminders().catch(() => {});
+        return;
+      }
+
       // No point scheduling anything the OS will not deliver. The reminders
       // stay in the plan; they are simply not scheduled until permission
       // exists, at which point this runs again (plans/phase8.md §6).
@@ -65,7 +92,7 @@ export function useReminderSync(isSignedIn: boolean, isRestoring: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [isSignedIn, plan.data]);
+  }, [isSignedIn, plan.data, registrationSettled, serverCanPush]);
 
   // Refetch when the app is reopened. A phone that has been closed for two days
   // has a plan two days old, and the reminders at the far end of it were never
@@ -130,10 +157,19 @@ export function useReminderTaps(isSignedIn: boolean, isRestoring: boolean) {
       // A notification can outlive the app version that scheduled it, so an
       // unreadable payload opens nothing rather than crashing the app
       // (plans/phase8.md §37).
-      const payload = readReminderPayload(response.notification.request.content.data);
-      if (payload === null) return;
+      //
+      // Two payload shapes reach here: one this device scheduled, and one the
+      // server pushed. They are read in that order because a pushed payload is
+      // the stricter shape — it names a notification the server holds — and a
+      // locally scheduled reminder can never satisfy it.
+      const data = response.notification.request.content.data;
 
-      const destination = reminderDestination(payload);
+      const pushed = readPushPayload(data);
+      const destination =
+        pushed !== null
+          ? notificationDestination(pushed)
+          : localDestination(readReminderPayload(data));
+      if (destination === null) return;
 
       if (ready.current) {
         router.push(destination);
@@ -144,6 +180,11 @@ export function useReminderTaps(isSignedIn: boolean, isRestoring: boolean) {
 
     return () => subscription.remove();
   }, [setPendingDestination]);
+}
+
+/** The destination of a locally scheduled reminder, or null if unreadable. */
+function localDestination(payload: ReturnType<typeof readReminderPayload>): Href | null {
+  return payload === null ? null : reminderDestination(payload);
 }
 
 /**

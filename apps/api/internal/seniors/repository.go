@@ -154,6 +154,46 @@ type UpdateParams struct {
 }
 
 // Update applies the supplied changes and returns the stored profile.
+// ListAllActive returns every active membership in the system.
+//
+// The notification scheduler's roster. It works outwards from memberships
+// rather than from users because a user with no active relationship has nothing
+// to be notified about, and a revoked caregiver leaves this result the moment
+// they are revoked (plans/phase11.md §§12, 31).
+//
+// Unpaged, and that is a deliberate MVP decision rather than an oversight: one
+// pass needs the whole roster at once to decide anything, and at MeraCare's
+// scale the whole roster is a few thousand rows. The first deployment where
+// that stops being true will need the sweep sharded by senior, which is a
+// change to the scheduler rather than to this query.
+func (r *Repository) ListAllActive(ctx context.Context) ([]Membership, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT `+seniorColumnsAliased+`,
+		       cr.id, cr.senior_id, cr.user_id, cr.role, cr.permissions, cr.status,
+		       cr.created_at, cr.updated_at
+		FROM care_relationships cr
+		JOIN senior_profiles s ON s.id = cr.senior_id
+		WHERE cr.status = 'active'
+		ORDER BY cr.senior_id, cr.user_id`)
+	if err != nil {
+		return nil, fmt.Errorf("list active memberships: %w", err)
+	}
+	defer rows.Close()
+
+	memberships := make([]Membership, 0)
+	for rows.Next() {
+		membership, err := scanMembership(rows)
+		if err != nil {
+			return nil, err
+		}
+		memberships = append(memberships, membership)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("read active memberships: %w", err)
+	}
+	return memberships, nil
+}
+
 func (r *Repository) Update(ctx context.Context, id uuid.UUID, params UpdateParams) (Senior, error) {
 	senior, err := scanSenior(r.pool.QueryRow(ctx, `
 		UPDATE senior_profiles SET

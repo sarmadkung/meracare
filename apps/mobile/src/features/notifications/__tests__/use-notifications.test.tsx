@@ -29,6 +29,8 @@ function preferences(overrides: Partial<NotificationPreferences> = {}): Notifica
     taskReminders: true,
     medicationReminders: true,
     appointmentReminders: true,
+    overdueTaskAlerts: true,
+    careActivity: true,
     updatedAt: '2026-08-19T06:00:00Z',
     ...overrides,
   };

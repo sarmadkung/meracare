@@ -27,7 +27,7 @@ func NewRepository(pool *database.Pool) *Repository {
 }
 
 const preferenceColumns = `user_id, task_reminders, medication_reminders,
-	appointment_reminders, created_at, updated_at`
+	appointment_reminders, overdue_task_alerts, care_activity, created_at, updated_at`
 
 // GetPreferences returns the user's settings, or the defaults if they have
 // never changed any.
@@ -55,6 +55,8 @@ type PreferenceUpdate struct {
 	TaskReminders        *bool
 	MedicationReminders  *bool
 	AppointmentReminders *bool
+	OverdueTaskAlerts    *bool
+	CareActivity         *bool
 }
 
 // SavePreferences applies an update, creating the row if this is the first one.
@@ -70,21 +72,28 @@ func (r *Repository) SavePreferences(
 
 	preferences, err := scanPreferences(r.db.QueryRow(ctx, `
 		INSERT INTO notification_preferences
-			(user_id, task_reminders, medication_reminders, appointment_reminders)
-		VALUES ($1, $2, $3, $4)
+			(user_id, task_reminders, medication_reminders, appointment_reminders,
+			 overdue_task_alerts, care_activity)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (user_id) DO UPDATE SET
-			task_reminders        = COALESCE($5, notification_preferences.task_reminders),
-			medication_reminders  = COALESCE($6, notification_preferences.medication_reminders),
-			appointment_reminders = COALESCE($7, notification_preferences.appointment_reminders),
+			task_reminders        = COALESCE($7, notification_preferences.task_reminders),
+			medication_reminders  = COALESCE($8, notification_preferences.medication_reminders),
+			appointment_reminders = COALESCE($9, notification_preferences.appointment_reminders),
+			overdue_task_alerts   = COALESCE($10, notification_preferences.overdue_task_alerts),
+			care_activity         = COALESCE($11, notification_preferences.care_activity),
 			updated_at            = now()
 		RETURNING `+preferenceColumns,
 		userID,
 		orDefault(update.TaskReminders, defaults.TaskReminders),
 		orDefault(update.MedicationReminders, defaults.MedicationReminders),
 		orDefault(update.AppointmentReminders, defaults.AppointmentReminders),
+		orDefault(update.OverdueTaskAlerts, defaults.OverdueTaskAlerts),
+		orDefault(update.CareActivity, defaults.CareActivity),
 		update.TaskReminders,
 		update.MedicationReminders,
 		update.AppointmentReminders,
+		update.OverdueTaskAlerts,
+		update.CareActivity,
 	))
 	if err != nil {
 		return Preferences{}, fmt.Errorf("save notification preferences: %w", err)
@@ -184,6 +193,8 @@ func scanPreferences(source row) (Preferences, error) {
 		&preferences.TaskReminders,
 		&preferences.MedicationReminders,
 		&preferences.AppointmentReminders,
+		&preferences.OverdueTaskAlerts,
+		&preferences.CareActivity,
 		&preferences.CreatedAt,
 		&preferences.UpdatedAt,
 	)

@@ -124,6 +124,11 @@ type Preferences struct {
 	TaskReminders        bool
 	MedicationReminders  bool
 	AppointmentReminders bool
+	// OverdueTaskAlerts and CareActivity are Phase 11's two additions. 0008
+	// refused to store switches for categories nothing could deliver; these two
+	// now have a delivery path, so they exist (plans/phase11.md §9).
+	OverdueTaskAlerts bool
+	CareActivity      bool
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -139,18 +144,35 @@ func DefaultPreferences(userID uuid.UUID) Preferences {
 		TaskReminders:        true,
 		MedicationReminders:  true,
 		AppointmentReminders: true,
+		OverdueTaskAlerts:    true,
+		CareActivity:         true,
 	}
 }
 
 // wants reports whether these preferences allow the given reminder type.
 func (p Preferences) wants(t ReminderType) bool {
+	return p.wantsType(t.notificationType())
+}
+
+// wantsType reports whether these preferences allow the given notification
+// type.
+//
+// The default is false, not true. A category nobody has decided about is a
+// category MeraCare has not been given permission to use, and an unrecognised
+// type reaching here at all means the vocabulary has grown without the
+// preferences following it.
+func (p Preferences) wantsType(t Type) bool {
 	switch t {
-	case ReminderTaskReminder:
+	case TypeTaskReminder:
 		return p.TaskReminders
-	case ReminderMedicationReminder:
+	case TypeMedicationReminder:
 		return p.MedicationReminders
-	case ReminderAppointmentReminder:
+	case TypeAppointmentReminder:
 		return p.AppointmentReminders
+	case TypeTaskOverdue:
+		return p.OverdueTaskAlerts
+	case TypeCareActivity:
+		return p.CareActivity
 	default:
 		return false
 	}

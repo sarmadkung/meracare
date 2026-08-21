@@ -3,15 +3,21 @@ package notifications
 import (
 	"errors"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/meracare/api/internal/auth"
 	"github.com/meracare/api/pkg/httpx"
 )
 
-// deviceIDParam is the path segment naming one installation.
-const deviceIDParam = "deviceId"
+// Path segments this handler reads.
+const (
+	deviceIDParam       = "deviceId"
+	notificationIDParam = "notificationId"
+)
 
 // Handler exposes the `/v1/notifications` endpoints.
 //
@@ -41,6 +47,13 @@ func (h *Handler) Routes() chi.Router {
 
 	router.Get("/reminders", h.reminders)
 
+	// The inbox. Every route is scoped to the caller in the query itself; none
+	// of them takes a user id from anywhere but the verified token
+	// (plans/phase11.md §8).
+	router.Get("/", h.list)
+	router.Post("/read-all", h.readAll)
+	router.Patch("/{"+notificationIDParam+"}/read", h.markRead)
+
 	// There is deliberately no endpoint that schedules, sends, or cancels a
 	// notification. Reminders follow from care, so the way to change them is to
 	// change the care or the preferences (plans/phase8.md §33).
@@ -69,6 +82,8 @@ type updatePreferencesRequest struct {
 	TaskReminders        *bool `json:"taskReminders"`
 	MedicationReminders  *bool `json:"medicationReminders"`
 	AppointmentReminders *bool `json:"appointmentReminders"`
+	OverdueTaskAlerts    *bool `json:"overdueTaskAlerts"`
+	CareActivity         *bool `json:"careActivity"`
 }
 
 // updatePreferences changes the caller's notification settings.
@@ -85,6 +100,8 @@ func (h *Handler) updatePreferences(w http.ResponseWriter, r *http.Request) {
 		TaskReminders:        body.TaskReminders,
 		MedicationReminders:  body.MedicationReminders,
 		AppointmentReminders: body.AppointmentReminders,
+		OverdueTaskAlerts:    body.OverdueTaskAlerts,
+		CareActivity:         body.CareActivity,
 	})
 	if err != nil {
 		httpx.WriteError(w, r, httpx.ErrInternal(err))
@@ -159,6 +176,79 @@ func (h *Handler) reminders(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, r, http.StatusOK, ToPlanResponse(plan, now))
 }
 
+// list returns one page of the caller's inbox, newest first.
+func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
+	principal := auth.MustPrincipal(r.Context())
+
+	// Same shape as the activity timeline's paging, deliberately: one cursor
+	// implementation and one way of reading it (plans/phase11.md §41).
+	limit := 0
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		if parsed, err := strconv.Atoi(raw); err == nil {
+			limit = parsed
+		}
+	}
+
+	page, err := h.service.Inbox(
+		r.Context(),
+		principal.UserID,
+		strings.TrimSpace(r.URL.Query().Get("cursor")),
+		limit,
+		time.Now(),
+	)
+	if errors.Is(err, ErrBadCursor) {
+		httpx.WriteError(w, r, httpx.ErrBadRequest("Start again from the first page."))
+		return
+	}
+	if err != nil {
+		httpx.WriteError(w, r, httpx.ErrInternal(err))
+		return
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, ToInboxResponse(page))
+}
+
+// markRead marks one of the caller's notifications as read.
+func (h *Handler) markRead(w http.ResponseWriter, r *http.Request) {
+	principal := auth.MustPrincipal(r.Context())
+
+	notificationID, err := uuid.Parse(chi.URLParam(r, notificationIDParam))
+	if err != nil {
+		// An unparseable id and somebody else's id get the same answer, so the
+		// endpoint cannot be used to find out which ids are real.
+		httpx.WriteError(w, r, httpx.ErrNotFound("The requested resource does not exist."))
+		return
+	}
+
+	notification, err := h.service.MarkRead(r.Context(), principal.UserID, notificationID)
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, ToNotificationResponse(notification))
+}
+
+// readAll marks every arrived notification of the caller's as read.
+func (h *Handler) readAll(w http.ResponseWriter, r *http.Request) {
+	principal := auth.MustPrincipal(r.Context())
+	now := time.Now()
+
+	marked, err := h.service.MarkAllRead(r.Context(), principal.UserID, now)
+	if err != nil {
+		httpx.WriteError(w, r, httpx.ErrInternal(err))
+		return
+	}
+
+	unread, err := h.service.UnreadCount(r.Context(), principal.UserID, now)
+	if err != nil {
+		httpx.WriteError(w, r, httpx.ErrInternal(err))
+		return
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, ReadAllResponse{MarkedRead: marked, UnreadCount: unread})
+}
+
 // writeError maps this package's errors onto responses.
 func (h *Handler) writeError(w http.ResponseWriter, r *http.Request, err error) {
 	var invalid ErrInvalidDevice
@@ -173,7 +263,7 @@ func (h *Handler) writeError(w http.ResponseWriter, r *http.Request, err error) 
 	// A device belonging to somebody else and a device that does not exist get
 	// the same answer, so registrations cannot be probed for
 	// (plans/phase8.md §40).
-	if errors.Is(err, ErrUnknownDevice) {
+	if errors.Is(err, ErrUnknownDevice) || errors.Is(err, ErrUnknownNotification) {
 		httpx.WriteError(w, r, httpx.ErrNotFound("The requested resource does not exist."))
 		return
 	}
