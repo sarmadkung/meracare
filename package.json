@@ -9,6 +9,8 @@
   },
   "scripts": {
     "mobile": "pnpm --filter @meracare/mobile start",
+    "ios": "pnpm --filter @meracare/mobile ios",
+    "android": "pnpm --filter @meracare/mobile android",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
