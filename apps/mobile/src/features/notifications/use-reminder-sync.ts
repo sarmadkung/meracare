@@ -1,4 +1,4 @@
-import { readPushPayload, readReminderPayload } from '@meracare/contracts';
+import { readPushPayload, readReminderPayload } from '@genxcare/contracts';
 import * as Notifications from 'expo-notifications';
 import { router, type Href } from 'expo-router';
 import { useEffect, useRef } from 'react';
@@ -48,7 +48,7 @@ export function useReminderSync(isSignedIn: boolean, isRestoring: boolean) {
   // The server wins when it can: a push reflects the care as it is at the
   // moment it is sent, where a locally scheduled reminder reflects the plan as
   // it was when the app was last open. Local scheduling remains the fallback,
-  // and today it is the only path that works at all, because MeraCare holds no
+  // and today it is the only path that works at all, because GenXcare holds no
   // push credentials yet.
   const registrationSettled = register.isSuccess || register.isError;
   const serverCanPush = register.data?.pushTokenRegistered === true;

@@ -1,4 +1,4 @@
-import type { Reminder, ReminderPlan } from '@meracare/contracts';
+import type { Reminder, ReminderPlan } from '@genxcare/contracts';
 import * as Notifications from 'expo-notifications';
 
 import { clearReminders, syncReminders } from '../scheduler';

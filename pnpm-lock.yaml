@@ -16,7 +16,7 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@meracare/contracts':
+      '@genxcare/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@supabase/supabase-js':
@@ -92,7 +92,7 @@ importers:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(react@19.2.3)
     devDependencies:
-      '@meracare/config':
+      '@genxcare/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@testing-library/react-native':
@@ -124,7 +124,7 @@ importers:
 
   packages/contracts:
     devDependencies:
-      '@meracare/config':
+      '@genxcare/config':
         specifier: workspace:*
         version: link:../config
       typescript:

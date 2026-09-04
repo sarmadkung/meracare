@@ -1,4 +1,4 @@
-import { can, type CarePermission, type CircleMember, type Senior } from '@meracare/contracts';
+import { can, type CarePermission, type CircleMember, type Senior } from '@genxcare/contracts';
 
 /**
  * Which controls the Care Circle screen offers.

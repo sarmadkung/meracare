@@ -1,4 +1,4 @@
-import type { Appointment, CareTask, MedicationDose } from '@meracare/contracts';
+import type { Appointment, CareTask, MedicationDose } from '@genxcare/contracts';
 import * as SQLite from 'expo-sqlite';
 
 import type { SyncEntityType, SyncOperation, SyncStatus, SyncStore } from './sync-queue';
@@ -11,7 +11,7 @@ import type { SyncEntityType, SyncOperation, SyncStatus, SyncStore } from './syn
  * Everything else is fetched when there is a connection.
  */
 
-const DATABASE_NAME = 'meracare.db';
+const DATABASE_NAME = 'genxcare.db';
 
 let handle: SQLite.SQLiteDatabase | null = null;
 

@@ -1,4 +1,4 @@
-# MeraCare — Phase 2: User & Senior Foundation
+# GenXcare — Phase 2: User & Senior Foundation
 
 Phase 1 is complete.
 

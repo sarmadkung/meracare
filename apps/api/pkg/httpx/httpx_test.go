@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/meracare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/httpx"
 )
 
 func decodeError(t *testing.T, rec *httptest.ResponseRecorder) httpx.ErrorResponse {
@@ -186,18 +186,18 @@ func TestRecovererReturnsErrorEnvelope(t *testing.T) {
 }
 
 func TestCORSOnlyAnswersAllowedOrigins(t *testing.T) {
-	handler := httpx.CORS([]string{"https://meracare.app"})(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	handler := httpx.CORS([]string{"https://genxcare.app"})(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
 	t.Run("allowed origin", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/v1/me", nil)
-		req.Header.Set("Origin", "https://meracare.app")
+		req.Header.Set("Origin", "https://genxcare.app")
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)
 
-		if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "https://meracare.app" {
+		if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "https://genxcare.app" {
 			t.Errorf("Access-Control-Allow-Origin = %q", got)
 		}
 	})
@@ -216,7 +216,7 @@ func TestCORSOnlyAnswersAllowedOrigins(t *testing.T) {
 
 	t.Run("preflight", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodOptions, "/v1/me", nil)
-		req.Header.Set("Origin", "https://meracare.app")
+		req.Header.Set("Origin", "https://genxcare.app")
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)

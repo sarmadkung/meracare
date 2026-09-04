@@ -1,4 +1,4 @@
-import type { NotificationPreferences } from '@meracare/contracts';
+import type { NotificationPreferences } from '@genxcare/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';

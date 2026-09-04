@@ -14,7 +14,7 @@ import (
 // The push boundary.
 //
 // One interface, one implementation, and a composition root that can swap it.
-// MeraCare runs on Expo, so Expo's push service is the right provider today: it
+// GenXcare runs on Expo, so Expo's push service is the right provider today: it
 // speaks to both APNs and FCM, needs no Apple key or Firebase service account
 // in this repository, and is what the existing mobile stack already produces
 // tokens for. Building APNs and FCM transports directly would mean holding two
@@ -44,7 +44,7 @@ type PushOutcome struct {
 	Token string
 	// Delivered means the provider accepted the message. It does not mean the
 	// phone showed it: no push service can promise that, and pretending
-	// otherwise would make "sent" a claim MeraCare cannot support.
+	// otherwise would make "sent" a claim GenXcare cannot support.
 	Delivered bool
 	// Retryable distinguishes "the provider was briefly unavailable" from "this
 	// message will never be accepted". Only the former is worth attempting
@@ -68,7 +68,7 @@ type PushSender interface {
 // It reports every message as permanently undeliverable, which is the truth:
 // there is nowhere to send it. The notification still exists and still appears
 // in the inbox, so the app is fully usable with no push credentials at all —
-// which is the state MeraCare is in until an EAS project is set up
+// which is the state GenXcare is in until an EAS project is set up
 // (plans/phase11.md §43).
 type DisabledSender struct{}
 

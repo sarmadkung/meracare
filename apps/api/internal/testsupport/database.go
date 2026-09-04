@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // DatabaseURLEnv names the environment variable that enables integration tests.

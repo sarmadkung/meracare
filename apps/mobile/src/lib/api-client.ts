@@ -1,4 +1,4 @@
-import { API_VERSION_PREFIX } from '@meracare/contracts';
+import { API_VERSION_PREFIX } from '@genxcare/contracts';
 
 import { ApiError } from './api-error';
 import { env } from './env';

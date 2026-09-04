@@ -1,4 +1,4 @@
-import type { CareTask } from '@meracare/contracts';
+import type { CareTask } from '@genxcare/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';

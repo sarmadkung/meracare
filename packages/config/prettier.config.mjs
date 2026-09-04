@@ -1,4 +1,4 @@
-/** Shared Prettier configuration for MeraCare TypeScript workspaces. */
+/** Shared Prettier configuration for GenXcare TypeScript workspaces. */
 export default {
   semi: true,
   singleQuote: true,

@@ -1,4 +1,4 @@
-module github.com/meracare/api
+module github.com/genxcare/api
 
 go 1.24.5
 

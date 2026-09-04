@@ -13,7 +13,7 @@ The notification system should be **generic infrastructure**, while those domain
 Save this as `plans/phase8.md`:
 
 ````md
-# MeraCare — Phase 8: Notifications & Reminders
+# GenXcare — Phase 8: Notifications & Reminders
 
 Phase 7 is complete and merged.
 
@@ -23,7 +23,7 @@ Do not start Phase 9 or implement unrelated features.
 
 ## Objective
 
-Build the notification and reminder infrastructure for MeraCare.
+Build the notification and reminder infrastructure for GenXcare.
 
 The system must provide reliable reminders for:
 
@@ -45,7 +45,7 @@ The system must support:
 - reminder scheduling
 - cancellation/rescheduling
 - notification state
-- deep linking into the relevant MeraCare screen
+- deep linking into the relevant GenXcare screen
 - retry-safe notification processing
 
 The architecture must work for:
@@ -231,12 +231,12 @@ Do not assume that application-level permission means the device has granted not
 There are two separate concepts:
 
 ```text
-MeraCare preference
+GenXcare preference
         +
 OS notification permission
 ```
 
-The application preference controls what MeraCare wants to send.
+The application preference controls what GenXcare wants to send.
 
 The operating system controls whether the device allows notifications.
 
@@ -1145,7 +1145,7 @@ Primary color:
 #0F766E
 ```
 
-Notification settings should use the existing MeraCare design system.
+Notification settings should use the existing GenXcare design system.
 
 Keep the interface:
 

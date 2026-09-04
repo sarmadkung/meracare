@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/relationships"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/relationships"
 )
 
 // Domain failures the transport layer maps onto responses.

@@ -12,12 +12,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/server"
-	"github.com/meracare/api/internal/testsupport"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/server"
+	"github.com/genxcare/api/internal/testsupport"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // The MVP end-to-end journey (plans/phase9.md §40).

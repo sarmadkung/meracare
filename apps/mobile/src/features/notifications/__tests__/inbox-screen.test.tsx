@@ -1,4 +1,4 @@
-import type { Notification, NotificationInbox } from '@meracare/contracts';
+import type { Notification, NotificationInbox } from '@genxcare/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';

@@ -128,7 +128,7 @@ func ToPlanResponse(reminders []Reminder, now time.Time) PlanResponse {
 //
 // It carries the words as they were sent, and identifiers for where to go. It
 // carries no delivery state: whether a push reached a phone is an operational
-// fact about MeraCare's infrastructure, not something the person reading their
+// fact about GenXcare's infrastructure, not something the person reading their
 // inbox has any use for, and exposing it would invite a client to render
 // "failed" against a notification the user is looking at right now
 // (plans/phase11.md §§6, 27).

@@ -71,7 +71,7 @@ func hostOf(rawURL string) (string, error) {
 		return parsed.Hostname(), nil
 	}
 
-	// Keyword form: `host=localhost port=5432 dbname=meracare`. Anything the
+	// Keyword form: `host=localhost port=5432 dbname=genxcare`. Anything the
 	// suite cannot read the host out of is refused rather than assumed local.
 	for _, field := range strings.Fields(trimmed) {
 		key, value, ok := strings.Cut(field, "=")

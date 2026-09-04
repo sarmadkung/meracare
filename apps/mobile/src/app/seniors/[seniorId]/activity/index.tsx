@@ -1,5 +1,5 @@
-import type { CareEvent } from '@meracare/contracts';
-import { groupByDay } from '@meracare/contracts';
+import type { CareEvent } from '@genxcare/contracts';
+import { groupByDay } from '@genxcare/contracts';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, SectionList, View } from 'react-native';

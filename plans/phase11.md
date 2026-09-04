@@ -1,11 +1,11 @@
-# MeraCare — Phase 11: Notifications & Reminders
+# GenXcare — Phase 11: Notifications & Reminders
 
 Implement **Phase 11 only**.
 
-Establish MeraCare's notification system and deliver the first production-useful
+Establish GenXcare's notification system and deliver the first production-useful
 notifications for medication reminders, upcoming appointments, care tasks,
 overdue tasks, and important care-circle activity — for family caregivers,
-professional caregivers, and seniors using MeraCare themselves.
+professional caregivers, and seniors using GenXcare themselves.
 
 Do not implement SMS, WhatsApp, email, or marketing notifications in this phase.
 
@@ -48,7 +48,7 @@ domain lives in `internal/notifications/` and defines the vocabulary:
 4. **Preferences.** User-level and independently configurable: medication,
    appointment, task, overdue task, care activity. Small, focused, sensible
    defaults.
-5. **Every care mode.** A senior using MeraCare alone receives their own
+5. **Every care mode.** A senior using GenXcare alone receives their own
    medication reminders. Family members are notified according to relationship,
    permission, and preference — not everybody about everything. A professional
    caregiver receives notifications for every client they are authorized for,

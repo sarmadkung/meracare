@@ -1,5 +1,5 @@
 /**
- * MeraCare design tokens.
+ * GenXcare design tokens.
  *
  * The locked visual system lives in `docs/18-visual-theme-and-illustrations.md`:
  * green with a slight blue/teal bias, `#0F766E` Deep Teal as the brand colour,

@@ -58,7 +58,7 @@ export default function SignInScreen() {
   return (
     <Screen scrollable>
       <View style={{ gap: theme.spacing.sm }}>
-        <Text variant="pageHeading">MeraCare</Text>
+        <Text variant="pageHeading">GenXcare</Text>
         <Text variant="body" color="secondary">
           Care for yourself, or coordinate care with your family and caregivers.
         </Text>

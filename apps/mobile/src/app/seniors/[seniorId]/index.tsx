@@ -1,4 +1,4 @@
-import type { Appointment, CareTask, MedicationDose, Senior } from '@meracare/contracts';
+import type { Appointment, CareTask, MedicationDose, Senior } from '@genxcare/contracts';
 import {
   appointmentStatusLabel,
   appointmentWhenLabel,
@@ -9,7 +9,7 @@ import {
   doseTimeLabel,
   statusLabel,
   taskTimeLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useMemo, type ReactNode } from 'react';
@@ -161,7 +161,7 @@ function Dashboard({ profile }: { profile: Senior }) {
           emptyTitle="No medication today"
           emptyBody={
             can(profile, 'medications.manage')
-              ? 'Add a medicine and its times, and MeraCare will show each dose here and remind you before it is due.'
+              ? 'Add a medicine and its times, and GenXcare will show each dose here and remind you before it is due.'
               : 'Nothing is scheduled for today.'
           }
           action={{
@@ -220,7 +220,7 @@ function Dashboard({ profile }: { profile: Senior }) {
           emptyTitle="No appointments today"
           emptyBody={
             can(profile, 'appointments.manage')
-              ? 'Add a visit and MeraCare will remind the circle an hour before it starts.'
+              ? 'Add a visit and GenXcare will remind the circle an hour before it starts.'
               : 'Nothing is booked for today.'
           }
           action={{
@@ -502,7 +502,7 @@ function GettingStarted({ profile }: { profile: Senior }) {
       <Text variant="sectionHeading">Getting started</Text>
       <Text variant="body" color="secondary">
         {profile.isSelf
-          ? 'Nothing is set up yet. Add whatever you want MeraCare to keep track of — you can do the rest later.'
+          ? 'Nothing is set up yet. Add whatever you want GenXcare to keep track of — you can do the rest later.'
           : `Nothing is set up for ${profile.displayName} yet. Start with whichever of these matters most today.`}
       </Text>
 

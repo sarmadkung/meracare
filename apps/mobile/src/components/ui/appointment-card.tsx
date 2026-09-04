@@ -1,10 +1,10 @@
-import type { Appointment } from '@meracare/contracts';
+import type { Appointment } from '@genxcare/contracts';
 import {
   appointmentPlaceLabel,
   appointmentStatusLabel,
   appointmentStatusTone,
   appointmentWhenLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Pressable } from 'react-native';
 
 import { useTheme } from '@/theme';

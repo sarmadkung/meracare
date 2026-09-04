@@ -5,14 +5,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/appointments"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/invitations"
-	"github.com/meracare/api/internal/medications"
-	"github.com/meracare/api/internal/notifications"
-	"github.com/meracare/api/internal/seniors"
-	"github.com/meracare/api/internal/tasks"
-	"github.com/meracare/api/internal/users"
+	"github.com/genxcare/api/internal/appointments"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/invitations"
+	"github.com/genxcare/api/internal/medications"
+	"github.com/genxcare/api/internal/notifications"
+	"github.com/genxcare/api/internal/seniors"
+	"github.com/genxcare/api/internal/tasks"
+	"github.com/genxcare/api/internal/users"
 )
 
 // userLookup adapts the users repository to the narrow interface the invitation
@@ -258,7 +258,7 @@ type overdueSource struct {
 //
 // It asks the tasks domain what is still pending rather than computing overdue
 // itself. tasks.Instance.EffectiveStatus is the single definition of overdue in
-// MeraCare and stays that way: a still-stored-pending occurrence whose time has
+// GenXcare and stays that way: a still-stored-pending occurrence whose time has
 // passed is exactly what that method calls overdue, and a second definition
 // here is how two parts of an app start disagreeing about whether Amma took her
 // tablets (plans/phase11.md §17).

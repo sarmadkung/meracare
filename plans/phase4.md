@@ -1,4 +1,4 @@
-# MeraCare — Phase 4: Tasks & Daily Care
+# GenXcare — Phase 4: Tasks & Daily Care
 
 Phase 3 is complete and merged.
 

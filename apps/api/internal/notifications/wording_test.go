@@ -15,7 +15,7 @@ import (
 // docs/09-security-privacy.md).
 
 // forbidden is the kind of material no notification may ever contain. Written
-// as the things a real MeraCare record holds, because those are what would
+// as the things a real GenXcare record holds, because those are what would
 // actually leak if the policy were relaxed.
 var forbidden = []string{
 	// Medicines, dosages, forms.
@@ -69,7 +69,7 @@ func TestEveryTypeHasWordingOfItsOwn(t *testing.T) {
 	seen := make(map[string]Type, len(Types))
 	for _, notificationType := range Types {
 		title := Title(notificationType)
-		if title == "" || title == "MeraCare" {
+		if title == "" || title == "GenXcare" {
 			t.Errorf("%s has no title of its own", notificationType)
 		}
 		if previous, ok := seen[title]; ok {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/meracare/api/internal/careevents"
+	"github.com/genxcare/api/internal/careevents"
 )
 
 // The vocabulary is the documentation's, so the tests that matter here are the

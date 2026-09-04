@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/seniors"
-	"github.com/meracare/api/internal/tasks"
-	"github.com/meracare/api/internal/testsupport"
-	"github.com/meracare/api/internal/users"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/seniors"
+	"github.com/genxcare/api/internal/tasks"
+	"github.com/genxcare/api/internal/testsupport"
+	"github.com/genxcare/api/internal/users"
 )
 
 type fixture struct {

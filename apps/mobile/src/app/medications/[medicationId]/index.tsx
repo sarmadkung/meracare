@@ -1,4 +1,4 @@
-import type { MedicationDose } from '@meracare/contracts';
+import type { MedicationDose } from '@genxcare/contracts';
 import {
   can,
   doseDateLabel,
@@ -7,7 +7,7 @@ import {
   formLabel,
   nextDoseLabel,
   schedulesLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 

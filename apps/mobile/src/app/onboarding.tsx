@@ -1,4 +1,4 @@
-import type { ApiErrorBody, SeniorCreateMode } from '@meracare/contracts';
+import type { ApiErrorBody, SeniorCreateMode } from '@genxcare/contracts';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -10,7 +10,7 @@ import { useUIStore } from '@/stores/ui-store';
 import { useTheme } from '@/theme';
 
 /**
- * Onboarding: choose how you will use MeraCare, then create the first profile.
+ * Onboarding: choose how you will use GenXcare, then create the first profile.
  *
  * The three choices are the product's care modes (docs/01). They set the
  * creator's role in the new care circle — they do not select a different app.
@@ -63,7 +63,7 @@ export default function OnboardingScreen() {
   return (
     <Screen scrollable>
       <View style={{ gap: theme.spacing.sm }}>
-        <Text variant="pageHeading">Welcome to MeraCare</Text>
+        <Text variant="pageHeading">Welcome to GenXcare</Text>
         <Text variant="body" color="secondary">
           How would you like to start? You can change this later, and you never have to invite
           anyone.

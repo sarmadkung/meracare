@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/paging"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/paging"
 )
 
 // ErrNotFound is returned when no appointment matches.

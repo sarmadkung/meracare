@@ -1,4 +1,4 @@
-import { permissionLabel, roleLabel } from '@meracare/contracts';
+import { permissionLabel, roleLabel } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -43,7 +43,7 @@ export default function AcceptInvitationScreen() {
               ? preview.error.message
               : 'The link may be incorrect, or the invitation may have been cancelled.'}
           </Text>
-          <Button variant="secondary" label="Go to MeraCare" onPress={() => router.replace('/')} />
+          <Button variant="secondary" label="Go to GenXcare" onPress={() => router.replace('/')} />
         </Card>
       </Screen>
     );

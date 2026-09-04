@@ -1,4 +1,4 @@
-# MeraCare
+# GenXcare
 
 Senior care and family coordination platform.
 

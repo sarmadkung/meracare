@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/seniors"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/seniors"
 )
 
 // SeniorLookup loads the senior an appointment belongs to, for their timezone.

@@ -1,6 +1,6 @@
-# @meracare/marketing
+# @genxcare/marketing
 
-The MeraCare marketing site. One page: what the app does, who it is for, and the
+The GenXcare marketing site. One page: what the app does, who it is for, and the
 App Store / Google Play links.
 
 Plain HTML and CSS with no build step and no dependencies, so it deploys as
@@ -10,7 +10,7 @@ output directory set to `apps/marketing`.
 ## Run it locally
 
 ```bash
-pnpm --filter @meracare/marketing dev   # http://localhost:4173
+pnpm --filter @genxcare/marketing dev   # http://localhost:4173
 ```
 
 ## Structure
@@ -41,12 +41,12 @@ disabled under `prefers-reduced-motion`.
 
 - [ ] Replace the placeholder store URLs. They appear in three places in
       `index.html`: the hero, the closing section, and the footer. Currently
-      `id0000000000` (Apple) and `app.meracare.mobile` is already correct, taken from apps/mobile/app.json.
+      `id0000000000` (Apple) and `app.genxcare.mobile` is already correct, taken from apps/mobile/app.json.
 - [ ] Swap the in-brand download buttons for Apple's and Google's official
       badge artwork — both stores require their own badge assets.
 - [ ] Add a privacy policy page and link it in the footer. Both stores require a
       reachable privacy policy URL before submission.
 - [ ] Add `assets/social-card.png` (1200×630) for the Open Graph preview, or
       remove the `og:image` and `twitter:card` tags.
-- [ ] Confirm the `hello@meracare.app` support address and the `meracare.app`
+- [ ] Confirm the `hello@genxcare.app` support address and the `genxcare.app`
       canonical domain.

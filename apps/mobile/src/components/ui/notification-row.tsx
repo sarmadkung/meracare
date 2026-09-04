@@ -1,5 +1,5 @@
-import type { Notification } from '@meracare/contracts';
-import { timeInTimezone } from '@meracare/contracts';
+import type { Notification } from '@genxcare/contracts';
+import { timeInTimezone } from '@genxcare/contracts';
 import { Pressable, View } from 'react-native';
 
 import { useTheme } from '@/theme';
@@ -18,7 +18,7 @@ export interface NotificationRowProps {
  *
  * The title and body are the server's, unchanged. They are the words that were
  * sent, and re-writing them here would mean the inbox and the lock screen could
- * disagree about what MeraCare said (plans/phase11.md §6).
+ * disagree about what GenXcare said (plans/phase11.md §6).
  *
  * Unread is marked twice over — a dot and a heavier title — because a state
  * carried by colour alone is a state some readers cannot see

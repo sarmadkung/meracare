@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/relationships"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/relationships"
 )
 
 // ErrNotFound is returned when no senior profile matches.
@@ -162,7 +162,7 @@ type UpdateParams struct {
 // they are revoked (plans/phase11.md §§12, 31).
 //
 // Unpaged, and that is a deliberate MVP decision rather than an oversight: one
-// pass needs the whole roster at once to decide anything, and at MeraCare's
+// pass needs the whole roster at once to decide anything, and at GenXcare's
 // scale the whole roster is a few thousand rows. The first deployment where
 // that stops being true will need the sweep sharded by senior, which is a
 // change to the scheduler rather than to this query.

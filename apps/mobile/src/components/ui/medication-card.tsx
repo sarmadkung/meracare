@@ -1,5 +1,5 @@
-import type { MedicationDose } from '@meracare/contracts';
-import { doseStatusLabel, doseStatusTone, doseTimeLabel, isDoseOpen } from '@meracare/contracts';
+import type { MedicationDose } from '@genxcare/contracts';
+import { doseStatusLabel, doseStatusTone, doseTimeLabel, isDoseOpen } from '@genxcare/contracts';
 import { Pressable, View } from 'react-native';
 
 import { useTheme } from '@/theme';

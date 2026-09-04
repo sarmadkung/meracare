@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/meracare/api/internal/database"
+	"github.com/genxcare/api/internal/database"
 )
 
 func TestLoadMigrationsAreOrderedAndNonEmpty(t *testing.T) {

@@ -1,5 +1,5 @@
-import type { CareTask, Senior } from '@meracare/contracts';
-import { statusLabel, taskTimeLabel } from '@meracare/contracts';
+import type { CareTask, Senior } from '@genxcare/contracts';
+import { statusLabel, taskTimeLabel } from '@genxcare/contracts';
 import { Link, Redirect, router } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 

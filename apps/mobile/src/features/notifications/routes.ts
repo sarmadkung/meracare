@@ -1,4 +1,4 @@
-import type { NotificationEntity, ReminderPayload } from '@meracare/contracts';
+import type { NotificationEntity, ReminderPayload } from '@genxcare/contracts';
 import type { Href } from 'expo-router';
 
 /**

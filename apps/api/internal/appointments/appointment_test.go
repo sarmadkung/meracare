@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/meracare/api/internal/appointments"
+	"github.com/genxcare/api/internal/appointments"
 )
 
 // The state machine is the whole of the conflict rule (plans/phase6.md §§3,

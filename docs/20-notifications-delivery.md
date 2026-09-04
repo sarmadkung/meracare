@@ -1,6 +1,6 @@
 # Notifications and Delivery
 
-How MeraCare decides what to tell each person, when to tell them, and how it
+How GenXcare decides what to tell each person, when to tell them, and how it
 reaches their phone. Implemented in Phase 11 (`plans/phase11.md`), on top of the
 device-scheduled reminders of Phase 8.
 
@@ -13,7 +13,7 @@ says which one and where it belongs — never its value.
 
 ## Two Ways a Reminder Reaches a Phone
 
-MeraCare has both, and that is deliberate.
+GenXcare has both, and that is deliberate.
 
 **Device-scheduled reminders** (Phase 8) — the app fetches a plan from
 `GET /v1/notifications/reminders` and schedules local notifications with the
@@ -32,7 +32,7 @@ delivering and the app clears its local schedule; otherwise the app schedules
 locally. Two would announce every dose twice, which is the kind of bug that
 teaches people to ignore the app.
 
-Because MeraCare holds no push credentials yet, `pushTokenRegistered` is false
+Because GenXcare holds no push credentials yet, `pushTokenRegistered` is false
 everywhere and local scheduling is what actually runs. The server path is
 complete and dormant.
 
@@ -249,7 +249,7 @@ settings rather than offering a button that does nothing.
 
 With permission denied the app works: the inbox, history, read state, and every
 care screen are unaffected. Only the buzz is missing. The settings screen shows
-both halves — what MeraCare will send, and what the OS allows — because an app
+both halves — what GenXcare will send, and what the OS allows — because an app
 that conflates them insists reminders are on while the phone stays silent.
 
 ## Configuration
@@ -289,7 +289,7 @@ reminders with pushes that go nowhere.
   Push needs a service worker and VAPID keys, which is its own piece of work.
   This is a deliberate Phase 11 limitation.
 - **The roster is unpaged.** One pass reads every active membership at once. At
-  MeraCare's scale that is a few thousand rows; the first deployment where it is
+  GenXcare's scale that is a few thousand rows; the first deployment where it is
   not will need the sweep sharded by senior.
 - **Care activity is polled, not pushed.** Each pass re-reads the last fifteen
   minutes of care events. Redundant, and self-healing after downtime; a
@@ -312,9 +312,9 @@ pnpm format:check
 Fresh-database migrations:
 
 ```bash
-createdb meracare_fresh   # or docker exec … psql -c 'CREATE DATABASE …'
-DATABASE_URL=…/meracare_fresh go run ./cmd/migrate up
-TEST_DATABASE_URL=…/meracare_fresh go test -count=1 ./...
+createdb genxcare_fresh   # or docker exec … psql -c 'CREATE DATABASE …'
+DATABASE_URL=…/genxcare_fresh go run ./cmd/migrate up
+TEST_DATABASE_URL=…/genxcare_fresh go test -count=1 ./...
 ```
 
 ### The manual push test, once push is configured

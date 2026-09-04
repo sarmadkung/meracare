@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/pkg/httpx"
-	"github.com/meracare/api/pkg/validation"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/validation"
 )
 
 const (

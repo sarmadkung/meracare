@@ -1,4 +1,4 @@
-import type { MedicationDose } from '@meracare/contracts';
+import type { MedicationDose } from '@genxcare/contracts';
 
 import { apiRequest } from '@/lib/api-client';
 import { classify, readNotes } from '@/lib/offline/classify';

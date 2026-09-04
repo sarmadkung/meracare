@@ -1,4 +1,4 @@
-import type { CareTask } from '@meracare/contracts';
+import type { CareTask } from '@genxcare/contracts';
 
 import { apiRequest } from '@/lib/api-client';
 import { classify, readNotes } from '@/lib/offline/classify';

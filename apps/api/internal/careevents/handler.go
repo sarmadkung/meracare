@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meracare/api/internal/authz"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/pkg/httpx"
+	"github.com/genxcare/api/internal/authz"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/pkg/httpx"
 )
 
 // Handler exposes the activity timeline.
