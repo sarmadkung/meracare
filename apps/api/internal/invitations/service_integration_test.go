@@ -3,6 +3,7 @@ package invitations_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -254,6 +255,36 @@ func TestCreateInvitationRefusesTheSeniorRole(t *testing.T) {
 }
 
 // --- 4 & 5. Retrieve and accept ---------------------------------------------
+
+// A code is read off a share message and typed back in, so it returns grouped
+// and in whatever case the keyboard produced. It must still find its
+// invitation.
+func TestInvitationIsFoundByACodeAsAPersonTypesIt(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+
+	sara := f.newUser(t, "sara-typed@example.com")
+	circle := f.newCircle(t, sara, "Mrs Khan")
+	maria := f.newUser(t, "maria-typed@example.com")
+
+	created := f.invite(t, circle.Relationship, circle.Senior.ID, maria.Email,
+		care.RoleProfessionalCaregiver)
+
+	raw := string(created.Token)
+	grouped := invitations.Token(strings.ToLower(raw[:4] + "-" + raw[4:8] + "-" + raw[8:]))
+
+	if _, err := f.invitations.Preview(ctx, grouped); err != nil {
+		t.Fatalf("Preview with a grouped, lowercased code: %v", err)
+	}
+
+	relationship, err := f.invitations.Accept(ctx, maria, grouped)
+	if err != nil {
+		t.Fatalf("Accept with a grouped, lowercased code: %v", err)
+	}
+	if !relationship.IsActive() {
+		t.Errorf("relationship = %+v, want an active membership", relationship)
+	}
+}
 
 func TestAcceptInvitationCreatesMembership(t *testing.T) {
 	f := newFixture(t)

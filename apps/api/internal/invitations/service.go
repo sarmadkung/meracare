@@ -370,8 +370,14 @@ func (s *Service) GetByID(ctx context.Context, id uuid.UUID) (Invitation, error)
 
 // findByToken validates the token's shape before looking it up, so malformed
 // input never reaches the database.
-func (s *Service) findByToken(ctx context.Context, token Token) (Invitation, error) {
-	if !token.Valid() {
+// findByToken resolves a code as it was supplied.
+//
+// Normalising here rather than in the handlers means every route that redeems a
+// code — preview and accept alike — accepts the same forms, and a malformed one
+// is turned away before it becomes a query.
+func (s *Service) findByToken(ctx context.Context, supplied Token) (Invitation, error) {
+	token, ok := NormaliseToken(string(supplied))
+	if !ok {
 		return Invitation{}, ErrNotFound
 	}
 	return s.invitations.FindByTokenHash(ctx, token.Hash())

@@ -726,8 +726,17 @@ docs/12 or docs/17 was changed.
 1. **Only the token's hash is stored.** The raw token exists in memory and in
    the single response that delivers it. A database disclosure therefore hands
    an attacker no working invitations. Plain SHA-256 is the right primitive for
-   a 256-bit random value; bcrypt-style hashes exist to slow brute force against
+   a value this random; bcrypt-style hashes exist to slow brute force against
    low-entropy human secrets, and would only add cost per lookup here.
+
+   The token was originally 256 bits, rendered as 43 base64url characters. It is
+   now 12 symbols of Crockford base32 — 60 bits — because a code nobody can read
+   aloud or type is a code that only travels by paste, and the invitation had no
+   other delivery channel. 60 bits keeps an online search hopeless: against
+   5,000 outstanding invitations at 5,000 guesses per second, a hit is expected
+   about once per million years, so the guarantee still comes from the token
+   rather than from rate limiting. `NormaliseToken` folds the case, grouping and
+   mistakable letters that a hand-copied code arrives with.
 2. **Expiry is computed, never merely stored.** `EffectiveStatus` treats a
    lapsed invitation as expired at read time, so correctness never depends on a
    sweep having run. `ExpirePending` exists for housekeeping only.

@@ -99,6 +99,17 @@ export default function HomeScreen() {
         </View>
       )}
 
+      {/*
+        Outside the list, so it is there in the empty state too: somebody
+        invited as a caregiver arrives with no seniors of their own and this is
+        the only way in.
+      */}
+      <Button
+        variant="secondary"
+        label="Join a care circle"
+        onPress={() => router.push('/invitations/join')}
+      />
+
       <Button
         variant="ghost"
         label="Notification settings"
