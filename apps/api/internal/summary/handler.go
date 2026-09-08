@@ -75,3 +75,64 @@ func toCounts(counts *Counts) *CountsResponse {
 	}
 	return &CountsResponse{Done: counts.Done, Total: counts.Total}
 }
+
+// TodayHandler exposes `GET /v1/today`.
+type TodayHandler struct {
+	service *TodayService
+}
+
+// NewTodayHandler builds the handler.
+func NewTodayHandler(service *TodayService) *TodayHandler {
+	return &TodayHandler{service: service}
+}
+
+// Routes mounts the endpoint. The caller applies authentication; the response
+// is already scoped to the reader's own active relationships and filtered by
+// each senior's permissions inside the service.
+func (h *TodayHandler) Routes() chi.Router {
+	router := chi.NewRouter()
+	router.Get("/", h.list)
+	return router
+}
+
+// ItemResponse is one thing happening today.
+type ItemResponse struct {
+	Kind         string `json:"kind"`
+	ID           string `json:"id"`
+	SeniorID     string `json:"seniorId"`
+	SeniorName   string `json:"seniorName"`
+	Timezone     string `json:"timezone"`
+	Title        string `json:"title"`
+	Detail       string `json:"detail"`
+	ScheduledFor string `json:"scheduledFor"`
+	Status       string `json:"status"`
+	AssignedToMe bool   `json:"assignedToMe"`
+}
+
+func (h *TodayHandler) list(w http.ResponseWriter, r *http.Request) {
+	principal := auth.MustPrincipal(r.Context())
+
+	items, err := h.service.ForUser(r.Context(), principal, time.Now())
+	if err != nil {
+		httpx.WriteError(w, r, httpx.ErrInternal(err))
+		return
+	}
+
+	response := make([]ItemResponse, 0, len(items))
+	for _, item := range items {
+		response = append(response, ItemResponse{
+			Kind:         string(item.Kind),
+			ID:           item.ID.String(),
+			SeniorID:     item.SeniorID.String(),
+			SeniorName:   item.SeniorName,
+			Timezone:     item.Timezone,
+			Title:        item.Title,
+			Detail:       item.Detail,
+			ScheduledFor: item.ScheduledFor.UTC().Format(time.RFC3339),
+			Status:       item.Status,
+			AssignedToMe: item.AssignedToMe,
+		})
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, map[string]any{"items": response})
+}

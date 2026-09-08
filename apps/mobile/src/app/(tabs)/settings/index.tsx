@@ -28,6 +28,11 @@ export default function SettingsScreen() {
         subtitle="Reminders and alerts"
         href="/settings/notifications"
       />
+      <ListRow
+        title="Appearance"
+        subtitle="Light, dark, or match your phone"
+        href="/settings/appearance"
+      />
 
       <View style={{ gap: theme.spacing.md, marginTop: theme.spacing.xl }}>
         {/*

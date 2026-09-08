@@ -61,12 +61,15 @@ it('offers sign out', () => {
   expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
 });
 
-it('leads to profile and notification settings', () => {
+it('leads to profile, notifications and appearance', () => {
   mockAuthActions.mockReturnValue(actions());
   renderScreen();
 
   expect(screen.getByRole('button', { name: 'Profile, Your name and details' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Notifications, Reminders and alerts' })).toBeTruthy();
+  expect(
+    screen.getByRole('button', { name: 'Appearance, Light, dark, or match your phone' }),
+  ).toBeTruthy();
 });
 
 it('shows why sign-out was refused', () => {

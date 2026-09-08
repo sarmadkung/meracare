@@ -1,5 +1,17 @@
 export { headerOptions } from './navigation';
-export { ThemeProvider, useTheme, type Theme } from './theme-provider';
+export {
+  resolveScheme,
+  themePreferenceLabel,
+  themePreferences,
+  type ThemePreference,
+} from './preference';
+export {
+  ThemeProvider,
+  useAppearance,
+  useTheme,
+  type Appearance,
+  type Theme,
+} from './theme-provider';
 export {
   darkColors,
   elevation,

@@ -85,6 +85,10 @@ func New(deps Dependencies) http.Handler {
 	summaryHandler := summary.NewHandler(summary.NewService(
 		seniors.NewService(seniorRepo, relationshipRepo), taskService, medicationService,
 	))
+	todayHandler := summary.NewTodayHandler(summary.NewTodayService(
+		seniors.NewService(seniorRepo, relationshipRepo),
+		taskService, medicationService, appointmentService,
+	))
 	noteHandler := notes.NewHandler(notes.NewService(notes.NewRepository(deps.Pool), recorder), guard)
 	messageHandler := messages.NewHandler(messages.NewService(messages.NewRepository(deps.Pool)), guard)
 
@@ -123,6 +127,7 @@ func New(deps Dependencies) http.Handler {
 		v1.Use(requireAuth)
 		v1.Mount("/me", userHandler.Routes())
 		v1.Mount("/notifications", notificationHandler.Routes())
+		v1.Mount("/today", todayHandler.Routes())
 		v1.Mount("/tasks", taskHandler.TaskRoutes())
 		v1.Mount("/medications", medicationHandler.MedicationRoutes())
 		v1.Mount("/appointments", appointmentHandler.AppointmentRoutes())
