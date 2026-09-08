@@ -6,6 +6,7 @@ export { Card } from './card';
 export { GoogleButton, type GoogleButtonProps } from './google-button';
 export { Icon, type IconName, type IconProps } from './icon';
 export { Illustration, type IllustrationName, type IllustrationProps } from './illustration';
+export { ListRow, type ListRowProps } from './list-row';
 export { MedicationCard, type MedicationCardProps } from './medication-card';
 export { NotificationRow, type NotificationRowProps } from './notification-row';
 export { OptionCard, type OptionCardProps } from './option-card';
