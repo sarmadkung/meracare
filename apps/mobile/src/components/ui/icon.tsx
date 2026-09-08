@@ -13,15 +13,7 @@ import { useTheme } from '@/theme';
  * character `›`, which is most of why it read as a prototype.
  */
 export type IconName =
-  | 'chevron'
-  | 'bell'
-  | 'pill'
-  | 'calendar'
-  | 'people'
-  | 'settings'
-  | 'today'
-  | 'task'
-  | 'plus';
+  'chevron' | 'bell' | 'pill' | 'calendar' | 'people' | 'settings' | 'today' | 'task' | 'plus';
 
 const glyphs: Record<IconName, ComponentProps<typeof Ionicons>['name']> = {
   chevron: 'chevron-forward',
