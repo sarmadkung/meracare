@@ -24,6 +24,7 @@ import (
 	"github.com/meracare/api/internal/notifications"
 	"github.com/meracare/api/internal/relationships"
 	"github.com/meracare/api/internal/seniors"
+	"github.com/meracare/api/internal/summary"
 	"github.com/meracare/api/internal/tasks"
 	"github.com/meracare/api/internal/users"
 	"github.com/meracare/api/pkg/httpx"
@@ -78,6 +79,12 @@ func New(deps Dependencies) http.Handler {
 		appointments.NewRepository(deps.Pool), seniorRepo, relationshipRepo, recorder,
 	)
 	appointmentHandler := appointments.NewHandler(appointmentService, guard)
+
+	// Composes the domains above so the care circle can be summarised in one
+	// request rather than two per senior.
+	summaryHandler := summary.NewHandler(summary.NewService(
+		seniors.NewService(seniorRepo, relationshipRepo), taskService, medicationService,
+	))
 	noteHandler := notes.NewHandler(notes.NewService(notes.NewRepository(deps.Pool), recorder), guard)
 	messageHandler := messages.NewHandler(messages.NewService(messages.NewRepository(deps.Pool)), guard)
 
@@ -121,6 +128,7 @@ func New(deps Dependencies) http.Handler {
 		v1.Mount("/appointments", appointmentHandler.AppointmentRoutes())
 		v1.Mount("/notes", noteHandler.NoteRoutes())
 		v1.Mount("/seniors", seniorHandler.Routes(seniors.SubRoutes{
+			Summary:      summaryHandler.Routes(),
 			Members:      memberHandler.Routes(),
 			Invitations:  invitationHandler.SeniorRoutes(),
 			Tasks:        taskHandler.SeniorRoutes(),

@@ -4,6 +4,8 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { Button, Card, EmptyState, Screen, SummaryCard, Text } from '@/components/ui';
 import { useSession } from '@/features/auth/session-provider';
+import { summaryStats } from '@/features/seniors/senior-summary-stats';
+import { useSeniorSummaries } from '@/features/seniors/use-senior-summaries';
 import { useSeniors } from '@/features/seniors/use-seniors';
 import { ApiError } from '@/lib/api-error';
 import { useTheme } from '@/theme';
@@ -21,6 +23,11 @@ export default function CircleScreen() {
   const { isSignedIn } = useSession();
   const seniors = useSeniors(isSignedIn);
   const people = seniors.data ?? [];
+
+  // A separate request from the list, so names render immediately and each
+  // card fills in rather than the whole circle waiting on the slower query.
+  const summaries = useSeniorSummaries(isSignedIn);
+  const bySenior = new Map((summaries.data ?? []).map((entry) => [entry.seniorId, entry]));
 
   return (
     <Screen scrollable variant="list">
@@ -78,10 +85,7 @@ export default function CircleScreen() {
             name={senior.displayName}
             role={describeRole(senior)}
             href={{ pathname: '/seniors/[seniorId]', params: { seniorId: senior.id } }}
-            // Per-person counts need an endpoint that batches them; fetching
-            // each separately would be one request per row. Until then a card
-            // without a stat strip, which SummaryCard already handles.
-            stats={[]}
+            stats={summaryStats(bySenior.get(senior.id))}
           />
         ))
       )}

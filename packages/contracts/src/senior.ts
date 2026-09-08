@@ -70,3 +70,30 @@ export interface SeniorRemovalResponse {
 export function can(senior: Senior, permission: CarePermission): boolean {
   return senior.permissions.includes(permission);
 }
+
+/** How much of something is finished, out of how much there is. */
+export interface CareCounts {
+  done: number;
+  total: number;
+}
+
+/**
+ * One senior's day at a glance.
+ *
+ * `medications` and `tasks` are null when the reader lacks permission to view
+ * that domain, which is not the same as zero. Zero doses is a fact about the
+ * senior; null is a fact about the reader, and showing "0/0" to a caregiver who
+ * simply cannot see medication would tell them something untrue.
+ */
+export interface SeniorSummary {
+  seniorId: string;
+  medications: CareCounts | null;
+  tasks: CareCounts | null;
+  /** Overdue tasks plus missed doses, counted only across visible domains. */
+  needsAttention: number;
+}
+
+/** Response shape of `GET /v1/seniors/summary`. */
+export interface SeniorSummaryListResponse {
+  items: SeniorSummary[];
+}
