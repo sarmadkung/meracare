@@ -150,3 +150,15 @@ export function newOperation(
     status: 'pending',
   };
 }
+
+/**
+ * A unique local id for one queued user action.
+ *
+ * Generated on the phone rather than by the server: the whole point of the
+ * queue is that the server is unreachable when the action is recorded. Hermes
+ * has no WebCrypto, so this is a timestamp and a random suffix rather than a
+ * UUID.
+ */
+export function newOperationId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}

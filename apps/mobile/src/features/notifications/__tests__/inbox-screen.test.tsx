@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import NotificationsScreen from '@/app/notifications';
+import NotificationsScreen from '@/app/(tabs)/notifications';
 import { ThemeProvider } from '@/theme';
 
 /**

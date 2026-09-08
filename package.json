@@ -20,6 +20,8 @@
     "api:migrate": "cd apps/api && go run ./cmd/migrate up",
     "api:test": "cd apps/api && go test ./...",
     "api:lint": "cd apps/api && go vet ./...",
+    "db:seed": "cd apps/api && go run ./cmd/seed",
+    "db:seed:dry": "cd apps/api && go run ./cmd/seed -dry-run",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down"
   },

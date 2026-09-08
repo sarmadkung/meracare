@@ -31,6 +31,9 @@ export function useOfflineSync() {
         await queryClient.invalidateQueries({ queryKey: ['tasks'] });
         await queryClient.invalidateQueries({ queryKey: ['medications'] });
         await queryClient.invalidateQueries({ queryKey: ['seniors'] });
+        // Today is built from its own endpoint, so it is not reached by any of
+        // the keys above — a drained dose would go on reading as pending.
+        await queryClient.invalidateQueries({ queryKey: ['today'] });
       }
     } catch {
       // A failed pass is not an error the user can act on; the operations are

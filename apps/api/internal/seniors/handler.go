@@ -39,6 +39,10 @@ func NewHandler(service *Service, guard *authz.Guard) *Handler {
 // shares one `{seniorID}` parameter and the guard reads the same value whatever
 // the resource.
 type SubRoutes struct {
+	// Summary sits beside the list at `/summary` rather than under a senior:
+	// it answers for the whole circle at once. It is passed in because it
+	// composes tasks and medications, and both of those import this package.
+	Summary      chi.Router
 	Members      chi.Router
 	Invitations  chi.Router
 	Tasks        chi.Router
@@ -56,6 +60,13 @@ func (h *Handler) Routes(sub SubRoutes) chi.Router {
 
 	router.Get("/", h.list)
 	router.Post("/", h.create)
+
+	// Mounted before the parameterised route so the literal path wins. Senior
+	// IDs are UUIDs, so "summary" can never be one, but relying on that rather
+	// than on ordering would be a trap for the next person.
+	if sub.Summary != nil {
+		router.Mount("/summary", sub.Summary)
+	}
 
 	router.Route("/{"+authz.SeniorIDParam+"}", func(senior chi.Router) {
 		senior.With(h.guard.RequirePermission(care.PermissionSeniorView)).Get("/", h.get)
