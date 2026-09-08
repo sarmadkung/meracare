@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
+import type { ColorValue } from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -31,7 +32,7 @@ export interface IconProps {
   name: IconName;
   size?: number;
   /** Defaults to the secondary text colour. Pass a theme colour, never a literal. */
-  color?: string;
+  color?: ColorValue;
   /**
    * Omit when adjacent text already says the same thing — otherwise a screen
    * reader announces it twice.

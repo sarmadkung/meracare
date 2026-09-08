@@ -2,38 +2,28 @@ import { render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import HomeScreen from '@/app/home';
+import SettingsScreen from '@/app/(tabs)/settings/index';
 import { ThemeProvider } from '@/theme';
 
 /**
- * Home is the only screen with a sign-out button, and sign-out is the one
- * action here that can refuse. A refusal it does not show is indistinguishable
- * from a dead button — the person taps, nothing moves, and there is nothing on
- * the screen to act on.
+ * Settings owns the only action in the app that can refuse. A refusal it does
+ * not show is indistinguishable from a dead button — the person taps, nothing
+ * moves, and there is nothing on screen to act on.
+ *
+ * This coverage moved here from Home along with the button itself, which spent
+ * its life stranded mid-screen because docs/13's Settings screens were
+ * specified and never built.
  */
 
 const mockAuthActions = jest.fn();
-
-jest.mock('@/features/auth/session-provider', () => ({
-  useSession: () => ({ isSignedIn: true, isRestoring: false }),
-}));
 
 jest.mock('@/features/auth/use-auth-actions', () => ({
   useAuthActions: () => mockAuthActions(),
 }));
 
-jest.mock('@/features/seniors/use-seniors', () => ({
-  useSeniors: () => ({ data: [], isPending: false, isError: false, refetch: jest.fn() }),
-}));
-
-jest.mock('@/features/tasks/use-tasks', () => ({ useMyTasks: () => ({ data: [] }) }));
-jest.mock('@/features/notifications/use-notifications', () => ({ useUnreadCount: () => 0 }));
-jest.mock('@/features/sync/use-sync', () => ({ useOfflineSync: jest.fn() }));
-
 jest.mock('expo-router', () => ({
-  Link: ({ children }: { children: ReactNode }) => children,
-  Redirect: () => null,
   router: { push: jest.fn() },
+  Stack: { Screen: () => null },
 }));
 
 function actions(overrides: Record<string, unknown> = {}) {
@@ -61,8 +51,23 @@ function renderScreen() {
     );
   }
 
-  return render(<HomeScreen />, { wrapper: Wrapper });
+  return render(<SettingsScreen />, { wrapper: Wrapper });
 }
+
+it('offers sign out', () => {
+  mockAuthActions.mockReturnValue(actions());
+  renderScreen();
+
+  expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
+});
+
+it('leads to profile and notification settings', () => {
+  mockAuthActions.mockReturnValue(actions());
+  renderScreen();
+
+  expect(screen.getByRole('button', { name: 'Profile, Your name and details' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Notifications, Reminders and alerts' })).toBeTruthy();
+});
 
 it('shows why sign-out was refused', () => {
   mockAuthActions.mockReturnValue(
