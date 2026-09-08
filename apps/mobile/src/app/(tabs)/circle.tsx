@@ -20,10 +20,27 @@ export default function CircleScreen() {
   const theme = useTheme();
   const { isSignedIn } = useSession();
   const seniors = useSeniors(isSignedIn);
+  const people = seniors.data ?? [];
 
   return (
     <Screen scrollable variant="list">
-      <Stack.Screen options={{ title: 'Circle' }} />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/*
+        The tab bar hides its header, so the screen has to name itself. Without
+        this the list began at the top of the screen with nothing saying what
+        the list was.
+      */}
+      <View style={{ gap: theme.spacing.xs, marginBottom: theme.spacing.sm }}>
+        {people.length > 0 ? (
+          <Text variant="label" color="secondary">
+            {people.length === 1 ? '1 PERSON' : `${people.length} PEOPLE`}
+          </Text>
+        ) : null}
+        <Text accessibilityRole="header" variant="pageHeading">
+          Your circle
+        </Text>
+      </View>
 
       {seniors.isPending ? (
         <View

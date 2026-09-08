@@ -19,7 +19,7 @@ import {
   useReminderTaps,
 } from '@/features/notifications/use-reminder-sync';
 import { createQueryClient } from '@/lib/query-client';
-import { ThemeProvider, useTheme } from '@/theme';
+import { ThemeProvider, headerOptions, useTheme } from '@/theme';
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -86,16 +86,8 @@ function ThemedStack() {
     <Stack
       screenOptions={{
         headerShown: false,
-        headerStyle: { backgroundColor: theme.colors.background },
-        headerTintColor: theme.colors.primary,
-        headerTitleStyle: {
-          color: theme.colors.textPrimary,
-          fontFamily: 'Inter_600SemiBold',
-          fontSize: 17,
-        },
-        headerShadowVisible: false,
         headerBackButtonDisplayMode: 'minimal',
-        contentStyle: { backgroundColor: theme.colors.background },
+        ...headerOptions(theme),
       }}
     />
   );

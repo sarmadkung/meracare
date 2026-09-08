@@ -1,3 +1,4 @@
+export { headerOptions } from './navigation';
 export { ThemeProvider, useTheme, type Theme } from './theme-provider';
 export {
   darkColors,

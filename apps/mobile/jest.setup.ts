@@ -1,3 +1,5 @@
+import { configure } from '@testing-library/react-native';
+
 /**
  * Jest setup.
  *
@@ -22,3 +24,17 @@ jest.mock('expo-font', () => ({
   isLoaded: () => true,
   loadAsync: jest.fn(() => Promise.resolve()),
 }));
+
+/**
+ * Give async queries room on a loaded machine.
+ *
+ * The default ceiling is one second. A screen like the senior dashboard fires
+ * six queries in parallel, and when the whole suite runs at once that can take
+ * longer than a second to settle — so the test failed by the clock rather than
+ * for anything it was written to catch. This was already flaky before the
+ * design work and got worse as the suite grew.
+ *
+ * waitFor still returns the moment its condition holds, so a higher ceiling
+ * costs nothing on a passing test.
+ */
+configure({ asyncUtilTimeout: 5000 });
