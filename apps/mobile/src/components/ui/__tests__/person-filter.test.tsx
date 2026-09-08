@@ -12,9 +12,21 @@ import { ThemeProvider } from '@/theme';
  */
 
 const people = [
-  { seniorId: 'me', name: 'Sarmad', isSelf: true, needsAttention: false },
-  { seniorId: 'a', name: 'Amina Bibi', isSelf: false, needsAttention: true },
-  { seniorId: 'y', name: 'Yusuf Khan', isSelf: false, needsAttention: false },
+  { seniorId: 'me', name: 'Sarmad', isSelf: true, needsAttention: false, timezone: 'Asia/Karachi' },
+  {
+    seniorId: 'a',
+    name: 'Amina Bibi',
+    isSelf: false,
+    needsAttention: true,
+    timezone: 'Asia/Karachi',
+  },
+  {
+    seniorId: 'y',
+    name: 'Yusuf Khan',
+    isSelf: false,
+    needsAttention: false,
+    timezone: 'Asia/Karachi',
+  },
 ];
 
 function renderFilter(props: Partial<Parameters<typeof PersonFilter>[0]> = {}) {
@@ -29,8 +41,18 @@ it('offers everyone and each person by name', () => {
   renderFilter();
 
   expect(screen.getByRole('tab', { name: 'Everyone' })).toBeTruthy();
-  expect(screen.getByRole('tab', { name: 'Sarmad' })).toBeTruthy();
   expect(screen.getByRole('tab', { name: 'Amina Bibi' })).toBeTruthy();
+});
+
+/**
+ * Your own profile is the one face you never have to read a name to recognise,
+ * and "You" says what the filter does — the initials still identify the disc.
+ */
+it('calls your own care yours', () => {
+  renderFilter();
+
+  expect(screen.getByRole('tab', { name: 'You' })).toBeTruthy();
+  expect(screen.getByText('S')).toBeTruthy();
 });
 
 /** Selection is state, not decoration, so it has to be announced as state. */

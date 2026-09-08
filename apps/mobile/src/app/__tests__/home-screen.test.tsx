@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -77,11 +78,12 @@ function item(overrides = {}) {
   };
 }
 
-function person(id: string, name: string, isSelf = false) {
-  return { id, displayName: name, isSelf, timezone: 'UTC' };
+function person(id: string, name: string, isSelf = false, timezone = 'Asia/Karachi') {
+  return { id, displayName: name, isSelf, timezone };
 }
 
 beforeEach(() => {
+  jest.mocked(router.push).mockClear();
   mockSettle.mockReset().mockResolvedValue('recorded');
   mockToday.mockReturnValue({ data: [], isPending: false, isError: false });
   mockSeniors.mockReturnValue({ data: [person('senior-1', 'Amina Bibi')] });
@@ -110,7 +112,7 @@ it('shows care that nobody has been assigned', () => {
   mockToday.mockReturnValue({ data: [item()], isPending: false, isError: false });
   renderScreen();
 
-  expect(screen.getByText('Metformin')).toBeTruthy();
+  expect(screen.getByText('Metformin 500 mg')).toBeTruthy();
 });
 
 it('says so when the day really is clear', () => {
@@ -162,8 +164,8 @@ it('shows the whole circle by default', () => {
   renderScreen();
 
   expect(screen.getByRole('header', { name: 'Today' })).toBeTruthy();
-  expect(screen.getByText('Metformin')).toBeTruthy();
-  expect(screen.getByText('Atorvastatin')).toBeTruthy();
+  expect(screen.getByText('Metformin 500 mg')).toBeTruthy();
+  expect(screen.getByText('Atorvastatin 500 mg')).toBeTruthy();
 });
 
 it('narrows the day to the person tapped', () => {
@@ -199,8 +201,8 @@ it('goes back to the whole circle', () => {
   fireEvent.press(screen.getByRole('tab', { name: 'Yusuf Khan' }));
   fireEvent.press(screen.getByRole('tab', { name: 'Everyone' }));
 
-  expect(screen.getByText('Metformin')).toBeTruthy();
-  expect(screen.getByText('Atorvastatin')).toBeTruthy();
+  expect(screen.getByText('Metformin 500 mg')).toBeTruthy();
+  expect(screen.getByText('Atorvastatin 500 mg')).toBeTruthy();
 });
 
 /**
@@ -234,7 +236,7 @@ it('names what slipped at the top of the day', () => {
   });
   renderScreen();
 
-  expect(screen.getByText('Amlodipine was missed')).toBeTruthy();
+  expect(screen.getByText('Amlodipine 500 mg was missed')).toBeTruthy();
 });
 
 it('says nothing at the top when the day is on track', () => {
@@ -260,7 +262,7 @@ it('marks the work that is yours without hiding anyone else’s', () => {
   renderScreen();
 
   expect(screen.getByText('Yours')).toBeTruthy();
-  expect(screen.getByText('Aspirin')).toBeTruthy();
+  expect(screen.getByText('Aspirin 500 mg')).toBeTruthy();
 });
 
 // --- recording an outcome --------------------------------------------------------
@@ -302,4 +304,71 @@ it('offers the action on the current thing only', () => {
   renderScreen();
 
   expect(screen.getAllByRole('button', { name: 'Mark as taken' })).toHaveLength(1);
+});
+
+// --- the line under the heading -------------------------------------------------
+
+/**
+ * Choosing a person is choosing a clock as well as a list. Their city is what
+ * makes the times in the gutter mean something to a reader in another zone.
+ */
+it("says how the chosen person's day is going, in their own city", () => {
+  twoCircles();
+  renderScreen();
+
+  fireEvent.press(screen.getByRole('tab', { name: 'Yusuf Khan' }));
+
+  expect(screen.getByText('1 left')).toBeTruthy();
+  expect(screen.getByText('Karachi')).toBeTruthy();
+});
+
+/** Across the whole circle there is no one clock and no one count to give. */
+it('says nothing of the kind while the day spans everyone', () => {
+  twoCircles();
+  renderScreen();
+
+  expect(screen.queryByText('Karachi')).toBeNull();
+});
+
+// --- the way out ----------------------------------------------------------------
+
+/**
+ * A filter must never be a dead end: from one person's day there has to be a
+ * way into the rest of their care.
+ */
+it("offers a way into the chosen person's full care", () => {
+  twoCircles();
+  renderScreen();
+
+  fireEvent.press(screen.getByRole('tab', { name: 'Yusuf Khan' }));
+  fireEvent.press(screen.getByRole('button', { name: /Open Yusuf Khan’s care/ }));
+
+  expect(router.push).toHaveBeenCalledWith({
+    pathname: '/seniors/[seniorId]',
+    params: { seniorId: 'senior-2' },
+  });
+});
+
+it('offers no such way out while the day spans everyone', () => {
+  twoCircles();
+  renderScreen();
+
+  expect(screen.queryByRole('button', { name: /full care/ })).toBeNull();
+});
+
+/** Naming what slipped is half the help; going there in one tap is the rest. */
+it('takes you to the one thing that slipped', () => {
+  mockToday.mockReturnValue({
+    data: [item({ status: 'missed', title: 'Amlodipine' })],
+    isPending: false,
+    isError: false,
+  });
+  renderScreen();
+
+  fireEvent.press(screen.getByRole('button', { name: /Amlodipine 500 mg was missed/ }));
+
+  expect(router.push).toHaveBeenCalledWith({
+    pathname: '/seniors/[seniorId]/medications',
+    params: { seniorId: 'senior-1' },
+  });
 });

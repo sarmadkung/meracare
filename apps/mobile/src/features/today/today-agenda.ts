@@ -46,6 +46,8 @@ export interface FilterPerson {
   name: string;
   isSelf: boolean;
   needsAttention: boolean;
+  /** Their own zone, which is the one the heading names a city from. */
+  timezone: string;
 }
 
 const icons: Record<TodayItemKind, IconName> = {
@@ -132,7 +134,7 @@ export function buildAgenda(items: TodayItem[], { now, namePeople }: AgendaOptio
       id: `${item.kind}:${item.id}`,
       kind: item.kind,
       icon: icons[item.kind],
-      title: item.title,
+      title: titleOf(item, namePeople),
       detail: describe(item, { namePeople, soon: tone === 'now' ? until(item, now) : null }),
       time,
       showTime,
@@ -149,6 +151,19 @@ export function buildAgenda(items: TodayItem[], { now, namePeople }: AgendaOptio
       action: settleable(item),
     };
   });
+}
+
+/**
+ * What the row is called.
+ *
+ * Under Everyone the line beneath is taken by the senior's name, so a dose has
+ * to carry its dosage in the title or it is not on the screen at all. A task's
+ * detail is not a dosage: "Morning walk 20 minutes" is a sentence, not a title.
+ */
+function titleOf(item: TodayItem, namePeople: boolean): string {
+  if (!namePeople || item.kind !== 'dose' || item.detail === '') return item.title;
+
+  return `${item.title} ${item.detail}`;
 }
 
 /** The line under a row's title. */
@@ -190,19 +205,30 @@ function settleable(item: TodayItem): AgendaAction | null {
   return { kind: item.kind, id: item.id, seniorId: item.seniorId };
 }
 
+/** Where a row lives, which is also where its slip can be settled. */
+export type Destination = { pathname: string; params: Record<string, string> };
+
+export interface Attention {
+  title: string;
+  detail: string;
+  /** The one thing that slipped, or null once several have. */
+  href: Destination | null;
+}
+
 /** What the banner at the top of the day says, or null when nothing has slipped. */
-export function attention(entries: AgendaEntry[]): { title: string; detail: string } | null {
+export function attention(entries: AgendaEntry[]): Attention | null {
   const slipping = entries.filter((entry) => entry.tone === 'attention');
 
   if (slipping.length === 0) return null;
 
-  // One thing can be named, and naming it saves a tap. Several cannot be named
-  // without the banner becoming the list it sits above.
+  // One thing can be named and gone to. Several cannot be named without the
+  // banner becoming the list it sits above, or pointed at without choosing one.
   const [only] = slipping;
   if (slipping.length === 1 && only !== undefined) {
     return {
       title: `${only.title} ${only.status === 'Missed' ? 'was missed' : 'is overdue'}`,
-      detail: `Due ${only.time}`,
+      detail: `Due ${only.time} · record it or mark it skipped`,
+      href: only.href,
     };
   }
 
@@ -212,7 +238,53 @@ export function attention(entries: AgendaEntry[]): { title: string; detail: stri
       .slice(0, 2)
       .map((entry) => entry.title)
       .join(' · '),
+    href: null,
   };
+}
+
+/** How the chosen person's day is going, said under their name. */
+export interface DaySummary {
+  /** "4 left", or "All done". */
+  left: string;
+  /** "2 need attention", or null while the day is on track. */
+  attention: string | null;
+  /** The city whose clock the times are on, or null for a zone naming none. */
+  place: string | null;
+}
+
+/**
+ * The line under the heading.
+ *
+ * It exists mostly for the city. Times are drawn in the senior's zone, so a
+ * daughter in London reading "14:00" needs to be told whose 14:00 it is — and
+ * once there is a line there, what is left and what has slipped belong on it.
+ */
+export function daySummary(entries: AgendaEntry[], timezone: string): DaySummary {
+  const left = entries.filter((entry) => entry.tone !== 'done').length;
+  const slipping = entries.filter((entry) => entry.tone === 'attention').length;
+
+  return {
+    // "0 left" is a number to decode; "All done" is the thing it means.
+    left: left === 0 ? 'All done' : `${left} left`,
+    attention:
+      slipping === 0 ? null : slipping === 1 ? '1 needs attention' : `${slipping} need attention`,
+    place: cityIn(timezone),
+  };
+}
+
+/**
+ * The city in an IANA zone name: `Asia/Karachi` is Karachi.
+ *
+ * A zone with no region in it names no city, and inventing one would be a lie
+ * about whose clock a reader is looking at.
+ */
+function cityIn(timezone: string): string | null {
+  const parts = timezone.split('/');
+  const city = parts[parts.length - 1];
+
+  if (parts.length < 2 || city === undefined || city === '') return null;
+
+  return city.replace(/_/g, ' ');
 }
 
 /**
@@ -230,6 +302,7 @@ export function peopleInDay(seniors: Senior[], summaries: SeniorSummary[]): Filt
       seniorId: senior.id,
       name: senior.displayName,
       isSelf: senior.isSelf,
+      timezone: senior.timezone,
       // An absent summary is not evidence that nothing is wrong — it is no
       // evidence at all, so the dot stays off rather than guessing.
       needsAttention: (bySenior.get(senior.id)?.needsAttention ?? 0) > 0,

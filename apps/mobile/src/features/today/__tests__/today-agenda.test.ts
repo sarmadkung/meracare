@@ -1,6 +1,6 @@
 import type { Senior, SeniorSummary, TodayItem } from '@meracare/contracts';
 
-import { attention, buildAgenda, peopleInDay } from '../today-agenda';
+import { attention, buildAgenda, daySummary, peopleInDay } from '../today-agenda';
 
 /**
  * Today is one timeline that spans every circle, narrowed by a person filter.
@@ -40,6 +40,25 @@ function agenda(items: TodayItem[], namePeople = true) {
  */
 it("reads each time in the senior's own zone", () => {
   expect(agenda([item()])[0]?.time).toBe('14:00');
+});
+
+/**
+ * Under Everyone the second line is taken by the senior's name, so the dose
+ * itself has to travel with the title or it is not on the screen at all.
+ */
+it('carries the dosage in the title while the day spans people', () => {
+  expect(agenda([item()])[0]?.title).toBe('Metformin 500 mg');
+});
+
+/** A task's detail is not a dosage; appending it makes a sentence, not a title. */
+it('leaves a task title as it was written', () => {
+  const entry = agenda([item({ kind: 'task', title: 'Morning walk', detail: '20 minutes' })])[0];
+
+  expect(entry?.title).toBe('Morning walk');
+});
+
+it('gives the title back once one person is chosen and the row has room', () => {
+  expect(agenda([item()], false)[0]?.title).toBe('Metformin');
 });
 
 /** Unfiltered, the list spans circles, so a row without a name says nothing. */
@@ -196,10 +215,27 @@ it('stops offering an action once the outcome is recorded', () => {
 // --- what has slipped --------------------------------------------------------
 
 it('names the one thing that slipped', () => {
-  const found = attention(agenda([item({ status: 'missed' }), item({ id: 'b' })]));
+  const found = attention(agenda([item({ status: 'missed' }), item({ id: 'b' })], false));
 
   expect(found?.title).toBe('Metformin was missed');
   expect(found?.detail).toContain('14:00');
+});
+
+/** Naming it is half the help; the other half is going there in one tap. */
+it('points at the one thing that slipped', () => {
+  const found = attention(agenda([item({ status: 'missed' })], false));
+
+  expect(found?.href).toEqual({
+    pathname: '/seniors/[seniorId]/medications',
+    params: { seniorId: 'senior-1' },
+  });
+});
+
+/** Nothing is stuck until it is recorded, and skipping is a real answer. */
+it('says what would clear it', () => {
+  expect(attention(agenda([item({ status: 'missed' })], false))?.detail).toBe(
+    'Due 14:00 · record it or mark it skipped',
+  );
 });
 
 it('says an overdue task is overdue rather than missed', () => {
@@ -216,12 +252,75 @@ it('counts them once more than one has slipped', () => {
     ]),
   );
 
+  // Under Everyone the row titles carry the dosage, and the banner quotes them.
+
   expect(found?.title).toBe('2 need attention');
-  expect(found?.detail).toBe('Amlodipine · Blood pressure check');
+  expect(found?.detail).toBe('Amlodipine 500 mg · Blood pressure check');
+});
+
+/** Several things cannot be pointed at, and the list below is where they are. */
+it('points nowhere once more than one has slipped', () => {
+  const found = attention(
+    agenda([
+      item({ id: 'a', status: 'missed' }),
+      item({ id: 'b', kind: 'task', title: 'Bathe', status: 'overdue' }),
+    ]),
+  );
+
+  expect(found?.href).toBeNull();
 });
 
 it('says nothing when the day is on track', () => {
   expect(attention(agenda([item(), item({ id: 'b', status: 'taken' })]))).toBeNull();
+});
+
+// --- the line under the heading ------------------------------------------------
+
+/**
+ * Once the day is one person's, the heading can say how it is going: how much
+ * is left, how much has slipped, and which city's clock the times are in.
+ */
+it("counts what is left, what has slipped, and names the senior's city", () => {
+  const line = daySummary(
+    agenda(
+      [item({ status: 'taken' }), item({ id: 'b' }), item({ id: 'c', status: 'missed' })],
+      false,
+    ),
+    'Asia/Karachi',
+  );
+
+  expect(line.left).toBe('2 left');
+  expect(line.attention).toBe('1 needs attention');
+  expect(line.place).toBe('Karachi');
+});
+
+it('counts more than one in the plural', () => {
+  const line = daySummary(
+    agenda([item({ status: 'missed' }), item({ id: 'b', status: 'overdue' })], false),
+    'Asia/Karachi',
+  );
+
+  expect(line.attention).toBe('2 need attention');
+});
+
+it('stays quiet about attention while the day is on track', () => {
+  expect(daySummary(agenda([item()], false), 'Asia/Karachi').attention).toBeNull();
+});
+
+/** "0 left" is a number to decode; "All done" is the thing it means. */
+it('says the day is done rather than counting nothing', () => {
+  expect(daySummary(agenda([item({ status: 'taken' })], false), 'Asia/Karachi').left).toBe(
+    'All done',
+  );
+});
+
+it('reads a city out of the zone rather than an underscore', () => {
+  expect(daySummary([], 'America/New_York').place).toBe('New York');
+});
+
+/** A bare zone names no city, and inventing one would be a lie about a clock. */
+it('names no place for a zone with no city in it', () => {
+  expect(daySummary([], 'UTC').place).toBeNull();
 });
 
 // --- the person strip ---------------------------------------------------------
@@ -281,4 +380,9 @@ it('marks the people who have something missed or overdue', () => {
  */
 it('does not invent a warning for a person whose summary has not arrived', () => {
   expect(peopleInDay([senior({ id: 'a' })], [])[0]?.needsAttention).toBe(false);
+});
+
+/** The heading names the senior's city, and only their own zone knows it. */
+it("carries each person's zone into the strip", () => {
+  expect(peopleInDay([senior({ id: 'a' })], [])[0]?.timezone).toBe('Asia/Karachi');
 });

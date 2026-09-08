@@ -13,6 +13,8 @@ export interface FilterPerson {
   name: string;
   isSelf: boolean;
   needsAttention: boolean;
+  /** Their own zone. Unused here; the strip passes people through whole. */
+  timezone: string;
 }
 
 export interface PersonFilterProps {
@@ -50,21 +52,34 @@ export function PersonFilter({ people, selected, onSelect }: PersonFilterProps) 
         label="Everyone"
         selected={selected === null}
         onPress={() => onSelect(null)}
-        glyph={<Icon name="people" color={theme.colors.textSecondary} />}
+        glyph={
+          <Icon
+            name="people"
+            color={selected === null ? theme.colors.onPrimary : theme.colors.textSecondary}
+          />
+        }
       />
 
-      {people.map((person) => (
-        <Choice
-          key={person.seniorId}
-          label={person.name}
-          // Colour is never the only carrier of meaning (docs/18): the dot is
-          // drawn, and the same fact is spoken.
-          spokenLabel={person.needsAttention ? `${person.name}, needs attention` : undefined}
-          selected={selected === person.seniorId}
-          marked={person.needsAttention}
-          onPress={() => onSelect(person.seniorId)}
-        />
-      ))}
+      {people.map((person) => {
+        // Your own profile is the one face you never read a name to recognise,
+        // and "You" says what the filter does. The disc keeps your initials, so
+        // the strip still reads as a row of people.
+        const label = person.isSelf ? 'You' : person.name;
+
+        return (
+          <Choice
+            key={person.seniorId}
+            label={label}
+            disc={initials(person.name)}
+            // Colour is never the only carrier of meaning (docs/18): the dot is
+            // drawn, and the same fact is spoken.
+            spokenLabel={person.needsAttention ? `${label}, needs attention` : undefined}
+            selected={selected === person.seniorId}
+            marked={person.needsAttention}
+            onPress={() => onSelect(person.seniorId)}
+          />
+        );
+      })}
     </ScrollView>
   );
 }
@@ -74,6 +89,7 @@ function Choice({
   spokenLabel,
   selected,
   marked,
+  disc,
   glyph,
   onPress,
 }: {
@@ -81,6 +97,8 @@ function Choice({
   spokenLabel?: string;
   selected: boolean;
   marked?: boolean;
+  /** Initials for the disc, when they differ from the caption below it. */
+  disc?: string;
   glyph?: ReactNode;
   onPress: () => void;
 }) {
@@ -112,7 +130,7 @@ function Choice({
             variant="bodyStrong"
             style={{ color: selected ? theme.colors.onPrimary : theme.colors.textSecondary }}
           >
-            {initials(label)}
+            {disc ?? initials(label)}
           </Text>
         )}
 

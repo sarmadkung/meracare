@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   EmptyState,
+  ListRow,
   PersonFilter,
   Screen,
   Text,
@@ -22,8 +23,10 @@ import { settleAgendaItem } from '@/features/today/settle';
 import {
   attention,
   buildAgenda,
+  daySummary,
   peopleInDay,
   type AgendaEntry,
+  type DaySummary,
 } from '@/features/today/today-agenda';
 import { useToday } from '@/features/today/use-today';
 import { useTheme } from '@/theme';
@@ -103,13 +106,29 @@ export default function HomeScreen() {
           })}
         </Text>
         <Text accessibilityRole="header" variant="pageHeading">
-          {chosen?.name ?? 'Today'}
+          {chosen === null ? 'Today' : chosen.isSelf ? 'Your day' : chosen.name}
         </Text>
+
+        {/*
+          Only once a person is chosen. Across the whole circle there is no one
+          clock and no one count to give, and the city is most of the point:
+          the gutter is drawn in the senior's zone, so a reader in another one
+          has to be told whose 14:00 they are looking at.
+        */}
+        {chosen === null ? null : <DayLine summary={daySummary(entries, chosen.timezone)} />}
       </View>
 
       <PersonFilter people={people} selected={chosen?.seniorId ?? null} onSelect={setSelected} />
 
-      {slipped === null ? null : <AttentionBanner title={slipped.title} detail={slipped.detail} />}
+      {slipped === null ? null : (
+        <AttentionBanner
+          title={slipped.title}
+          detail={slipped.detail}
+          onPress={
+            slipped.href === null ? undefined : () => router.push(slipped.href as unknown as Href)
+          }
+        />
+      )}
 
       {today.isPending ? (
         <View style={{ alignItems: 'center', paddingVertical: theme.spacing.xxl }}>
@@ -161,7 +180,74 @@ export default function HomeScreen() {
           ))}
         </View>
       )}
+
+      {/*
+        A filter must never be a dead end. From one person's day there is one
+        tap into the rest of their care — and it matters most when the day is
+        empty, which is exactly when there is nothing else on screen to touch.
+      */}
+      {chosen === null ? null : (
+        <ListRow
+          title={`Open ${chosen.isSelf ? 'your' : `${chosen.name}’s`} care`}
+          subtitle="Medications, tasks, notes and history"
+          href={
+            {
+              pathname: '/seniors/[seniorId]',
+              params: { seniorId: chosen.seniorId },
+            } as Href
+          }
+        />
+      )}
     </Screen>
+  );
+}
+
+/**
+ * How the chosen person's day is going, under their name.
+ *
+ * Drawn as separate pieces rather than one interpolated string so the count
+ * that has slipped can carry the warning colour, and spoken as one sentence so
+ * a screen reader does not stop four times on one line.
+ */
+function DayLine({ summary }: { summary: DaySummary }) {
+  const theme = useTheme();
+
+  const parts = [summary.left, summary.attention, summary.place].filter(
+    (part): part is string => part !== null,
+  );
+
+  return (
+    <View
+      accessible
+      accessibilityLabel={parts.join(', ')}
+      style={{ alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}
+    >
+      <Text variant="secondary" color="secondary">
+        {summary.left}
+      </Text>
+
+      {summary.attention === null ? null : (
+        <>
+          <Text variant="secondary" color="muted">
+            &#183;
+          </Text>
+          <Text variant="secondary" style={{ color: theme.colors.warning, fontWeight: '600' }}>
+            {summary.attention}
+          </Text>
+        </>
+      )}
+
+      {summary.place === null ? null : (
+        <>
+          <Text variant="secondary" color="muted">
+            &#183;
+          </Text>
+          <Text variant="secondary" color="secondary">
+            {summary.place}
+          </Text>
+        </>
+      )}
+    </View>
   );
 }
 
