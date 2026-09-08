@@ -2,6 +2,7 @@ import { clearReminders } from '@/features/notifications/scheduler';
 import { deviceId } from '@/features/notifications/device';
 import { syncQueuedOperations } from '@/features/sync/replay';
 import { apiRequest } from '@/lib/api-client';
+import { ApiError } from '@/lib/api-error';
 import { clearOfflineData, queuedOperationCount } from '@/lib/offline/database';
 
 /** A sign-out failure whose text is safe to show directly. */
@@ -42,10 +43,17 @@ export async function prepareForSignOut(): Promise<void> {
       method: 'DELETE',
     });
   } catch (cause) {
-    throw new SignOutPreparationError(
-      'This device could not be disconnected securely. Connect to the internet and try again.',
-      { cause },
-    );
+    // A device the server has no record of is already unreachable, which is the
+    // whole point of the call — so 404 is the desired end state, not a failure.
+    // Registration happens once per sign-in and is never retried, so a phone
+    // that was offline at that moment would otherwise be unable to sign out at
+    // all, permanently (plans/phase8.md §25).
+    if (!(cause instanceof ApiError && cause.status === 404)) {
+      throw new SignOutPreparationError(
+        'This device could not be disconnected securely. Connect to the internet and try again.',
+        { cause },
+      );
+    }
   }
 
   await clearReminders();
