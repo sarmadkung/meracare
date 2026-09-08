@@ -108,7 +108,18 @@ export default function AcceptInvitationScreen() {
             Sign in as {invitation.inviteeEmail} to accept. If you do not have an account yet, you
             can create one with that address.
           </Text>
-          <Button label="Sign in or create an account" onPress={() => router.push('/sign-in')} />
+          <Button
+            label="Sign in or create an account"
+            // Carry the invitation across sign-in. Without this the person
+            // lands on the dashboard afterwards and the invitation they came
+            // to accept is gone.
+            onPress={() =>
+              router.push({
+                pathname: '/sign-in',
+                params: { next: `/invitations/${token ?? ''}` },
+              })
+            }
+          />
         </Card>
       ) : (
         <View style={{ gap: theme.spacing.md }}>

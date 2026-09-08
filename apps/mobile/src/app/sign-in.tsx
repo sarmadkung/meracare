@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -18,6 +18,10 @@ import { useTheme } from '@/theme';
 export default function SignInScreen() {
   const theme = useTheme();
   const { isSignedIn } = useSession();
+  // Set when sign-in was reached from somewhere that wants the person back
+  // afterwards — an invitation, most of all, which is otherwise lost the moment
+  // they leave it to create an account.
+  const { next } = useLocalSearchParams<{ next?: string }>();
   const {
     signIn,
     signUp,
@@ -35,7 +39,7 @@ export default function SignInScreen() {
   const [notice, setNotice] = useState<string | null>(null);
 
   if (isSignedIn) {
-    return <Redirect href="/home" />;
+    return <Redirect href={destinationAfterSignIn(next)} />;
   }
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
@@ -128,6 +132,13 @@ export default function SignInScreen() {
           onPress={switchMode}
           disabled={isSubmitting}
         />
+
+        <Button
+          variant="ghost"
+          label="Have an invitation code?"
+          onPress={() => router.push('/invitations/join')}
+          disabled={isSubmitting}
+        />
       </Card>
 
       <View style={{ gap: theme.spacing.md }}>
@@ -144,4 +155,16 @@ export default function SignInScreen() {
       </View>
     </Screen>
   );
+}
+
+/**
+ * Where to land once a session exists.
+ *
+ * Only an in-app path is honoured. `next` arrives from the URL, so anything
+ * carrying a scheme or host is refused rather than followed — signing in must
+ * not be a way to send somebody somewhere else.
+ */
+function destinationAfterSignIn(next: string | undefined) {
+  const safe = next !== undefined && next.startsWith('/') && !next.startsWith('//');
+  return (safe ? next : '/home') as Parameters<typeof Redirect>[0]['href'];
 }

@@ -100,3 +100,26 @@ it('registers without a token when the push service cannot be reached', async ()
 
   await expect(describeDevice()).resolves.toMatchObject({ pushToken: undefined });
 });
+
+/**
+ * Hermes has no WebCrypto. `globalThis.crypto` is undefined on the device, so
+ * an identifier minted through it throws — and because that throw happens
+ * inside `describeDevice`, registration fails on every launch and sign-out,
+ * which deactivates this device first, can never complete.
+ */
+it('creates an identifier in a runtime without WebCrypto', async () => {
+  await secureStorage.removeItem('meracare.deviceId');
+  resetDeviceIdCache();
+
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+  Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true });
+
+  try {
+    const id = await deviceId();
+
+    expect(typeof id).toBe('string');
+    expect(id).not.toBe('');
+  } finally {
+    if (descriptor !== undefined) Object.defineProperty(globalThis, 'crypto', descriptor);
+  }
+});

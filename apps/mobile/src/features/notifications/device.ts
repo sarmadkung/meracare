@@ -37,10 +37,31 @@ export async function deviceId(): Promise<string> {
     return existing;
   }
 
-  const created = globalThis.crypto.randomUUID();
+  const created = newDeviceId();
   await secureStorage.setItem(DEVICE_ID_KEY, created);
   cached = created;
   return created;
+}
+
+/**
+ * Mints an identifier for this installation.
+ *
+ * Hermes ships no WebCrypto, so `globalThis.crypto` is undefined on the device
+ * and reaching for `randomUUID` there throws — which happens inside
+ * `describeDevice`, so registration fails on every launch and sign-out, which
+ * deactivates this device first, can never complete.
+ *
+ * This names one installation of the app; it is not a credential and nothing is
+ * authorised by holding it, so a random string is enough. The same reasoning
+ * gave the offline queue its operation ids (src/features/tasks/use-tasks.ts).
+ */
+function newDeviceId(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  const random = () => Math.random().toString(36).slice(2, 12);
+  return `${Date.now().toString(36)}-${random()}-${random()}`;
 }
 
 /** Forgets the cached identifier. Used by tests; the stored value is untouched. */

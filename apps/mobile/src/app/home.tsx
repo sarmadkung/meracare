@@ -28,7 +28,7 @@ import { useTheme } from '@/theme';
 export default function HomeScreen() {
   const theme = useTheme();
   const { isSignedIn, isRestoring } = useSession();
-  const { signOut, isSubmitting } = useAuthActions();
+  const { signOut, isSubmitting, error: signOutError } = useAuthActions();
   const seniors = useSeniors(isSignedIn);
   const myTasks = useMyTasks();
   // Read off the inbox itself, so the badge and the list cannot disagree
@@ -99,11 +99,33 @@ export default function HomeScreen() {
         </View>
       )}
 
+      {/*
+        Outside the list, so it is there in the empty state too: somebody
+        invited as a caregiver arrives with no seniors of their own and this is
+        the only way in.
+      */}
+      <Button
+        variant="secondary"
+        label="Join a care circle"
+        onPress={() => router.push('/invitations/join')}
+      />
+
       <Button
         variant="ghost"
         label="Notification settings"
         onPress={() => router.push('/settings/notifications')}
       />
+
+      {/*
+        Sign-out is the one action here that can refuse — a queued care update
+        that has not reached the server yet, most often. Left unsaid, the button
+        reads as broken.
+      */}
+      {signOutError !== null ? (
+        <Text accessibilityRole="alert" variant="secondary" color="danger">
+          {signOutError}
+        </Text>
+      ) : null}
 
       <Button variant="ghost" label="Sign out" onPress={signOut} loading={isSubmitting} />
     </Screen>

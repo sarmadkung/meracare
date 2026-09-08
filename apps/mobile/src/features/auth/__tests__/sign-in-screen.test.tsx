@@ -22,6 +22,8 @@ jest.mock('@/features/auth/use-auth-actions', () => ({
 
 jest.mock('expo-router', () => ({
   Redirect: () => null,
+  router: { push: jest.fn() },
+  useLocalSearchParams: () => ({}),
 }));
 
 function actions(overrides: Record<string, unknown> = {}) {
