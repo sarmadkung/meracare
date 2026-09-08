@@ -112,8 +112,14 @@ func TestDocumentedButUnemittedCareEventTypesAreNotEmittedByCareDomains(t *testi
 		}
 
 		for path, content := range sources {
-			if allowed[path] || strings.HasPrefix(path, filepath.Join("internal", "notifications")+string(filepath.Separator)) ||
-				!strings.Contains(content, string(unemitted)) {
+			// internal/seed is exempt for the same reason as internal/notifications:
+			// it writes a notification of this type, which is a real escalation,
+			// and never a care event. TestTheSeederNeverFabricatesAMissedCareEvent
+			// is what holds it to that.
+			exempt := strings.HasPrefix(path, filepath.Join("internal", "notifications")+string(filepath.Separator)) ||
+				strings.HasPrefix(path, filepath.Join("internal", "seed")+string(filepath.Separator))
+
+			if allowed[path] || exempt || !strings.Contains(content, string(unemitted)) {
 				continue
 			}
 			t.Errorf("%s mentions %q, which is documented but deliberately never emitted as a care event",
