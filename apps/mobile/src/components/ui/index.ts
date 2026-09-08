@@ -1,6 +1,8 @@
 export { ActivityRow, type ActivityRowProps } from './activity-row';
 export { AppointmentCard, type AppointmentCardProps } from './appointment-card';
+export { AgendaRow, type AgendaOutcome, type AgendaRowProps, type AgendaTone } from './agenda-row';
 export { AppleButton, type AppleButtonProps } from './apple-button';
+export { AttentionBanner, type AttentionBannerProps } from './attention-banner';
 export { Avatar, initials, type AvatarProps } from './avatar';
 export { Button, type ButtonProps, type ButtonVariant } from './button';
 export { Card } from './card';
@@ -13,6 +15,7 @@ export { MedicationCard, type MedicationCardProps } from './medication-card';
 export { NotificationRow, type NotificationRowProps } from './notification-row';
 export { OptionCard, type OptionCardProps } from './option-card';
 export { PermissionToggle, type PermissionToggleProps } from './permission-toggle';
+export { PersonFilter, type FilterPerson, type PersonFilterProps } from './person-filter';
 export { Screen, type ScreenProps, type ScreenVariant } from './screen';
 export { SectionHeader, type SectionHeaderProps } from './section-header';
 export { StatChip, type StatChipProps, type StatTone } from './stat-chip';

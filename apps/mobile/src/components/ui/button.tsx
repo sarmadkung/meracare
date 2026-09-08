@@ -52,6 +52,10 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
+      // The spinner replaces the label while loading, which would otherwise
+      // leave the control with no spoken name at the exact moment a person
+      // wants to know what it is doing.
+      accessibilityLabel={label}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       style={({ pressed }) => [
