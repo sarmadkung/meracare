@@ -4,6 +4,7 @@ export { AppleButton, type AppleButtonProps } from './apple-button';
 export { Button, type ButtonProps, type ButtonVariant } from './button';
 export { Card } from './card';
 export { GoogleButton, type GoogleButtonProps } from './google-button';
+export { Icon, type IconName, type IconProps } from './icon';
 export { Illustration, type IllustrationName, type IllustrationProps } from './illustration';
 export { MedicationCard, type MedicationCardProps } from './medication-card';
 export { NotificationRow, type NotificationRowProps } from './notification-row';
