@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native';
 
 import {
   darkColors,
+  elevation,
   lightColors,
   minTouchTarget,
   radii,
@@ -16,6 +17,7 @@ export interface Theme {
   spacing: typeof spacing;
   radii: typeof radii;
   typography: typeof typography;
+  elevation: typeof elevation;
   minTouchTarget: number;
   isDark: boolean;
 }
@@ -26,6 +28,7 @@ function buildTheme(isDark: boolean): Theme {
     spacing,
     radii,
     typography,
+    elevation,
     minTouchTarget,
     isDark,
   };

@@ -1,6 +1,7 @@
 export { ThemeProvider, useTheme, type Theme } from './theme-provider';
 export {
   darkColors,
+  elevation,
   lightColors,
   minTouchTarget,
   radii,
