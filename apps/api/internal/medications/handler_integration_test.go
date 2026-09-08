@@ -249,6 +249,8 @@ func TestMedicationRoutesRequireAuthentication(t *testing.T) {
 		{http.MethodGet, "/v1/medications/" + medicationID + "/instances"},
 		{http.MethodPost, dosePath(medicationID, doseID, "take")},
 		{http.MethodPost, dosePath(medicationID, doseID, "skip")},
+		{http.MethodPost, "/v1/medications/instances/" + doseID + "/take"},
+		{http.MethodPost, "/v1/medications/instances/" + doseID + "/skip"},
 	}
 
 	for _, route := range routes {
@@ -258,6 +260,32 @@ func TestMedicationRoutesRequireAuthentication(t *testing.T) {
 				t.Errorf("status = %d, want 401", rec.Code)
 			}
 		})
+	}
+}
+
+func TestNotificationActionCanRecordADoseByInstanceID(t *testing.T) {
+	h := newHarness(t)
+	h.account("owner", "owner@example.com")
+	h.account("stranger", "stranger@example.com")
+
+	seniorID := h.createCircle(t, "owner", "Mrs Khan", "Asia/Karachi")
+	medicationID := h.createMedication(t, "owner", seniorID, "Metformin")
+	doseID := h.addDose(t, "owner", medicationID, time.Now().Add(-time.Minute))
+	path := "/v1/medications/instances/" + doseID + "/take"
+
+	// A notification is not permission: another signed-in user learns nothing
+	// from holding its dose identifier.
+	if rec := h.do(t, "stranger", http.MethodPost, path, nil); rec.Code != http.StatusNotFound {
+		t.Errorf("stranger status = %d, want 404", rec.Code)
+	}
+
+	first := decodeBody(t, h.do(t, "owner", http.MethodPost, path, nil), http.StatusOK)
+	second := decodeBody(t, h.do(t, "owner", http.MethodPost, path, nil), http.StatusOK)
+	if first["status"] != "taken" || second["status"] != "taken" {
+		t.Fatalf("direct notification action did not record taken: %v / %v", first, second)
+	}
+	if first["takenAt"] != second["takenAt"] {
+		t.Error("replaying the notification action moved the recorded time")
 	}
 }
 

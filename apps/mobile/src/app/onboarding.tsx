@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Button, Card, OptionCard, Screen, Text, TextField } from '@/components/ui';
+import { Button, Card, Illustration, OptionCard, Screen, Text, TextField } from '@/components/ui';
 import { useCreateSenior } from '@/features/seniors/use-seniors';
 import { ApiError } from '@/lib/api-error';
 import { useUIStore } from '@/stores/ui-store';
@@ -62,6 +62,8 @@ export default function OnboardingScreen() {
 
   return (
     <Screen scrollable>
+      <Illustration name="welcome" height={180} />
+
       <View style={{ gap: theme.spacing.sm }}>
         <Text variant="pageHeading">Welcome to GenXcare</Text>
         <Text variant="body" color="secondary">

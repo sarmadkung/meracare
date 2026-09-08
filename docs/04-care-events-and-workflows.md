@@ -44,6 +44,15 @@ Medication reminder
 → care-circle visibility
 ```
 
+## Medication Entry Correction
+
+1. An authorized manager chooses **Delete mistaken medication**.
+2. If no dose is taken or skipped, the medication and unrecorded schedule are
+   permanently deleted.
+3. If any dose outcome exists, deletion is refused and the manager uses
+   **Stop this medication** instead.
+4. Stopping prevents future use while preserving dose history.
+
 ## Missed Task Escalation
 
 MVP rules should be simple and configurable.
@@ -92,3 +101,12 @@ Not:
 3.  No invitation is required.
 4.  User can create tasks, medication, and appointments.
 5.  User may invite others later.
+
+## Care-circle Exit and Managed Profile Removal
+
+- A non-senior caregiver can leave only when another active member can manage
+  the circle. Their relationship becomes revoked; authored history remains.
+- A coordinator removing an empty managed profile deletes it permanently.
+- If tasks, medications, appointments, notes, messages, invitations, or care
+  events exist, removal archives the profile and revokes active access instead.
+- A linked self/solo profile is handled by the account lifecycle, not this flow.

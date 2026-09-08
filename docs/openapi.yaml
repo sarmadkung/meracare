@@ -1,0 +1,535 @@
+openapi: 3.1.0
+info:
+  title: GenXcare API
+  version: 1.0.0
+  description: REST contract for the GenXcare modular monolith.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - { name: Profile }
+  - { name: Seniors }
+  - { name: Care circle }
+  - { name: Tasks }
+  - { name: Medications }
+  - { name: Appointments }
+  - { name: Notes }
+  - { name: Activity }
+  - { name: Messages }
+  - { name: Notifications }
+paths:
+  /healthz:
+    get:
+      security: []
+      operationId: health
+      responses:
+        "200": { $ref: "#/components/responses/Health" }
+  /readyz:
+    get:
+      security: []
+      operationId: ready
+      responses:
+        "200": { $ref: "#/components/responses/Health" }
+        "503": { $ref: "#/components/responses/Error" }
+  /v1/me:
+    get:
+      tags: [Profile]
+      operationId: getMe
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [Profile]
+      operationId: updateMe
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors:
+    get:
+      tags: [Seniors]
+      operationId: listSeniors
+      responses:
+        "200": { $ref: "#/components/responses/List" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [Seniors]
+      operationId: createSenior
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses:
+        "201": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Seniors]
+      operationId: getSenior
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [Seniors]
+      operationId: updateSenior
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [Seniors]
+      operationId: removeSenior
+      description: Deletes an empty managed profile or archives one with care history.
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/members:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Care circle]
+      operationId: listMembers
+      responses:
+        "200": { $ref: "#/components/responses/List" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/members/{relationshipId}:
+    parameters:
+      - { $ref: "#/components/parameters/SeniorId" }
+      - { name: relationshipId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    patch:
+      tags: [Care circle]
+      operationId: updateMember
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [Care circle]
+      operationId: revokeMember
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/members/me:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    delete:
+      tags: [Care circle]
+      operationId: leaveCareCircle
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/invitations:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Care circle]
+      operationId: listInvitations
+      responses:
+        "200": { $ref: "#/components/responses/List" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [Care circle]
+      operationId: createInvitation
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses:
+        "201": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/invitations/{token}:
+    parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+    get:
+      security: []
+      tags: [Care circle]
+      operationId: previewInvitation
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/invitations/{token}/accept:
+    parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+    post:
+      tags: [Care circle]
+      operationId: acceptInvitation
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/invitations/{invitationId}/revoke:
+    parameters: [{ name: invitationId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }]
+    post:
+      tags: [Care circle]
+      operationId: revokeInvitation
+      responses:
+        "200": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/tasks:
+    get:
+      tags: [Tasks]
+      operationId: listAssignedTasks
+      responses:
+        "200": { $ref: "#/components/responses/List" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/tasks:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Tasks]
+      operationId: listTasks
+      parameters: [{ $ref: "#/components/parameters/Scope" }]
+      responses:
+        "200": { $ref: "#/components/responses/List" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [Tasks]
+      operationId: createTask
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses:
+        "201": { $ref: "#/components/responses/Entity" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/tasks/templates:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Tasks]
+      operationId: listTaskTemplates
+      responses:
+        "200": { $ref: "#/components/responses/List" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/seniors/{seniorId}/tasks/templates/{templateId}:
+    parameters:
+      - { $ref: "#/components/parameters/SeniorId" }
+      - { name: templateId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    patch:
+      tags: [Tasks]
+      operationId: updateTaskTemplate
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/tasks/{taskId}:
+    parameters: [{ name: taskId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }]
+    get:
+      tags: [Tasks]
+      operationId: getTask
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+    patch:
+      tags: [Tasks]
+      operationId: updateTask
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+    delete:
+      tags: [Tasks]
+      operationId: cancelTask
+      responses: { "204": { description: Cancelled }, default: { $ref: "#/components/responses/Error" } }
+  /v1/tasks/{taskId}/complete:
+    parameters: [{ name: taskId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }]
+    post:
+      tags: [Tasks]
+      operationId: completeTask
+      requestBody: { $ref: "#/components/requestBodies/OptionalJsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/tasks/{taskId}/skip:
+    parameters: [{ name: taskId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }]
+    post:
+      tags: [Tasks]
+      operationId: skipTask
+      requestBody: { $ref: "#/components/requestBodies/OptionalJsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/medications:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Medications]
+      operationId: listMedications
+      responses: { "200": { $ref: "#/components/responses/List" }, default: { $ref: "#/components/responses/Error" } }
+    post:
+      tags: [Medications]
+      operationId: createMedication
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "201": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/medications/doses:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Medications]
+      operationId: listSeniorDoses
+      parameters: [{ $ref: "#/components/parameters/Scope" }]
+      responses: { "200": { $ref: "#/components/responses/List" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/{medicationId}:
+    parameters: [{ $ref: "#/components/parameters/MedicationId" }]
+    get:
+      tags: [Medications]
+      operationId: getMedication
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+    patch:
+      tags: [Medications]
+      operationId: updateMedication
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+    delete:
+      tags: [Medications]
+      operationId: deleteMistakenMedication
+      description: Deletes only before a taken or skipped dose exists.
+      responses:
+        "204": { description: Deleted }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/medications/{medicationId}/schedules:
+    parameters: [{ $ref: "#/components/parameters/MedicationId" }]
+    get:
+      tags: [Medications]
+      operationId: listMedicationSchedules
+      responses: { "200": { $ref: "#/components/responses/List" }, default: { $ref: "#/components/responses/Error" } }
+    post:
+      tags: [Medications]
+      operationId: addMedicationSchedule
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "201": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/{medicationId}/schedules/{scheduleId}:
+    parameters:
+      - { $ref: "#/components/parameters/MedicationId" }
+      - { name: scheduleId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    patch:
+      tags: [Medications]
+      operationId: updateMedicationSchedule
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/{medicationId}/doses:
+    parameters: [{ $ref: "#/components/parameters/MedicationId" }]
+    post:
+      tags: [Medications]
+      operationId: addMedicationDose
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "201": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/{medicationId}/instances:
+    parameters: [{ $ref: "#/components/parameters/MedicationId" }]
+    get:
+      tags: [Medications]
+      operationId: listMedicationHistory
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses: { "200": { $ref: "#/components/responses/Page" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/{medicationId}/instances/{instanceId}/take:
+    parameters: [{ $ref: "#/components/parameters/MedicationId" }, { $ref: "#/components/parameters/InstanceId" }]
+    post:
+      tags: [Medications]
+      operationId: takeMedication
+      requestBody: { $ref: "#/components/requestBodies/OptionalJsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/{medicationId}/instances/{instanceId}/skip:
+    parameters: [{ $ref: "#/components/parameters/MedicationId" }, { $ref: "#/components/parameters/InstanceId" }]
+    post:
+      tags: [Medications]
+      operationId: skipMedication
+      requestBody: { $ref: "#/components/requestBodies/OptionalJsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/instances/{instanceId}/take:
+    parameters: [{ $ref: "#/components/parameters/InstanceId" }]
+    post:
+      tags: [Medications]
+      operationId: takeMedicationFromNotification
+      requestBody: { $ref: "#/components/requestBodies/OptionalJsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/medications/instances/{instanceId}/skip:
+    parameters: [{ $ref: "#/components/parameters/InstanceId" }]
+    post:
+      tags: [Medications]
+      operationId: skipMedicationFromNotification
+      requestBody: { $ref: "#/components/requestBodies/OptionalJsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/appointments:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Appointments]
+      operationId: listAppointments
+      parameters: [{ $ref: "#/components/parameters/Scope" }, { $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses: { "200": { $ref: "#/components/responses/Page" }, default: { $ref: "#/components/responses/Error" } }
+    post:
+      tags: [Appointments]
+      operationId: createAppointment
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "201": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/appointments/{appointmentId}:
+    parameters: [{ $ref: "#/components/parameters/AppointmentId" }]
+    get:
+      tags: [Appointments]
+      operationId: getAppointment
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+    patch:
+      tags: [Appointments]
+      operationId: updateAppointment
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/appointments/{appointmentId}/cancel:
+    parameters: [{ $ref: "#/components/parameters/AppointmentId" }]
+    post:
+      tags: [Appointments]
+      operationId: cancelAppointment
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/appointments/{appointmentId}/complete:
+    parameters: [{ $ref: "#/components/parameters/AppointmentId" }]
+    post:
+      tags: [Appointments]
+      operationId: completeAppointment
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/notes:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Notes]
+      operationId: listNotes
+      responses: { "200": { $ref: "#/components/responses/List" }, default: { $ref: "#/components/responses/Error" } }
+    post:
+      tags: [Notes]
+      operationId: createNote
+      requestBody: { $ref: "#/components/requestBodies/Content" }
+      responses: { "201": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notes/{noteId}:
+    parameters: [{ name: noteId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }]
+    patch:
+      tags: [Notes]
+      operationId: updateNote
+      requestBody: { $ref: "#/components/requestBodies/Content" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/activity:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Activity]
+      operationId: listActivity
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses: { "200": { $ref: "#/components/responses/Page" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/messages:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    get:
+      tags: [Messages]
+      operationId: listMessages
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses: { "200": { $ref: "#/components/responses/MessagePage" }, default: { $ref: "#/components/responses/Error" } }
+    post:
+      tags: [Messages]
+      operationId: createMessage
+      requestBody: { $ref: "#/components/requestBodies/MessageContent" }
+      responses: { "201": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/seniors/{seniorId}/messages/read:
+    parameters: [{ $ref: "#/components/parameters/SeniorId" }]
+    post:
+      tags: [Messages]
+      operationId: markMessagesRead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [throughMessageId]
+              properties: { throughMessageId: { $ref: "#/components/schemas/Uuid" } }
+      responses: { "204": { description: Read state advanced }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications:
+    get:
+      tags: [Notifications]
+      operationId: listNotifications
+      parameters: [{ $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" }]
+      responses: { "200": { $ref: "#/components/responses/Page" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications/preferences:
+    get:
+      tags: [Notifications]
+      operationId: getNotificationPreferences
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+    patch:
+      tags: [Notifications]
+      operationId: updateNotificationPreferences
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications/devices:
+    post:
+      tags: [Notifications]
+      operationId: registerNotificationDevice
+      requestBody: { $ref: "#/components/requestBodies/JsonObject" }
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications/devices/{deviceId}:
+    parameters: [{ name: deviceId, in: path, required: true, schema: { type: string } }]
+    delete:
+      tags: [Notifications]
+      operationId: deactivateNotificationDevice
+      responses: { "204": { description: Device deactivated }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications/reminders:
+    get:
+      tags: [Notifications]
+      operationId: getReminderPlan
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications/read-all:
+    post:
+      tags: [Notifications]
+      operationId: markAllNotificationsRead
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+  /v1/notifications/{notificationId}/read:
+    parameters: [{ name: notificationId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }]
+    patch:
+      tags: [Notifications]
+      operationId: markNotificationRead
+      responses: { "200": { $ref: "#/components/responses/Entity" }, default: { $ref: "#/components/responses/Error" } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    SeniorId: { name: seniorId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    MedicationId: { name: medicationId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    InstanceId: { name: instanceId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    AppointmentId: { name: appointmentId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    Cursor: { name: cursor, in: query, schema: { type: string } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+    Scope: { name: scope, in: query, schema: { type: string } }
+  requestBodies:
+    JsonObject:
+      required: true
+      content: { application/json: { schema: { type: object } } }
+    OptionalJsonObject:
+      required: false
+      content: { application/json: { schema: { type: object } } }
+    Content:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [content]
+            properties: { content: { type: string, minLength: 1, maxLength: 4000 } }
+    MessageContent:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [content]
+            properties: { content: { type: string, minLength: 1, maxLength: 2000 } }
+  responses:
+    Health:
+      description: Healthy
+      content: { application/json: { schema: { type: object, required: [status], properties: { status: { type: string } } } } }
+    Entity:
+      description: Resource
+      content: { application/json: { schema: { type: object } } }
+    List:
+      description: Resource list
+      content: { application/json: { schema: { $ref: "#/components/schemas/ListEnvelope" } } }
+    Page:
+      description: Cursor page
+      content: { application/json: { schema: { $ref: "#/components/schemas/PageEnvelope" } } }
+    MessagePage:
+      description: Cursor page of messages with unread state
+      content: { application/json: { schema: { $ref: "#/components/schemas/MessagePage" } } }
+    Error:
+      description: Request failed
+      content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+  schemas:
+    Uuid: { type: string, format: uuid }
+    ListEnvelope:
+      type: object
+      required: [items]
+      properties: { items: { type: array, items: { type: object } } }
+    PageEnvelope:
+      allOf:
+        - { $ref: "#/components/schemas/ListEnvelope" }
+        - { type: object, required: [nextCursor], properties: { nextCursor: { type: [string, "null"] } } }
+    MessagePage:
+      allOf:
+        - { $ref: "#/components/schemas/PageEnvelope" }
+        - { type: object, required: [unreadCount], properties: { unreadCount: { type: integer, minimum: 0 } } }
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: { type: object, additionalProperties: { type: string } }

@@ -29,6 +29,7 @@ import { cacheDoses, cachedDoses, sqliteSyncStore } from '@/lib/offline/database
 import { newOperation } from '@/lib/offline/sync-queue';
 
 import { doseEntityId } from './medication-sync';
+import { cancelSnoozedMedicationNotifications } from '@/features/notifications/scheduler';
 
 /**
  * Medication data.
@@ -166,6 +167,22 @@ export function useUpdateMedication(seniorId: string) {
   });
 }
 
+/** Permanently removes a mistaken entry before any dose has been recorded. */
+export function useDeleteMedication(seniorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (medicationId: string) =>
+      apiRequest<void>(`/medications/${medicationId}`, { method: 'DELETE' }),
+    onSuccess: (_result, medicationId) => {
+      queryClient.removeQueries({ queryKey: medicationKeys.detail(medicationId) });
+      queryClient.removeQueries({ queryKey: medicationKeys.schedules(medicationId) });
+      queryClient.removeQueries({ queryKey: medicationKeys.history(medicationId) });
+      void invalidateMedications(queryClient, seniorId);
+    },
+  });
+}
+
 /** Adds a time of day to a medication. */
 export function useAddMedicationSchedule(seniorId: string, medicationId: string) {
   const queryClient = useQueryClient();
@@ -250,7 +267,6 @@ function useDoseAction(seniorId: string, operationType: 'take' | 'skip') {
           {
             method: 'POST',
             body: notes === undefined ? undefined : { notes },
-            idempotencyKey: operationId,
           },
         );
       } catch (error) {
@@ -298,8 +314,10 @@ function useDoseAction(seniorId: string, operationType: 'take' | 'skip') {
       }
     },
 
-    onSettled: (_result, _error, { medicationId }) =>
-      invalidateOneMedication(queryClient, seniorId, medicationId),
+    onSettled: async (_result, error, { medicationId, doseId }) => {
+      if (!error) await cancelSnoozedMedicationNotifications(doseId).catch(() => {});
+      await invalidateOneMedication(queryClient, seniorId, medicationId);
+    },
   });
 }
 
@@ -328,7 +346,7 @@ async function invalidateOneMedication(
   ]);
 }
 
-/** A unique id for one user action, used as the idempotency key. */
+/** A unique local queue id for one user action. */
 function newOperationId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

@@ -93,14 +93,15 @@ func TestEntityTypesAreRecognised(t *testing.T) {
 	}
 }
 
-// The documented-but-unemitted types are a deliberate decision, not an
-// oversight, and this pins the decision: nothing in the codebase produces one.
+// The documented-but-unemitted care-event types are a deliberate decision, not
+// an oversight, and this pins the decision: no care-domain path produces one.
 //
 // TASK_MISSED and MEDICATION_MISSED are derived from the clock rather than
 // performed by anybody — nothing writes "missed" anywhere, precisely so no
-// background sweep has to be alive for the data to be true. Emitting them would
-// mean inventing the sweep Phases 4 and 5 refused. NOTE_ADDED has no domain yet.
-func TestDocumentedButUnemittedTypesAreNotEmittedAnywhere(t *testing.T) {
+// background sweep has to be alive for the care data to be true. The
+// notification package may use the same vocabulary for an escalation record;
+// that does not fabricate a care event or persist a medication status.
+func TestDocumentedButUnemittedCareEventTypesAreNotEmittedByCareDomains(t *testing.T) {
 	sources := goSources(t, filepath.Join("..", ".."))
 
 	for _, unemitted := range careevents.NotYetEmitted {
@@ -111,10 +112,11 @@ func TestDocumentedButUnemittedTypesAreNotEmittedAnywhere(t *testing.T) {
 		}
 
 		for path, content := range sources {
-			if allowed[path] || !strings.Contains(content, string(unemitted)) {
+			if allowed[path] || strings.HasPrefix(path, filepath.Join("internal", "notifications")+string(filepath.Separator)) ||
+				!strings.Contains(content, string(unemitted)) {
 				continue
 			}
-			t.Errorf("%s mentions %q, which is documented but deliberately never emitted",
+			t.Errorf("%s mentions %q, which is documented but deliberately never emitted as a care event",
 				path, unemitted)
 		}
 	}

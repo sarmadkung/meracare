@@ -27,7 +27,7 @@ func NewRepository(pool *database.Pool) *Repository {
 }
 
 const preferenceColumns = `user_id, task_reminders, medication_reminders,
-	appointment_reminders, overdue_task_alerts, care_activity, created_at, updated_at`
+	appointment_reminders, overdue_task_alerts, missed_medication_alerts, care_activity, created_at, updated_at`
 
 // GetPreferences returns the user's settings, or the defaults if they have
 // never changed any.
@@ -52,11 +52,12 @@ func (r *Repository) GetPreferences(ctx context.Context, userID uuid.UUID) (Pref
 // is, so a client can turn one category off without having to send — and
 // possibly stale-overwrite — the others.
 type PreferenceUpdate struct {
-	TaskReminders        *bool
-	MedicationReminders  *bool
-	AppointmentReminders *bool
-	OverdueTaskAlerts    *bool
-	CareActivity         *bool
+	TaskReminders          *bool
+	MedicationReminders    *bool
+	AppointmentReminders   *bool
+	OverdueTaskAlerts      *bool
+	MissedMedicationAlerts *bool
+	CareActivity           *bool
 }
 
 // SavePreferences applies an update, creating the row if this is the first one.
@@ -73,14 +74,15 @@ func (r *Repository) SavePreferences(
 	preferences, err := scanPreferences(r.db.QueryRow(ctx, `
 		INSERT INTO notification_preferences
 			(user_id, task_reminders, medication_reminders, appointment_reminders,
-			 overdue_task_alerts, care_activity)
-		VALUES ($1, $2, $3, $4, $5, $6)
+			 overdue_task_alerts, missed_medication_alerts, care_activity)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (user_id) DO UPDATE SET
-			task_reminders        = COALESCE($7, notification_preferences.task_reminders),
-			medication_reminders  = COALESCE($8, notification_preferences.medication_reminders),
-			appointment_reminders = COALESCE($9, notification_preferences.appointment_reminders),
-			overdue_task_alerts   = COALESCE($10, notification_preferences.overdue_task_alerts),
-			care_activity         = COALESCE($11, notification_preferences.care_activity),
+			task_reminders             = COALESCE($8, notification_preferences.task_reminders),
+			medication_reminders       = COALESCE($9, notification_preferences.medication_reminders),
+			appointment_reminders      = COALESCE($10, notification_preferences.appointment_reminders),
+			overdue_task_alerts        = COALESCE($11, notification_preferences.overdue_task_alerts),
+			missed_medication_alerts   = COALESCE($12, notification_preferences.missed_medication_alerts),
+			care_activity              = COALESCE($13, notification_preferences.care_activity),
 			updated_at            = now()
 		RETURNING `+preferenceColumns,
 		userID,
@@ -88,11 +90,13 @@ func (r *Repository) SavePreferences(
 		orDefault(update.MedicationReminders, defaults.MedicationReminders),
 		orDefault(update.AppointmentReminders, defaults.AppointmentReminders),
 		orDefault(update.OverdueTaskAlerts, defaults.OverdueTaskAlerts),
+		orDefault(update.MissedMedicationAlerts, defaults.MissedMedicationAlerts),
 		orDefault(update.CareActivity, defaults.CareActivity),
 		update.TaskReminders,
 		update.MedicationReminders,
 		update.AppointmentReminders,
 		update.OverdueTaskAlerts,
+		update.MissedMedicationAlerts,
 		update.CareActivity,
 	))
 	if err != nil {
@@ -194,6 +198,7 @@ func scanPreferences(source row) (Preferences, error) {
 		&preferences.MedicationReminders,
 		&preferences.AppointmentReminders,
 		&preferences.OverdueTaskAlerts,
+		&preferences.MissedMedicationAlerts,
 		&preferences.CareActivity,
 		&preferences.CreatedAt,
 		&preferences.UpdatedAt,

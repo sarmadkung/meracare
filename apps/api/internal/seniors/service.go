@@ -127,8 +127,9 @@ func (s *Service) Create(ctx context.Context, principal auth.Principal, input Cr
 	return Membership{Senior: senior, Relationship: relationship}, nil
 }
 
-// coordinatorPermissions is the creator's permission set: their role's
-// defaults, plus members.manage.
+// coordinatorPermissions is the creator's permission set. A professional who
+// creates a client is that client's initial coordinator and needs the complete
+// setup surface; invited professionals retain the narrower role defaults.
 //
 // Without the addition a family circle has nobody who can ever revoke anybody.
 // A daughter who sets up her mother's care is a family member, and
@@ -147,7 +148,18 @@ func (s *Service) Create(ctx context.Context, principal auth.Principal, input Cr
 // to them, which is the transfer that same section anticipates. Solo Mode
 // already had it: the senior's own role carries members.manage.
 func coordinatorPermissions(role care.Role) care.PermissionSet {
-	return care.Normalise(append(care.DefaultPermissions(role), care.PermissionMembersManage))
+	permissions := append(care.PermissionSet{}, care.DefaultPermissions(role)...)
+	permissions = append(permissions, care.PermissionMembersManage)
+	if role == care.RoleProfessionalCaregiver {
+		permissions = append(permissions,
+			care.PermissionSeniorEdit,
+			care.PermissionTasksManage,
+			care.PermissionMedicationsManage,
+			care.PermissionAppointmentsManage,
+			care.PermissionMembersInvite,
+		)
+	}
+	return care.Normalise(permissions)
 }
 
 // List returns every senior the caller can currently reach.
@@ -164,4 +176,13 @@ func (s *Service) Get(ctx context.Context, seniorID uuid.UUID) (Senior, error) {
 // Update applies profile changes.
 func (s *Service) Update(ctx context.Context, seniorID uuid.UUID, params UpdateParams) (Senior, error) {
 	return s.seniors.Update(ctx, seniorID, params)
+}
+
+// Remove deletes an empty managed profile or archives it when care history
+// must be preserved. Solo/self profiles require the separate account flow.
+func (s *Service) Remove(
+	ctx context.Context,
+	seniorID, actorID uuid.UUID,
+) (RemovalDisposition, error) {
+	return s.seniors.RemoveManagedProfile(ctx, seniorID, actorID)
 }

@@ -87,6 +87,11 @@ Mom - Ahmed --- son - Sara --- daughter
 
 A professional caregiver can manage many seniors.
 
+When a professional creates a client profile, they are that care circle's
+initial coordinator and receive the setup permissions needed to edit the
+profile, manage tasks, medications and appointments, and invite/manage members.
+Professionals invited later keep the narrower defaults granted by the inviter.
+
 Example:
 
 Maria - Mrs. Khan - Mr. Ahmed - Mrs. Ali
@@ -116,3 +121,8 @@ The MVP should distinguish:
 -   permissions
 
 This allows future transfer of coordination responsibilities.
+
+A non-senior caregiver may leave a care circle once another active member can
+manage it. An empty managed profile may be deleted as an entry mistake; after
+care activity exists it is archived instead. A senior's own linked profile is
+not removed through the managed-client flow.

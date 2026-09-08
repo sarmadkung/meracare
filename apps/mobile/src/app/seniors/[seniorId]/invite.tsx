@@ -1,11 +1,13 @@
 import type { CarePermission, InvitableRole } from '@genxcare/contracts';
 import { permissionLabelsByGroup, roleLabel } from '@genxcare/contracts';
+import * as Linking from 'expo-linking';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { Share, View } from 'react-native';
 
 import { Button, Card, OptionCard, Screen, Text, TextField } from '@/components/ui';
 import { PermissionToggle } from '@/components/ui/permission-toggle';
+import { formatInvitationCode } from '@/features/circle/invitation-code';
 import { useCreateInvitation } from '@/features/circle/use-circle';
 import { useSenior } from '@/features/seniors/use-seniors';
 import { ApiError } from '@/lib/api-error';
@@ -100,7 +102,13 @@ export default function InviteScreen() {
   }
 
   if (token !== null) {
-    return <InvitationSent token={token} email={email.trim()} />;
+    return (
+      <InvitationSent
+        token={token}
+        email={email.trim()}
+        seniorName={senior.data?.displayName ?? 'this person'}
+      />
+    );
   }
 
   return (
@@ -181,8 +189,36 @@ export default function InviteScreen() {
 }
 
 /** Shown once, with the token that cannot be retrieved again. */
-function InvitationSent({ token, email }: { token: string; email: string }) {
+function InvitationSent({
+  token,
+  email,
+  seniorName,
+}: {
+  token: string;
+  email: string;
+  seniorName: string;
+}) {
   const theme = useTheme();
+
+  // Resolves to genxcare://invitations/<code> in a build and to the exp://
+  // equivalent under Expo Go, so the link works wherever this is running.
+  const link = Linking.createURL(`/invitations/${token}`);
+
+  async function handleShare() {
+    await Share.share({
+      message: [
+        `You have been invited to help with ${seniorName}'s care on GenXcare.`,
+        '',
+        'Your invitation code:',
+        formatInvitationCode(token),
+        '',
+        'Already have the app? Open this link:',
+        link,
+        '',
+        'This code expires in seven days.',
+      ].join('\n'),
+    });
+  }
 
   return (
     <Screen scrollable>
@@ -202,16 +238,17 @@ function InvitationSent({ token, email }: { token: string; email: string }) {
           }}
         >
           <Text variant="bodyStrong" selectable>
-            {token}
+            {formatInvitationCode(token)}
           </Text>
         </View>
+        <Button label="Share invitation" onPress={handleShare} />
         <Text variant="secondary" color="secondary">
           This code is shown only once and expires in seven days. If it is lost, cancel the
           invitation and send a new one.
         </Text>
       </Card>
 
-      <Button label="Done" onPress={() => router.back()} />
+      <Button variant="ghost" label="Done" onPress={() => router.back()} />
     </Screen>
   );
 }

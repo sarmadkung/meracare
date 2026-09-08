@@ -19,6 +19,8 @@ import (
 	"github.com/genxcare/api/internal/invitations"
 	"github.com/genxcare/api/internal/medications"
 	"github.com/genxcare/api/internal/members"
+	"github.com/genxcare/api/internal/messages"
+	"github.com/genxcare/api/internal/notes"
 	"github.com/genxcare/api/internal/notifications"
 	"github.com/genxcare/api/internal/relationships"
 	"github.com/genxcare/api/internal/seniors"
@@ -76,6 +78,8 @@ func New(deps Dependencies) http.Handler {
 		appointments.NewRepository(deps.Pool), seniorRepo, relationshipRepo, recorder,
 	)
 	appointmentHandler := appointments.NewHandler(appointmentService, guard)
+	noteHandler := notes.NewHandler(notes.NewService(notes.NewRepository(deps.Pool), recorder), guard)
+	messageHandler := messages.NewHandler(messages.NewService(messages.NewRepository(deps.Pool)), guard)
 
 	// Reminders read the three domains above through narrow adapters, so the
 	// notification code never learns what a dose is (plans/phase8.md §1).
@@ -115,6 +119,7 @@ func New(deps Dependencies) http.Handler {
 		v1.Mount("/tasks", taskHandler.TaskRoutes())
 		v1.Mount("/medications", medicationHandler.MedicationRoutes())
 		v1.Mount("/appointments", appointmentHandler.AppointmentRoutes())
+		v1.Mount("/notes", noteHandler.NoteRoutes())
 		v1.Mount("/seniors", seniorHandler.Routes(seniors.SubRoutes{
 			Members:      memberHandler.Routes(),
 			Invitations:  invitationHandler.SeniorRoutes(),
@@ -122,6 +127,8 @@ func New(deps Dependencies) http.Handler {
 			Medications:  medicationHandler.SeniorRoutes(),
 			Appointments: appointmentHandler.SeniorRoutes(),
 			Activity:     activityHandler.SeniorRoutes(guard),
+			Notes:        noteHandler.SeniorRoutes(),
+			Messages:     messageHandler.SeniorRoutes(),
 		}))
 	})
 

@@ -1,17 +1,27 @@
 import { readPushPayload, readReminderPayload } from '@genxcare/contracts';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { router, type Href } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
-import { useUIStore } from '@/stores/ui-store';
+import { confirmAction, showMessage } from '@/lib/dialogs';
+import { useUIStore, type PendingMedicationNotificationAction } from '@/stores/ui-store';
 
 import { notificationDestination, reminderDestination } from './routes';
-import { clearReminders, syncReminders } from './scheduler';
 import { notificationPermission, permissionAllowsDelivery } from './permission';
 import { notificationKeys, useRegisterDevice, useReminderPlan } from './use-notifications';
-
-import { useQueryClient } from '@tanstack/react-query';
+import { recordMedicationNotificationAction } from './medication-actions';
+import {
+  MEDICATION_SKIP_ACTION,
+  MEDICATION_SNOOZE_ACTION,
+  MEDICATION_TAKEN_ACTION,
+  cancelSnoozedMedicationNotifications,
+  clearReminders,
+  registerMedicationNotificationActions,
+  snoozeMedicationNotification,
+  syncReminders,
+} from './scheduler';
 
 /**
  * Keeps the device's scheduled reminders in step with the server's plan.
@@ -36,6 +46,7 @@ export function useReminderSync(isSignedIn: boolean, isRestoring: boolean) {
   useEffect(() => {
     if (!isSignedIn) return;
     registerRef.current();
+    void registerMedicationNotificationActions().catch(() => {});
   }, [isSignedIn]);
 
   // Whether the server can reach this installation.
@@ -144,7 +155,9 @@ export function useReminderSync(isSignedIn: boolean, isRestoring: boolean) {
  * the user is through (plans/phase9.md §26).
  */
 export function useReminderTaps(isSignedIn: boolean, isRestoring: boolean) {
+  const queryClient = useQueryClient();
   const setPendingDestination = useUIStore((state) => state.setPendingDestination);
+  const setPendingAction = useUIStore((state) => state.setPendingMedicationNotificationAction);
 
   // Read through refs so the listener is subscribed once, at mount, rather than
   // resubscribed on every session change — a tap that arrives during a gap
@@ -165,11 +178,50 @@ export function useReminderTaps(isSignedIn: boolean, isRestoring: boolean) {
       const data = response.notification.request.content.data;
 
       const pushed = readPushPayload(data);
+      const local = readReminderPayload(data);
+      const target = pushed ?? local;
       const destination =
-        pushed !== null
-          ? notificationDestination(pushed)
-          : localDestination(readReminderPayload(data));
+        pushed !== null ? notificationDestination(pushed) : localDestination(local);
       if (destination === null) return;
+
+      if (
+        response.actionIdentifier === MEDICATION_SNOOZE_ACTION &&
+        target?.entityType === 'medication_dose'
+      ) {
+        void snoozeMedicationNotification(response.notification)
+          .then(() =>
+            showMessage({
+              title: 'Reminder set',
+              message: 'We will remind you again in 10 minutes.',
+            }),
+          )
+          .catch(() => {
+            showMessage({
+              title: 'Could not set reminder',
+              message: 'Open the medication list and try again.',
+            });
+            router.push(destination);
+          });
+        return;
+      }
+
+      const medicationAction = actionFromIdentifier(response.actionIdentifier);
+      if (medicationAction !== null && target?.entityType === 'medication_dose') {
+        const pendingAction: PendingMedicationNotificationAction = {
+          action: medicationAction,
+          doseId: target.entityId,
+          seniorId: target.seniorId,
+        };
+
+        if (ready.current) {
+          router.push(destination);
+          actOnMedicationNotification(queryClient, pendingAction);
+          return;
+        }
+        setPendingDestination(destination);
+        setPendingAction(pendingAction);
+        return;
+      }
 
       if (ready.current) {
         router.push(destination);
@@ -179,7 +231,7 @@ export function useReminderTaps(isSignedIn: boolean, isRestoring: boolean) {
     });
 
     return () => subscription.remove();
-  }, [setPendingDestination]);
+  }, [queryClient, setPendingAction, setPendingDestination]);
 }
 
 /** The destination of a locally scheduled reminder, or null if unreadable. */
@@ -204,4 +256,68 @@ export function usePendingDestination(isSignedIn: boolean, isRestoring: boolean)
     setPendingDestination(null);
     router.push(pendingDestination);
   }, [isSignedIn, isRestoring, pendingDestination, setPendingDestination]);
+}
+
+/** Executes a medication action that arrived before the session was ready. */
+export function usePendingMedicationNotificationAction(isSignedIn: boolean, isRestoring: boolean) {
+  const queryClient = useQueryClient();
+  const pending = useUIStore((state) => state.pendingMedicationNotificationAction);
+  const setPending = useUIStore((state) => state.setPendingMedicationNotificationAction);
+
+  useEffect(() => {
+    if (isRestoring || !isSignedIn || pending === null) return;
+
+    setPending(null);
+    actOnMedicationNotification(queryClient, pending);
+  }, [isSignedIn, isRestoring, pending, queryClient, setPending]);
+}
+
+function actionFromIdentifier(identifier: string): 'take' | 'skip' | null {
+  if (identifier === MEDICATION_TAKEN_ACTION) return 'take';
+  if (identifier === MEDICATION_SKIP_ACTION) return 'skip';
+  return null;
+}
+
+function actOnMedicationNotification(
+  queryClient: ReturnType<typeof useQueryClient>,
+  pending: PendingMedicationNotificationAction,
+): void {
+  if (pending.action === 'skip') {
+    confirmAction({
+      title: 'Skip this dose?',
+      message: 'This records that the dose was intentionally not taken.',
+      confirmLabel: 'Skip dose',
+      onConfirm: () => recordAndReport(queryClient, pending),
+    });
+    return;
+  }
+
+  void recordAndReport(queryClient, pending);
+}
+
+async function recordAndReport(
+  queryClient: ReturnType<typeof useQueryClient>,
+  pending: PendingMedicationNotificationAction,
+): Promise<void> {
+  try {
+    const outcome = await recordMedicationNotificationAction(
+      queryClient,
+      pending.seniorId,
+      pending.doseId,
+      pending.action,
+    );
+    await cancelSnoozedMedicationNotifications(pending.doseId).catch(() => {});
+    showMessage({
+      title: pending.action === 'take' ? 'Dose recorded' : 'Dose skipped',
+      message:
+        outcome === 'queued'
+          ? 'Saved on this device. GenXcare will send it when you are back online.'
+          : 'The medication record is up to date.',
+    });
+  } catch {
+    showMessage({
+      title: 'Could not update the dose',
+      message: 'Please use the medication screen to check its current status.',
+    });
+  }
 }

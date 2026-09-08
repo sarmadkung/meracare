@@ -263,23 +263,6 @@ describe('useTakeDose', () => {
     });
     expect(statusInList(queryClient)).toBe('taken');
   });
-
-  // The operation id is the idempotency key, so a mutation that reached the
-  // server before the connection dropped is recognised rather than recording a
-  // second dose of the same medicine.
-  it('sends an idempotency key with every attempt', async () => {
-    const { wrapper } = setup();
-    mockApiRequest.mockResolvedValue(dose({ status: 'taken' }));
-
-    const { result } = renderHook(() => useTakeDose('senior-1'), { wrapper });
-    result.current.mutate({ medicationId: 'med-1', doseId: 'dose-1' });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    const [path, options] = mockApiRequest.mock.calls[0] as [string, { idempotencyKey?: string }];
-    expect(path).toBe('/medications/med-1/instances/dose-1/take');
-    expect(options.idempotencyKey).toBeTruthy();
-  });
 });
 
 describe('useSkipDose', () => {

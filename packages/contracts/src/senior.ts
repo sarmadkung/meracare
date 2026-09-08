@@ -61,6 +61,11 @@ export interface SeniorListResponse {
   items: Senior[];
 }
 
+/** Result of removing a managed profile. */
+export interface SeniorRemovalResponse {
+  disposition: 'deleted' | 'archived';
+}
+
 /** Reports whether the caller may perform an action for this senior. */
 export function can(senior: Senior, permission: CarePermission): boolean {
   return senior.permissions.includes(permission);

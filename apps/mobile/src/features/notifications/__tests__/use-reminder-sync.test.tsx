@@ -23,6 +23,7 @@ jest.mock('@/lib/api-client', () => ({
 jest.mock('@/features/notifications/scheduler', () => ({
   syncReminders: (...args: unknown[]) => mockSync(...args),
   clearReminders: () => mockClear(),
+  registerMedicationNotificationActions: jest.fn(async () => undefined),
 }));
 
 jest.mock('@/features/notifications/permission', () => ({

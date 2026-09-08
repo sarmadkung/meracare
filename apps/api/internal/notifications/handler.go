@@ -79,11 +79,12 @@ func (h *Handler) getPreferences(w http.ResponseWriter, r *http.Request) {
 // There is no user field. The caller is the subject, always
 // (plans/phase8.md §40).
 type updatePreferencesRequest struct {
-	TaskReminders        *bool `json:"taskReminders"`
-	MedicationReminders  *bool `json:"medicationReminders"`
-	AppointmentReminders *bool `json:"appointmentReminders"`
-	OverdueTaskAlerts    *bool `json:"overdueTaskAlerts"`
-	CareActivity         *bool `json:"careActivity"`
+	TaskReminders          *bool `json:"taskReminders"`
+	MedicationReminders    *bool `json:"medicationReminders"`
+	AppointmentReminders   *bool `json:"appointmentReminders"`
+	OverdueTaskAlerts      *bool `json:"overdueTaskAlerts"`
+	MissedMedicationAlerts *bool `json:"missedMedicationAlerts"`
+	CareActivity           *bool `json:"careActivity"`
 }
 
 // updatePreferences changes the caller's notification settings.
@@ -97,11 +98,12 @@ func (h *Handler) updatePreferences(w http.ResponseWriter, r *http.Request) {
 	}
 
 	preferences, err := h.service.UpdatePreferences(r.Context(), principal.UserID, PreferenceUpdate{
-		TaskReminders:        body.TaskReminders,
-		MedicationReminders:  body.MedicationReminders,
-		AppointmentReminders: body.AppointmentReminders,
-		OverdueTaskAlerts:    body.OverdueTaskAlerts,
-		CareActivity:         body.CareActivity,
+		TaskReminders:          body.TaskReminders,
+		MedicationReminders:    body.MedicationReminders,
+		AppointmentReminders:   body.AppointmentReminders,
+		OverdueTaskAlerts:      body.OverdueTaskAlerts,
+		MissedMedicationAlerts: body.MissedMedicationAlerts,
+		CareActivity:           body.CareActivity,
 	})
 	if err != nil {
 		httpx.WriteError(w, r, httpx.ErrInternal(err))

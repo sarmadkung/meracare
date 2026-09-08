@@ -32,6 +32,7 @@ func (h *Handler) Routes() chi.Router {
 	router := chi.NewRouter()
 
 	router.With(h.guard.RequirePermission(care.PermissionMembersView)).Get("/", h.list)
+	router.With(h.guard.RequirePermission(care.PermissionMembersView)).Delete("/me", h.leave)
 
 	router.Route("/{"+relationshipIDParam+"}", func(member chi.Router) {
 		member.With(h.guard.RequirePermission(care.PermissionMembersManage)).Patch("/", h.update)
@@ -39,6 +40,16 @@ func (h *Handler) Routes() chi.Router {
 	})
 
 	return router
+}
+
+func (h *Handler) leave(w http.ResponseWriter, r *http.Request) {
+	member := authz.MustRelationship(r.Context())
+	revoked, err := h.service.Leave(r.Context(), member)
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+	httpx.WriteJSON(w, r, http.StatusOK, relationships.ToResponse(revoked))
 }
 
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +138,12 @@ func (h *Handler) writeError(w http.ResponseWriter, r *http.Request, err error) 
 	case errors.Is(err, ErrCannotModifySenior):
 		httpx.WriteError(w, r, httpx.ErrForbidden(
 			"The person this care circle is for cannot be changed or removed here."))
+	case errors.Is(err, ErrCannotRemoveSelf):
+		httpx.WriteError(w, r, httpx.ErrConflict(
+			"Use Leave care circle to remove your own access safely."))
+	case errors.Is(err, ErrLastCoordinator):
+		httpx.WriteError(w, r, httpx.ErrConflict(
+			"Give another person care-circle management access before you leave."))
 	case errors.Is(err, ErrPermissionEscalation):
 		var escalation *EscalationError
 		details := map[string]string{}

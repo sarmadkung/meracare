@@ -1,6 +1,12 @@
 import type { Href } from 'expo-router';
 import { create } from 'zustand';
 
+export interface PendingMedicationNotificationAction {
+  action: 'take' | 'skip';
+  doseId: string;
+  seniorId: string;
+}
+
 /**
  * Small client-only state.
  *
@@ -32,6 +38,12 @@ interface UIState {
   pendingDestination: Href | null;
   setPendingDestination: (destination: Href | null) => void;
 
+  /** A notification action waiting for session restoration or sign-in. */
+  pendingMedicationNotificationAction: PendingMedicationNotificationAction | null;
+  setPendingMedicationNotificationAction: (
+    action: PendingMedicationNotificationAction | null,
+  ) => void;
+
   reset: () => void;
 }
 
@@ -45,6 +57,15 @@ export const useUIStore = create<UIState>((set) => ({
   pendingDestination: null,
   setPendingDestination: (pendingDestination) => set({ pendingDestination }),
 
+  pendingMedicationNotificationAction: null,
+  setPendingMedicationNotificationAction: (pendingMedicationNotificationAction) =>
+    set({ pendingMedicationNotificationAction }),
+
   reset: () =>
-    set({ selectedSeniorId: null, hasCompletedOnboarding: false, pendingDestination: null }),
+    set({
+      selectedSeniorId: null,
+      hasCompletedOnboarding: false,
+      pendingDestination: null,
+      pendingMedicationNotificationAction: null,
+    }),
 }));

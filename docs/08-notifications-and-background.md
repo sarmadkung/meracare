@@ -28,11 +28,22 @@ OS local notification
 User action
 ```
 
+Medication notifications offer three OS actions:
+
+-   **Taken** records the dose immediately after authentication; offline actions
+    enter the durable sync queue.
+-   **Skip** opens the app and requires confirmation before recording.
+-   **Remind in 10 min** schedules one privacy-preserving local follow-up.
+
+These are notification actions, not a persistent full-screen alarm. The sound
+and presentation remain controlled by the operating system.
+
 ## Remote Push
 
 Use push notifications for:
 
 -   missed tasks
+-   missed medication doses
 -   caregiver activity
 -   invitations
 -   messages
@@ -92,6 +103,11 @@ Notify assigned caregiver
 Optional family notification
 ```
 
+Medication escalation uses the medication domain's existing two-hour grace
+period. If a dose is still pending when that period expires, notify every
+active care-circle member who can view medications and has missed-medication
+alerts enabled. This includes the senior in solo self-care.
+
 The escalation system should not imply medical emergency unless a
 separately implemented emergency feature exists.
 
@@ -101,6 +117,7 @@ Users should control:
 
 -   task reminders
 -   medication reminders
+-   missed medication alerts
 -   activity notifications
 -   messages
 -   invitations

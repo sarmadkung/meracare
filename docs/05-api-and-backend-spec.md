@@ -11,6 +11,8 @@
 -   Structured logging
 -   OpenAPI documentation
 
+The maintained machine-readable contract is [`openapi.yaml`](openapi.yaml).
+
 ## API Principles
 
 -   Version APIs: `/v1/...`
@@ -19,7 +21,10 @@
 -   ISO-8601 timestamps.
 -   Explicit validation.
 -   Relationship-based authorization.
--   Idempotency for mutation endpoints where retries are possible.
+-   Semantic idempotency for retryable terminal actions: repeating the same
+    task, dose, or appointment outcome returns the original result and writes
+    no duplicate care event. Introduce stored HTTP idempotency keys only for a
+    future mutation whose result cannot be derived safely from domain state.
 
 ## Core Endpoint Groups
 
@@ -37,12 +42,14 @@ GET    /v1/seniors
 POST   /v1/seniors
 GET    /v1/seniors/{id}
 PATCH  /v1/seniors/{id}
+DELETE /v1/seniors/{id}
 ```
 
 ### Care Circle
 
 ``` text
 GET    /v1/seniors/{id}/members
+DELETE /v1/seniors/{id}/members/me
 POST   /v1/seniors/{id}/invitations
 DELETE /v1/seniors/{id}/members/{memberId}
 PATCH  /v1/seniors/{id}/members/{memberId}
@@ -65,8 +72,22 @@ POST   /v1/tasks/{id}/skip
 GET    /v1/seniors/{id}/medications
 POST   /v1/seniors/{id}/medications
 PATCH  /v1/medications/{id}
+DELETE /v1/medications/{id}
 POST   /v1/medications/{id}/instances/{instanceId}/take
+POST   /v1/medications/{id}/instances/{instanceId}/skip
+POST   /v1/medications/instances/{instanceId}/take
+POST   /v1/medications/instances/{instanceId}/skip
 ```
+
+The direct instance routes support privacy-preserving notification actions: the
+notification carries a dose identifier but no medication details. The API
+resolves the dose and requires `medications.record` for its senior; unauthorized
+and unknown identifiers return the same 404. All four action routes share the
+same idempotent transition.
+
+Medication deletion returns `204` only before a taken/skipped dose exists; it
+returns `409` once history requires the medication to be stopped instead.
+Senior deletion returns `{ "disposition": "deleted" | "archived" }`.
 
 ### Appointments
 
@@ -95,6 +116,7 @@ GET /v1/seniors/{id}/activity?cursor=...
 ``` text
 GET  /v1/seniors/{id}/messages?cursor=...
 POST /v1/seniors/{id}/messages
+POST /v1/seniors/{id}/messages/read
 ```
 
 ## Pagination

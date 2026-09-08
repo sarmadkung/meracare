@@ -50,9 +50,10 @@ func NewNotificationScheduler(deps Dependencies) *notifications.Scheduler {
 			notifications.TypeMedicationReminder:  medicationSource{service: medicationService},
 			notifications.TypeAppointmentReminder: appointmentSource{service: appointmentService},
 		},
-		Overdue:  overdueSource{service: taskService},
-		Activity: activitySource{repo: eventRepo},
-		Logger:   deps.Logger,
+		Overdue:     overdueSource{service: taskService},
+		MissedDoses: missedDoseSource{service: medicationService},
+		Activity:    activitySource{repo: eventRepo},
+		Logger:      deps.Logger,
 	}, notifications.SchedulerOptions{
 		Interval:  deps.Config.NotificationSchedulerInterval,
 		Retention: deps.Config.NotificationRetention,

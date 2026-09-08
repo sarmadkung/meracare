@@ -16,6 +16,10 @@ import (
 // ErrNotFound is returned when no medication, schedule or dose matches.
 var ErrNotFound = errors.New("medication not found")
 
+// ErrRecordedHistory prevents a medication with a real care outcome from
+// being erased. It may still be stopped, which keeps that history intact.
+var ErrRecordedHistory = errors.New("medication has recorded dose history")
+
 // Repository reads and writes medications, their schedules, and their doses.
 type Repository struct {
 	db database.Querier
@@ -186,6 +190,59 @@ func (r *Repository) UpdateMedication(
 		return Medication{}, fmt.Errorf("update medication: %w", err)
 	}
 	return medication, nil
+}
+
+// DeleteMistakenMedication permanently removes a medication only while every
+// generated dose is still pending. Schedules and pending instances cascade;
+// the creation event is removed in the same transaction so the activity feed
+// cannot retain a link to a medication that was entered by mistake.
+func (r *Repository) DeleteMistakenMedication(ctx context.Context, id uuid.UUID) error {
+	var locked uuid.UUID
+	if err := r.db.QueryRow(ctx, `SELECT id FROM medications WHERE id = $1 FOR UPDATE`, id).Scan(&locked); errors.Is(err, pgx.ErrNoRows) {
+		return ErrNotFound
+	} else if err != nil {
+		return fmt.Errorf("lock medication for deletion: %w", err)
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT status FROM medication_instances
+		WHERE medication_id = $1 FOR UPDATE`, id)
+	if err != nil {
+		return fmt.Errorf("check medication history: %w", err)
+	}
+	defer rows.Close()
+	var hasHistory bool
+	for rows.Next() {
+		var status string
+		if err := rows.Scan(&status); err != nil {
+			return fmt.Errorf("read medication history: %w", err)
+		}
+		if status == string(StatusTaken) || status == string(StatusSkipped) {
+			hasHistory = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("read medication history: %w", err)
+	}
+	rows.Close()
+	if hasHistory {
+		return ErrRecordedHistory
+	}
+
+	if _, err := r.db.Exec(ctx, `
+		DELETE FROM care_events
+		WHERE entity_type = 'medication' AND entity_id = $1`, id); err != nil {
+		return fmt.Errorf("delete medication events: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, `DELETE FROM medications WHERE id = $1`, id)
+	if err != nil {
+		return fmt.Errorf("delete medication: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // --- Schedules -------------------------------------------------------------

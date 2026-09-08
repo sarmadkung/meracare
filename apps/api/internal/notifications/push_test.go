@@ -33,10 +33,11 @@ func expoServer(t *testing.T, status int, body string) (*ExpoSender, *[]byte) {
 
 func message(token string) PushMessage {
 	return PushMessage{
-		Token: token,
-		Title: "Medication reminder",
-		Body:  "A dose is due for Amma at 08:00.",
-		Data:  map[string]string{"type": "MEDICATION_REMINDER"},
+		Token:      token,
+		Title:      "Medication reminder",
+		Body:       "A dose is due for Amma at 08:00.",
+		Data:       map[string]string{"type": "MEDICATION_REMINDER"},
+		CategoryID: "medication_actions",
 	}
 }
 
@@ -63,6 +64,24 @@ func TestAnAcceptedMessageIsDelivered(t *testing.T) {
 	// A silent medication reminder is a medication reminder that does not work.
 	if sent[0]["sound"] != "default" {
 		t.Errorf("sound = %v, want the notification to be audible", sent[0]["sound"])
+	}
+	if sent[0]["categoryId"] != "medication_actions" {
+		t.Errorf("categoryId = %v, want medication actions", sent[0]["categoryId"])
+	}
+}
+
+func TestOnlyMedicationNotificationsOfferDoseActions(t *testing.T) {
+	t.Parallel()
+
+	for _, notificationType := range []Type{TypeMedicationReminder, TypeMedicationMissed} {
+		if got := actionCategoryFor(notificationType); got != "medication_actions" {
+			t.Errorf("%s category = %q, want medication_actions", notificationType, got)
+		}
+	}
+	for _, notificationType := range []Type{TypeTaskReminder, TypeTaskOverdue, TypeCareActivity} {
+		if got := actionCategoryFor(notificationType); got != "" {
+			t.Errorf("%s unexpectedly offers medication actions through %q", notificationType, got)
+		}
 	}
 }
 

@@ -4,6 +4,9 @@ Senior care and family coordination platform.
 
 `docs/` is the engineering source of truth. Current build state, decisions, and
 next tasks live in [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
+The implemented REST route contract is in
+[`docs/openapi.yaml`](docs/openapi.yaml), and launch gates are tracked in
+[`docs/21-release-readiness.md`](docs/21-release-readiness.md).
 
 ## Repository
 

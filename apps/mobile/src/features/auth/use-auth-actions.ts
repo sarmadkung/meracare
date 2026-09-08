@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 import { signInWithGoogle as startGoogleSignIn } from './google';
+import { signInWithApple as startAppleSignIn } from './apple';
+import { prepareForSignOut, SignOutPreparationError } from './sign-out';
 
 /** Which action is in flight, so only that control shows a spinner. */
-export type AuthAction = 'email' | 'google';
+export type AuthAction = 'email' | 'google' | 'apple';
 
 /**
  * Email sign-in/sign-up, Google sign-in, and sign-out.
@@ -83,11 +85,39 @@ export function useAuthActions() {
         false,
       ),
 
-    signOut: () => runEmail(() => supabase.auth.signOut()),
+    signInWithApple: () =>
+      run(
+        'apple',
+        async () => {
+          const result = await startAppleSignIn();
+          if (result.status === 'error') {
+            setError(result.message);
+            return false;
+          }
+          return result.status === 'success';
+        },
+        false,
+      ),
+
+    signOut: () =>
+      run(
+        'email',
+        async () => {
+          await prepareForSignOut();
+          const result = await supabase.auth.signOut();
+          if (result.error) {
+            setError(result.error.message);
+            return false;
+          }
+          return true;
+        },
+        false,
+      ),
   };
 }
 
 function messageFor(cause: unknown): string {
+  if (cause instanceof SignOutPreparationError) return cause.message;
   if (cause instanceof TypeError) {
     return 'Could not reach the network. Check your connection and try again.';
   }

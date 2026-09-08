@@ -25,6 +25,8 @@ func NewRepository(pool *database.Pool) *Repository {
 }
 
 const relationshipColumns = `id, senior_id, user_id, role, permissions, status, created_at, updated_at`
+const relationshipColumnsAliased = `cr.id, cr.senior_id, cr.user_id, cr.role, cr.permissions,
+	cr.status, cr.created_at, cr.updated_at`
 
 // CreateParams describes a new membership.
 type CreateParams struct {
@@ -81,9 +83,10 @@ func (r *Repository) create(ctx context.Context, db querier, params CreateParams
 // revoked membership means.
 func (r *Repository) FindByUserAndSenior(ctx context.Context, userID, seniorID uuid.UUID) (Relationship, error) {
 	relationship, err := scanRelationship(r.db.QueryRow(ctx,
-		`SELECT `+relationshipColumns+`
-		 FROM care_relationships
-		 WHERE user_id = $1 AND senior_id = $2`,
+		`SELECT `+relationshipColumnsAliased+`
+		 FROM care_relationships cr
+		 JOIN senior_profiles s ON s.id = cr.senior_id AND s.archived_at IS NULL
+		 WHERE cr.user_id = $1 AND cr.senior_id = $2`,
 		userID, seniorID,
 	))
 	if errors.Is(err, pgx.ErrNoRows) {

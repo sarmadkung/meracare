@@ -177,10 +177,6 @@ function useAppointmentAction(
     mutationFn: ({ appointmentId }: AppointmentActionInput) =>
       apiRequest<Appointment>(`/appointments/${appointmentId}/${action}`, {
         method: 'POST',
-        // The operation id is the idempotency key, so a request that reached
-        // the server before the connection dropped is recognised on retry
-        // rather than fighting with itself (plans/phase6.md §24).
-        idempotencyKey: newOperationId(),
       }),
 
     onMutate: async ({ appointmentId }) => {
@@ -224,9 +220,4 @@ function useAppointmentAction(
  */
 async function invalidateAppointments(queryClient: QueryClient, seniorId: string): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: ['seniors', seniorId, 'appointments'] });
-}
-
-/** A unique id for one user action, used as the idempotency key. */
-function newOperationId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

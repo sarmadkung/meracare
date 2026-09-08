@@ -156,6 +156,50 @@ func TestCreateMedicationWithNoSchedule(t *testing.T) {
 	}
 }
 
+func TestMistakenMedicationCanBeDeletedBeforeAnyDoseOutcome(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	owner := f.newUser(t, "delete-mistake@example.com")
+	circle := f.newCircle(t, owner, "Mrs Khan", "Asia/Karachi")
+	created, err := f.medications.Create(ctx, medications.CreateInput{
+		SeniorID: circle.Senior.ID, CreatedByUserID: owner.UserID, Name: "Wrong medicine",
+	}, time.Now())
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if err := f.medications.DeleteMistaken(ctx, created.Medication.ID); err != nil {
+		t.Fatalf("delete: %v", err)
+	}
+	if _, err := f.medications.Get(ctx, created.Medication.ID); !errors.Is(err, medications.ErrNotFound) {
+		t.Fatalf("Get error = %v", err)
+	}
+}
+
+func TestMedicationWithRecordedDoseCannotBeDeleted(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	owner := f.newUser(t, "keep-history@example.com")
+	circle := f.newCircle(t, owner, "Mrs Khan", "Asia/Karachi")
+	created, err := f.medications.Create(ctx, medications.CreateInput{
+		SeniorID: circle.Senior.ID, CreatedByUserID: owner.UserID, Name: "Metformin",
+		Schedules: []medications.ScheduleInput{daily(dueLaterToday(time.Now(), mustLoad(t, "Asia/Karachi")))},
+	}, time.Now())
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if len(created.Instances) == 0 {
+		t.Fatal("expected a generated dose")
+	}
+	if _, err := f.medications.Act(ctx, medications.ActInput{
+		InstanceID: created.Instances[0].ID, Action: medications.ActionTake, ActorID: owner.UserID,
+	}); err != nil {
+		t.Fatalf("take: %v", err)
+	}
+	if err := f.medications.DeleteMistaken(ctx, created.Medication.ID); !errors.Is(err, medications.ErrRecordedHistory) {
+		t.Fatalf("DeleteMistaken error = %v", err)
+	}
+}
+
 func TestCreateMedicationGeneratesTodaysDoses(t *testing.T) {
 	f := newFixture(t)
 	ctx := context.Background()

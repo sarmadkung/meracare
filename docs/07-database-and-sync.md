@@ -110,6 +110,10 @@ MVP local data should focus on:
 -   recent activity
 -   pending sync operations
 
+Care notes and care-circle messages remain server-authoritative in MVP and are
+refetched through TanStack Query. They are not copied into the durable mutation
+queue or SQLite cache; creating or editing them therefore requires a connection.
+
 ## Sync Queue
 
 A local mutation queue should contain:
@@ -126,13 +130,18 @@ A local mutation queue should contain:
 
 Mutation APIs must be idempotent where retries can occur.
 
+Before sign-out, the mobile app drains this queue. Sign-out is refused while an
+operation remains pending or failed: deleting it would lose recorded care, and
+leaving it for the next account could replay somebody else's action. Once the
+queue is empty, cached care data is removed from SQLite.
+
 ## Conflict Strategy
 
 For MVP:
 
 -   server authoritative for permissions and relationships
 -   server authoritative for final state
--   completion mutations idempotent
+-   completion mutations semantically idempotent through their terminal state
 -   avoid destructive overwrites
 -   preserve care-event history
 -   do not silently overwrite important care/health records
@@ -158,3 +167,8 @@ Use:
 
 Database constraints must reinforce application authorization and data
 integrity.
+
+The current application schema is managed by migrations `0001` through `0010`.
+Migration `0010_notes_and_messages.sql` adds `care_notes`, `messages`, and
+`message_read_states`, including senior-scoped indexes, content-length checks,
+foreign keys, and the read-state persistence used by the API.

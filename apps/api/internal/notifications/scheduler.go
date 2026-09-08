@@ -23,12 +23,13 @@ import (
 // flight to finish, and the API's shutdown blocks on it — so the process does
 // not exit with a delivery half-recorded.
 type Scheduler struct {
-	repository *Repository
-	sender     PushSender
-	roster     Roster
-	reminders  map[Type]ScheduleSource
-	overdue    OverdueSource
-	activity   ActivitySource
+	repository  *Repository
+	sender      PushSender
+	roster      Roster
+	reminders   map[Type]ScheduleSource
+	overdue     OverdueSource
+	missedDoses MissedDoseSource
+	activity    ActivitySource
 
 	options SchedulerOptions
 	logger  *slog.Logger
@@ -49,8 +50,7 @@ type SchedulerOptions struct {
 	// A minute. Notifications are scheduled to the minute, materialisation
 	// looks an hour ahead, and delivery re-reads the recent past, so a tick that
 	// is late by a few minutes costs nothing — but a tick much longer than this
-	// would delay the overdue alerts, which are the only type whose whole point
-	// is timeliness.
+	// would delay overdue and missed-care alerts, whose whole point is timeliness.
 	Interval time.Duration
 	// BatchSize is how many notifications one pass claims for delivery.
 	BatchSize int
@@ -101,10 +101,11 @@ type SchedulerDependencies struct {
 	Roster     Roster
 	// Reminders is keyed by notification type, so a domain with no reminder path
 	// is an absent entry rather than a nil check at every use.
-	Reminders map[Type]ScheduleSource
-	Overdue   OverdueSource
-	Activity  ActivitySource
-	Logger    *slog.Logger
+	Reminders   map[Type]ScheduleSource
+	Overdue     OverdueSource
+	MissedDoses MissedDoseSource
+	Activity    ActivitySource
+	Logger      *slog.Logger
 	// Now is the clock. Nil means time.Now.
 	Now func() time.Time
 }
@@ -125,15 +126,16 @@ func NewScheduler(deps SchedulerDependencies, options SchedulerOptions) *Schedul
 	}
 
 	return &Scheduler{
-		repository: deps.Repository,
-		sender:     sender,
-		roster:     deps.Roster,
-		reminders:  deps.Reminders,
-		overdue:    deps.Overdue,
-		activity:   deps.Activity,
-		options:    options.withDefaults(),
-		logger:     logger,
-		now:        clock,
+		repository:  deps.Repository,
+		sender:      sender,
+		roster:      deps.Roster,
+		reminders:   deps.Reminders,
+		overdue:     deps.Overdue,
+		missedDoses: deps.MissedDoses,
+		activity:    deps.Activity,
+		options:     options.withDefaults(),
+		logger:      logger,
+		now:         clock,
 	}
 }
 
@@ -285,6 +287,7 @@ func (s *Scheduler) materialise(ctx context.Context, now time.Time) (int, error)
 		Preferences: preferences,
 		Reminders:   s.reminders,
 		Overdue:     s.overdue,
+		MissedDoses: s.missedDoses,
 		Activity:    s.activity,
 		Now:         now,
 	})
@@ -365,10 +368,11 @@ func (s *Scheduler) deliverOne(
 	messages := make([]PushMessage, 0, len(devices))
 	for _, device := range devices {
 		messages = append(messages, PushMessage{
-			Token: device.PushToken,
-			Title: notification.Title,
-			Body:  notification.Body,
-			Data:  payloadFor(notification),
+			Token:      device.PushToken,
+			Title:      notification.Title,
+			Body:       notification.Body,
+			Data:       payloadFor(notification),
+			CategoryID: actionCategoryFor(notification.Type),
 		})
 	}
 
@@ -420,6 +424,13 @@ func (s *Scheduler) deliverOne(
 		return DeliveryFailed, s.repository.Settle(
 			ctx, notification.ID, DeliveryFailed, now, failure)
 	}
+}
+
+func actionCategoryFor(t Type) string {
+	if t == TypeMedicationReminder || t == TypeMedicationMissed {
+		return "medication_actions"
+	}
+	return ""
 }
 
 // backoff spaces out retries. Deliberately conservative: a push that failed is

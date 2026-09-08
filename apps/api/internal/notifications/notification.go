@@ -124,11 +124,12 @@ type Preferences struct {
 	TaskReminders        bool
 	MedicationReminders  bool
 	AppointmentReminders bool
-	// OverdueTaskAlerts and CareActivity are Phase 11's two additions. 0008
-	// refused to store switches for categories nothing could deliver; these two
-	// now have a delivery path, so they exist (plans/phase11.md §9).
-	OverdueTaskAlerts bool
-	CareActivity      bool
+	// Server-side categories exist only once they have a delivery path. Overdue
+	// task alerts and care activity arrived in Phase 11; missed-medication alerts
+	// were added with the domain-derived escalation sweep.
+	OverdueTaskAlerts      bool
+	MissedMedicationAlerts bool
+	CareActivity           bool
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -140,12 +141,13 @@ type Preferences struct {
 // respectful one.
 func DefaultPreferences(userID uuid.UUID) Preferences {
 	return Preferences{
-		UserID:               userID,
-		TaskReminders:        true,
-		MedicationReminders:  true,
-		AppointmentReminders: true,
-		OverdueTaskAlerts:    true,
-		CareActivity:         true,
+		UserID:                 userID,
+		TaskReminders:          true,
+		MedicationReminders:    true,
+		AppointmentReminders:   true,
+		OverdueTaskAlerts:      true,
+		MissedMedicationAlerts: true,
+		CareActivity:           true,
 	}
 }
 
@@ -171,6 +173,8 @@ func (p Preferences) wantsType(t Type) bool {
 		return p.AppointmentReminders
 	case TypeTaskOverdue:
 		return p.OverdueTaskAlerts
+	case TypeMedicationMissed:
+		return p.MissedMedicationAlerts
 	case TypeCareActivity:
 		return p.CareActivity
 	default:

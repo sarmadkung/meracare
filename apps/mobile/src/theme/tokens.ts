@@ -149,12 +149,12 @@ export const radii = {
  * primary actions are never smaller than 17pt.
  */
 export const typography = {
-  pageHeading: { fontSize: 30, lineHeight: 38, fontWeight: '700' },
-  sectionHeading: { fontSize: 23, lineHeight: 30, fontWeight: '600' },
-  body: { fontSize: 17, lineHeight: 26, fontWeight: '400' },
-  bodyStrong: { fontSize: 17, lineHeight: 26, fontWeight: '600' },
-  secondary: { fontSize: 15, lineHeight: 22, fontWeight: '400' },
-  action: { fontSize: 18, lineHeight: 24, fontWeight: '600' },
+  pageHeading: { fontFamily: 'Inter_700Bold', fontSize: 30, lineHeight: 38 },
+  sectionHeading: { fontFamily: 'Inter_600SemiBold', fontSize: 23, lineHeight: 30 },
+  body: { fontFamily: 'Inter_400Regular', fontSize: 17, lineHeight: 26 },
+  bodyStrong: { fontFamily: 'Inter_600SemiBold', fontSize: 17, lineHeight: 26 },
+  secondary: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 22 },
+  action: { fontFamily: 'Inter_600SemiBold', fontSize: 18, lineHeight: 24 },
 } as const;
 
 export type TypographyVariant = keyof typeof typography;

@@ -91,6 +91,11 @@ Recommended starting scale:
 The exact platform font implementation can vary between React Native and
 web while retaining the same typographic scale.
 
+The Expo application bundles Inter 400, 600, and 700 through
+`@expo-google-fonts/inter` and maps the semantic regular, semibold, and bold
+tokens to those faces. Font and candidate brand provenance is recorded in
+`ASSET_LICENSES.md`.
+
 ## Accessibility
 
 The visual system is specifically designed for older adults.
@@ -162,6 +167,10 @@ flow.
     for every shipped asset.
 -   Maintain an `ASSET_LICENSES.md` file once production assets are
     selected.
+-   `apps/mobile/assets/images/brand-mark.png` is the product-approved GenXcare
+    mark. Runtime icon, adaptive-icon, monochrome, splash, and favicon exports
+    derive from it. `brand-mark-v2.png` is an unselected concept and is not used
+    by the application. Store and social-card exports still require final review.
 -   Review the current license for each asset before shipping. Licenses
     can change independently of our product documentation.
 
@@ -173,6 +182,13 @@ assets/
     undraw/
     storyset/
 ```
+
+The implemented MVP set uses five locally bundled unDraw illustrations:
+`welcome-team`, `add-senior`, `all-caught-up`, `care-circle`, and
+`communication`. Screens reference semantic names through the shared
+`Illustration` component rather than vendor filenames. The component provides a
+consistent restrained frame and keeps artwork decorative by default so nearby
+headings and instructions are not announced twice by assistive technology.
 
 ## Illustration Placement
 

@@ -16,9 +16,9 @@ import type { ReplayOutcome, SyncOperation } from '@/lib/offline/sync-queue';
 /**
  * Replays one queued completion or skip.
  *
- * The operation id travels as the idempotency key, so a mutation that reached
- * the server before the connection dropped is recognised rather than applied
- * twice (plans/phase4.md §27).
+ * The server's terminal transition is semantically idempotent: replaying the
+ * same action returns the original result and emits no second care event
+ * (plans/phase4.md §27).
  */
 export async function replayTaskOperation(operation: SyncOperation): Promise<ReplayOutcome> {
   const notes = readNotes(operation.payload);
@@ -27,7 +27,6 @@ export async function replayTaskOperation(operation: SyncOperation): Promise<Rep
     await apiRequest<CareTask>(`/tasks/${operation.entityId}/${operation.operationType}`, {
       method: 'POST',
       body: notes === null ? undefined : { notes },
-      idempotencyKey: operation.operationId,
     });
     return { kind: 'applied' };
   } catch (error) {

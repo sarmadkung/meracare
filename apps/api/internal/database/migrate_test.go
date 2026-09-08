@@ -44,3 +44,15 @@ func TestFirstMigrationIsInit(t *testing.T) {
 		t.Errorf("first migration = %d_%s, want 0001_init", migrations[0].Version, migrations[0].Name)
 	}
 }
+
+func TestLatestMigrationAddsMissedMedicationAlerts(t *testing.T) {
+	migrations, err := database.LoadMigrations()
+	if err != nil {
+		t.Fatalf("LoadMigrations() error = %v", err)
+	}
+
+	latest := migrations[len(migrations)-1]
+	if latest.Version != 12 || latest.Name != "missed_medication_alerts" {
+		t.Errorf("latest migration = %d_%s, want 0012_missed_medication_alerts", latest.Version, latest.Name)
+	}
+}

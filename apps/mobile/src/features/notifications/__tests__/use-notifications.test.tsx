@@ -30,6 +30,7 @@ function preferences(overrides: Partial<NotificationPreferences> = {}): Notifica
     medicationReminders: true,
     appointmentReminders: true,
     overdueTaskAlerts: true,
+    missedMedicationAlerts: true,
     careActivity: true,
     updatedAt: '2026-08-19T06:00:00Z',
     ...overrides,

@@ -66,9 +66,16 @@ func (h *Handler) SeniorRoutes() chi.Router {
 func (h *Handler) MedicationRoutes() chi.Router {
 	router := chi.NewRouter()
 
+	// Notification actions know the dose identifier but deliberately carry no
+	// medication details. These routes resolve the dose first, authorize against
+	// its senior, and preserve the same idempotent transition as the nested route.
+	router.Post("/instances/{"+instanceIDParam+"}/take", h.actByInstance(ActionTake))
+	router.Post("/instances/{"+instanceIDParam+"}/skip", h.actByInstance(ActionSkip))
+
 	router.Route("/{"+medicationIDParam+"}", func(medication chi.Router) {
 		medication.Get("/", h.get)
 		medication.Patch("/", h.update)
+		medication.Delete("/", h.deleteMistaken)
 
 		medication.Get("/schedules", h.listSchedules)
 		medication.Post("/schedules", h.addSchedule)
@@ -185,6 +192,18 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.writeDetail(w, r, medication)
+}
+
+func (h *Handler) deleteMistaken(w http.ResponseWriter, r *http.Request) {
+	medication, ok := h.authorizedMedication(w, r, care.PermissionMedicationsManage)
+	if !ok {
+		return
+	}
+	if err := h.service.DeleteMistaken(r.Context(), medication.ID); err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // updateRequest is the `PATCH /v1/medications/{id}` body. An absent field is
@@ -533,42 +552,80 @@ func (h *Handler) act(action Action) http.HandlerFunc {
 			return
 		}
 
-		principal := auth.MustPrincipal(r.Context())
+		h.recordAction(w, r, instance, action)
+	}
+}
 
-		// A body is optional: the queued offline mutation sends none.
-		var body actRequest
-		if r.ContentLength > 0 {
-			if err := httpx.DecodeJSON(w, r, &body); err != nil {
-				httpx.WriteError(w, r, err)
+// actByInstance handles notification actions, which intentionally know only a
+// dose id. Every lookup or authorization failure is the same 404, so the route
+// cannot be used to discover another circle's medication instances.
+func (h *Handler) actByInstance(action Action) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		instanceID, err := uuid.Parse(chi.URLParam(r, instanceIDParam))
+		if err != nil {
+			notFound(w, r)
+			return
+		}
+
+		instance, err := h.service.GetInstance(r.Context(), instanceID)
+		if err != nil {
+			if errors.Is(err, ErrNotFound) {
+				notFound(w, r)
 				return
 			}
-		}
-
-		var errs validation.Errors
-		if body.Notes != nil {
-			errs.MaxLength("notes", *body.Notes, maxNotesLength)
-		}
-		if errs.Any() {
-			httpx.WriteError(w, r, httpx.ErrValidation("Please check the highlighted fields.", errs))
+			httpx.WriteError(w, r, httpx.ErrInternal(err))
 			return
 		}
 
-		result, err := h.service.Act(r.Context(), ActInput{
-			InstanceID: instance.ID,
-			Action:     action,
-			// Never the client's word for who took it: an actor supplied in a
-			// body could attribute somebody else's medicine to them
-			// (plans/phase5.md §6).
-			ActorID: principal.UserID,
-			Notes:   body.Notes,
-		})
-		if err != nil {
-			h.writeError(w, r, err)
+		principal := auth.MustPrincipal(r.Context())
+		if _, err := h.guard.Authorize(
+			r.Context(), principal.UserID, instance.SeniorID, care.PermissionMedicationsRecord,
+		); err != nil {
+			if errors.Is(err, authz.ErrDenied) {
+				notFound(w, r)
+				return
+			}
+			httpx.WriteError(w, r, httpx.ErrInternal(err))
 			return
 		}
 
-		httpx.WriteJSON(w, r, http.StatusOK, ToInstanceResponse(result.Instance, time.Now()))
+		h.recordAction(w, r, instance, action)
 	}
+}
+
+func (h *Handler) recordAction(w http.ResponseWriter, r *http.Request, instance Instance, action Action) {
+	principal := auth.MustPrincipal(r.Context())
+
+	// A body is optional: notification and queued offline mutations send none.
+	var body actRequest
+	if r.ContentLength > 0 {
+		if err := httpx.DecodeJSON(w, r, &body); err != nil {
+			httpx.WriteError(w, r, err)
+			return
+		}
+	}
+
+	var errs validation.Errors
+	if body.Notes != nil {
+		errs.MaxLength("notes", *body.Notes, maxNotesLength)
+	}
+	if errs.Any() {
+		httpx.WriteError(w, r, httpx.ErrValidation("Please check the highlighted fields.", errs))
+		return
+	}
+
+	result, err := h.service.Act(r.Context(), ActInput{
+		InstanceID: instance.ID,
+		Action:     action,
+		ActorID:    principal.UserID,
+		Notes:      body.Notes,
+	})
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, ToInstanceResponse(result.Instance, time.Now()))
 }
 
 // --- Authorization ---------------------------------------------------------
@@ -631,6 +688,10 @@ func (h *Handler) writeError(w http.ResponseWriter, r *http.Request, err error) 
 	case errors.Is(err, ErrInvalidTransition):
 		httpx.WriteError(w, r, httpx.ErrConflict(
 			"Somebody has already recorded a different outcome for this dose."))
+
+	case errors.Is(err, ErrRecordedHistory):
+		httpx.WriteError(w, r, httpx.ErrConflict(
+			"A dose has already been recorded. Stop this medication to preserve its history."))
 
 	default:
 		httpx.WriteError(w, r, httpx.ErrInternal(err))

@@ -1,7 +1,14 @@
 import type { Reminder, ReminderPlan } from '@genxcare/contracts';
 import * as Notifications from 'expo-notifications';
 
-import { clearReminders, syncReminders } from '../scheduler';
+import {
+  clearReminders,
+  cancelSnoozedMedicationNotifications,
+  MEDICATION_ACTION_CATEGORY,
+  registerMedicationNotificationActions,
+  snoozeMedicationNotification,
+  syncReminders,
+} from '../scheduler';
 
 /**
  * What the operating system is actually told. The reconciliation arithmetic is
@@ -13,17 +20,19 @@ import { clearReminders, syncReminders } from '../scheduler';
 
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),
+  setNotificationCategoryAsync: jest.fn().mockResolvedValue({}),
   scheduleNotificationAsync: jest.fn().mockResolvedValue('id'),
   cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
   cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
   getAllScheduledNotificationsAsync: jest.fn().mockResolvedValue([]),
-  SchedulableTriggerInputTypes: { DATE: 'date' },
+  SchedulableTriggerInputTypes: { DATE: 'date', TIME_INTERVAL: 'timeInterval' },
 }));
 
 const schedule = Notifications.scheduleNotificationAsync as jest.Mock;
 const cancel = Notifications.cancelScheduledNotificationAsync as jest.Mock;
 const cancelAll = Notifications.cancelAllScheduledNotificationsAsync as jest.Mock;
 const pending = Notifications.getAllScheduledNotificationsAsync as jest.Mock;
+const setCategory = Notifications.setNotificationCategoryAsync as jest.Mock;
 
 function reminder(overrides: Partial<Reminder> = {}): Reminder {
   return {
@@ -53,6 +62,7 @@ beforeEach(() => {
   cancel.mockClear();
   cancelAll.mockClear();
   pending.mockReset().mockResolvedValue([]);
+  setCategory.mockClear();
 });
 
 it('schedules a reminder under the server’s identifier', async () => {
@@ -82,6 +92,63 @@ it('gives the notification privacy-conscious wording and an identifier-only payl
     entityType: 'medication_dose',
     entityId: 'dose-1',
   });
+  expect(content.categoryIdentifier).toBe(MEDICATION_ACTION_CATEGORY);
+});
+
+it('registers taken, skip, and remind-again actions', async () => {
+  await registerMedicationNotificationActions();
+
+  expect(setCategory).toHaveBeenCalledWith(
+    MEDICATION_ACTION_CATEGORY,
+    expect.arrayContaining([
+      expect.objectContaining({ buttonTitle: 'Taken' }),
+      expect.objectContaining({ buttonTitle: 'Skip' }),
+      expect.objectContaining({ buttonTitle: 'Remind in 10 min' }),
+    ]),
+  );
+});
+
+it('snoozes a medication notification for ten minutes', async () => {
+  await snoozeMedicationNotification({
+    date: Date.now(),
+    request: {
+      identifier: 'original',
+      trigger: null,
+      content: {
+        title: 'Medication reminder',
+        body: 'A dose is due for Amma at 08:00.',
+        data: { entityId: 'dose-1' },
+        categoryIdentifier: MEDICATION_ACTION_CATEGORY,
+        sound: 'default',
+        subtitle: null,
+      },
+    },
+  });
+
+  expect(schedule).toHaveBeenCalledWith(
+    expect.objectContaining({
+      content: expect.objectContaining({ categoryIdentifier: MEDICATION_ACTION_CATEGORY }),
+      trigger: { type: 'timeInterval', seconds: 600, repeats: false },
+    }),
+  );
+});
+
+it('cancels a snoozed follow-up after that dose is recorded', async () => {
+  pending.mockResolvedValue([
+    {
+      identifier: 'genxcare-snooze-1',
+      content: { data: { entityId: 'dose-1' } },
+    },
+    {
+      identifier: 'genxcare-snooze-2',
+      content: { data: { entityId: 'dose-2' } },
+    },
+  ]);
+
+  await cancelSnoozedMedicationNotifications('dose-1');
+
+  expect(cancel).toHaveBeenCalledWith('genxcare-snooze-1');
+  expect(cancel).not.toHaveBeenCalledWith('genxcare-snooze-2');
 });
 
 it('schedules nothing on a second run', async () => {

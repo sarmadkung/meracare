@@ -1,7 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
 import { signInWithGoogle as startGoogleSignIn } from '../google';
+import { signInWithApple as startAppleSignIn } from '../apple';
 import { useAuthActions } from '../use-auth-actions';
+import { prepareForSignOut } from '../sign-out';
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -14,8 +16,14 @@ jest.mock('@/lib/supabase', () => ({
 }));
 
 jest.mock('../google', () => ({ signInWithGoogle: jest.fn() }));
+jest.mock('../apple', () => ({ signInWithApple: jest.fn() }));
+jest.mock('../sign-out', () => ({
+  prepareForSignOut: jest.fn().mockResolvedValue(undefined),
+  SignOutPreparationError: class SignOutPreparationError extends Error {},
+}));
 
 const googleSignIn = startGoogleSignIn as jest.Mock;
+const appleSignIn = startAppleSignIn as jest.Mock;
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -94,5 +102,26 @@ describe('useAuthActions — Google', () => {
 
     expect(result.current.pending).toBeNull();
     expect(googleSignIn).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useAuthActions — sign-out', () => {
+  it('prepares local and device state before ending the Supabase session', async () => {
+    const { result } = renderHook(() => useAuthActions());
+
+    await act(async () => {
+      await result.current.signOut();
+    });
+
+    expect(prepareForSignOut).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useAuthActions — Apple', () => {
+  it('uses the same provider-neutral success contract', async () => {
+    appleSignIn.mockResolvedValue({ status: 'success' });
+    const { result } = renderHook(() => useAuthActions());
+    await act(async () => expect(await result.current.signInWithApple()).toBe(true));
+    expect(result.current.error).toBeNull();
   });
 });

@@ -71,6 +71,9 @@ const preferences = {
   taskReminders: true,
   medicationReminders: true,
   appointmentReminders: true,
+  overdueTaskAlerts: true,
+  missedMedicationAlerts: true,
+  careActivity: true,
   updatedAt: '2026-08-19T06:00:00Z',
 };
 
@@ -86,6 +89,7 @@ it('shows every category in plain language', async () => {
   await waitFor(() => expect(screen.getByText('Medication reminders')).toBeTruthy());
   expect(screen.getByText('Care task reminders')).toBeTruthy();
   expect(screen.getByText('Appointment reminders')).toBeTruthy();
+  expect(screen.getByText('Missed medication alerts')).toBeTruthy();
 });
 
 it('never shows an internal notification type', async () => {
@@ -93,7 +97,12 @@ it('never shows an internal notification type', async () => {
 
   await waitFor(() => expect(screen.getByText('Medication reminders')).toBeTruthy());
 
-  for (const identifier of ['MEDICATION_REMINDER', 'TASK_REMINDER', 'APPOINTMENT_REMINDER']) {
+  for (const identifier of [
+    'MEDICATION_REMINDER',
+    'MEDICATION_MISSED',
+    'TASK_REMINDER',
+    'APPOINTMENT_REMINDER',
+  ]) {
     expect(screen.queryByText(identifier)).toBeNull();
   }
 });

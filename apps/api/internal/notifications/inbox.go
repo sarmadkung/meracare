@@ -12,10 +12,10 @@ import (
 // Type is what a delivered notification is about.
 //
 // A superset of ReminderType: the three reminder categories a device can
-// schedule for itself, plus the two that only a server can know about — a task
-// that has gone past its time, and something a *different* person did. Both of
-// those are facts about a moment that has already passed, which is precisely
-// what a device sitting in a pocket cannot compute (plans/phase11.md §5).
+// schedule for itself, plus the categories only a server can know about — care
+// that remained unrecorded after its grace period, and something a *different*
+// person did. Those are facts about a moment that has already passed, which is
+// precisely what a device sitting in a pocket cannot compute.
 //
 // The CHECK constraint on notifications.notification_type mirrors this list,
 // and so does NOTIFICATION_TYPES in packages/contracts/src/notification.ts.
@@ -30,20 +30,21 @@ const (
 	TypeTaskReminder Type = "TASK_REMINDER"
 	// TypeTaskOverdue is a care task whose time has passed with nothing recorded.
 	TypeTaskOverdue Type = "TASK_OVERDUE"
+	// TypeMedicationMissed is a dose whose two-hour window passed with nothing recorded.
+	TypeMedicationMissed Type = "MEDICATION_MISSED"
 	// TypeCareActivity is something somebody else did.
 	TypeCareActivity Type = "CARE_ACTIVITY"
 )
 
-// Types lists every notification type. There is deliberately none for a missed
-// dose: missed is derived from the clock and never stored, and a notification
-// type for it would mean inventing the sweep that writes it down — which
-// plans/phase4.md §8, plans/phase5.md §8, and plans/phase11.md §18 all refuse
-// (see careevents.NotYetEmitted, which names the event this would need).
+// Types lists every notification type. MEDICATION_MISSED is a notification
+// decision, not a stored medication state: the medication domain derives the
+// missed status and the scheduler only records who should be told about it.
 var Types = []Type{
 	TypeMedicationReminder,
 	TypeAppointmentReminder,
 	TypeTaskReminder,
 	TypeTaskOverdue,
+	TypeMedicationMissed,
 	TypeCareActivity,
 }
 

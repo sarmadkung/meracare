@@ -1,5 +1,10 @@
 # GenXcare — Phase 2: User & Senior Foundation
 
+> **Archived brief:** this historical prompt was captured incompletely and ends
+> mid-section. It is retained as implementation history, not as a current or
+> complete specification. The implemented Phase 2 behavior is recorded in
+> `docs/IMPLEMENTATION_STATUS.md`; current requirements remain in `/docs`.
+
 Phase 1 is complete.
 
 Now implement **Phase 2** according to the existing documentation.
@@ -76,3 +81,6 @@ The relationship should conceptually be:
 Supabase auth.users
         ↓
 Application User
+```
+
+<!-- The original captured brief ends here. Do not infer missing requirements. -->

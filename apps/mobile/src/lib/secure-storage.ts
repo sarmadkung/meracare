@@ -1,5 +1,4 @@
 import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
 
 /**
  * Keychain/Keystore-backed storage for the Supabase session.
@@ -72,8 +71,5 @@ export const secureStorage = {
   },
 };
 
-/**
- * SecureStore has no web implementation. Supabase falls back to its own storage
- * on web, which the future Next.js app will configure explicitly.
- */
-export const sessionStorage = Platform.OS === 'web' ? undefined : secureStorage;
+/** Native Supabase sessions use the same Keychain/Keystore-backed adapter. */
+export const sessionStorage = secureStorage;

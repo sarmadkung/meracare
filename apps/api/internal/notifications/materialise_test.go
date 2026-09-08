@@ -65,6 +65,20 @@ func (f fakeOverdue) Overdue(_ context.Context, _ uuid.UUID, from, to time.Time)
 	return found, nil
 }
 
+type fakeMissedDoses struct {
+	due []Due
+}
+
+func (f fakeMissedDoses) Missed(_ context.Context, _ uuid.UUID, from, to time.Time) ([]Due, error) {
+	found := make([]Due, 0, len(f.due))
+	for _, item := range f.due {
+		if !item.At.Before(from) && item.At.Before(to) {
+			found = append(found, item)
+		}
+	}
+	return found, nil
+}
+
 // fakeActivity returns fixed care events.
 type fakeActivity struct {
 	activities []Activity
@@ -489,6 +503,42 @@ func TestACompletedTaskNeverBecomesAnOverdueAlert(t *testing.T) {
 
 	if len(found) != 0 {
 		t.Errorf("got %d alerts, want none", len(found))
+	}
+}
+
+func TestAMissedDoseEscalatesToEveryAuthorizedCircleMember(t *testing.T) {
+	t.Parallel()
+
+	amma := senior("Amma", "Asia/Kolkata")
+	daughter, son, noAccess := uuid.New(), uuid.New(), uuid.New()
+	now := time.Date(2026, 3, 1, 10, 1, 0, 0, kolkata)
+	dose := uuid.New()
+
+	quiet := DefaultPreferences(son)
+	quiet.MissedMedicationAlerts = false
+	taskOnly := care.Normalise([]care.Permission{care.PermissionTasksView})
+
+	found := run(t, materialiseInput{
+		Memberships: []UserMembership{
+			membership(daughter, amma, everything),
+			membership(son, amma, everything),
+			membership(noAccess, amma, taskOnly),
+		},
+		Preferences: map[uuid.UUID]Preferences{son: quiet},
+		MissedDoses: fakeMissedDoses{due: []Due{{EntityID: dose, At: now.Add(-time.Minute)}}},
+		Now:         now,
+	})
+
+	if len(found) != 1 {
+		t.Fatalf("got %d notifications (%v), want only the authorized opted-in member", len(found), typesOf(found))
+	}
+	if found[0].RecipientUserID != daughter || found[0].Type != TypeMedicationMissed {
+		t.Errorf("got recipient/type %s/%s, want daughter/MEDICATION_MISSED",
+			found[0].RecipientUserID, found[0].Type)
+	}
+	if found[0].EntityType != EntityMedicationDose || found[0].EntityID != dose {
+		t.Errorf("points at %s/%s, want medication_dose/%s",
+			found[0].EntityType, found[0].EntityID, dose)
 	}
 }
 

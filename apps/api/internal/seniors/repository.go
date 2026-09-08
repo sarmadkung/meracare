@@ -17,6 +17,15 @@ import (
 // ErrNotFound is returned when no senior profile matches.
 var ErrNotFound = errors.New("senior profile not found")
 
+var ErrSelfProfileRemoval = errors.New("a signed-in senior profile cannot be removed here")
+
+type RemovalDisposition string
+
+const (
+	RemovalDeleted  RemovalDisposition = "deleted"
+	RemovalArchived RemovalDisposition = "archived"
+)
+
 // Repository reads and writes senior profiles.
 type Repository struct {
 	pool *database.Pool
@@ -87,7 +96,7 @@ func (r *Repository) CreateTx(ctx context.Context, tx pgx.Tx, params CreateParam
 // does not re-check it.
 func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (Senior, error) {
 	senior, err := scanSenior(r.pool.QueryRow(ctx,
-		`SELECT `+seniorColumns+` FROM senior_profiles WHERE id = $1`, id))
+		`SELECT `+seniorColumns+` FROM senior_profiles WHERE id = $1 AND archived_at IS NULL`, id))
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Senior{}, ErrNotFound
 	}
@@ -115,7 +124,7 @@ func (r *Repository) ListForUser(ctx context.Context, userID uuid.UUID) ([]Membe
 		       cr.id, cr.senior_id, cr.user_id, cr.role, cr.permissions, cr.status,
 		       cr.created_at, cr.updated_at
 		FROM care_relationships cr
-		JOIN senior_profiles s ON s.id = cr.senior_id
+		JOIN senior_profiles s ON s.id = cr.senior_id AND s.archived_at IS NULL
 		WHERE cr.user_id = $1 AND cr.status = 'active'
 		ORDER BY s.display_name, s.id`,
 		userID,
@@ -172,7 +181,7 @@ func (r *Repository) ListAllActive(ctx context.Context) ([]Membership, error) {
 		       cr.id, cr.senior_id, cr.user_id, cr.role, cr.permissions, cr.status,
 		       cr.created_at, cr.updated_at
 		FROM care_relationships cr
-		JOIN senior_profiles s ON s.id = cr.senior_id
+		JOIN senior_profiles s ON s.id = cr.senior_id AND s.archived_at IS NULL
 		WHERE cr.status = 'active'
 		ORDER BY cr.senior_id, cr.user_id`)
 	if err != nil {
@@ -225,6 +234,71 @@ func (r *Repository) Update(ctx context.Context, id uuid.UUID, params UpdatePara
 // BeginTx starts a transaction for operations that span tables.
 func (r *Repository) BeginTx(ctx context.Context) (pgx.Tx, error) {
 	return r.pool.Begin(ctx)
+}
+
+// RemoveManagedProfile deletes an empty accidental profile, or archives one
+// with care history. The row lock makes this decision and the removal atomic.
+func (r *Repository) RemoveManagedProfile(
+	ctx context.Context,
+	id, actorID uuid.UUID,
+) (RemovalDisposition, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return "", fmt.Errorf("begin profile removal: %w", err)
+	}
+	defer func() { _ = tx.Rollback(context.WithoutCancel(ctx)) }()
+
+	var userID uuid.NullUUID
+	err = tx.QueryRow(ctx, `
+		SELECT user_id FROM senior_profiles
+		WHERE id = $1 AND archived_at IS NULL
+		FOR UPDATE`, id).Scan(&userID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", ErrNotFound
+	}
+	if err != nil {
+		return "", fmt.Errorf("lock senior profile: %w", err)
+	}
+	if userID.Valid {
+		return "", ErrSelfProfileRemoval
+	}
+
+	var hasHistory bool
+	err = tx.QueryRow(ctx, `
+		SELECT EXISTS (SELECT 1 FROM care_task_templates WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM care_task_instances WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM medications WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM appointments WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM care_notes WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM messages WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM care_events WHERE senior_id = $1)
+		    OR EXISTS (SELECT 1 FROM invitations WHERE senior_id = $1)`, id).Scan(&hasHistory)
+	if err != nil {
+		return "", fmt.Errorf("check senior care history: %w", err)
+	}
+
+	disposition := RemovalDeleted
+	if hasHistory {
+		disposition = RemovalArchived
+		if _, err = tx.Exec(ctx, `
+			UPDATE senior_profiles
+			SET archived_at = now(), archived_by_user_id = $2
+			WHERE id = $1`, id, actorID); err != nil {
+			return "", fmt.Errorf("archive senior profile: %w", err)
+		}
+		if _, err = tx.Exec(ctx, `
+			UPDATE care_relationships SET status = 'revoked'
+			WHERE senior_id = $1 AND status <> 'revoked'`, id); err != nil {
+			return "", fmt.Errorf("revoke archived profile access: %w", err)
+		}
+	} else if _, err = tx.Exec(ctx, `DELETE FROM senior_profiles WHERE id = $1`, id); err != nil {
+		return "", fmt.Errorf("delete empty senior profile: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return "", fmt.Errorf("commit profile removal: %w", err)
+	}
+	return disposition, nil
 }
 
 type rowScanner interface {

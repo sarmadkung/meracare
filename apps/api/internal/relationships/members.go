@@ -173,6 +173,34 @@ func (r *Repository) RevokeMembership(ctx context.Context, id uuid.UUID) (Relati
 	return relationship, nil
 }
 
+// LockSeniorAndHasOtherManager serializes leave decisions for a care circle,
+// then reports whether somebody else can still manage membership.
+func (r *Repository) LockSeniorAndHasOtherManager(
+	ctx context.Context,
+	seniorID, leavingUserID uuid.UUID,
+) (bool, error) {
+	var locked uuid.UUID
+	if err := r.db.QueryRow(ctx,
+		`SELECT id FROM senior_profiles WHERE id = $1 FOR UPDATE`, seniorID,
+	).Scan(&locked); err != nil {
+		return false, fmt.Errorf("lock senior care circle: %w", err)
+	}
+
+	var found bool
+	err := r.db.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM care_relationships
+			WHERE senior_id = $1
+			  AND user_id <> $2
+			  AND status = 'active'
+			  AND permissions @> ARRAY['members.manage']::text[]
+		)`, seniorID, leavingUserID).Scan(&found)
+	if err != nil {
+		return false, fmt.Errorf("check another care-circle manager: %w", err)
+	}
+	return found, nil
+}
+
 // UpsertActiveTx creates a membership, or reactivates an existing one.
 //
 // Accepting an invitation must work for someone who was previously in the

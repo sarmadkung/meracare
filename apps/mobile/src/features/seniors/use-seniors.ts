@@ -2,6 +2,7 @@ import type {
   CreateSeniorRequest,
   Senior,
   SeniorListResponse,
+  SeniorRemovalResponse,
   UpdateSeniorRequest,
 } from '@genxcare/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -55,6 +56,21 @@ export function useUpdateSenior(seniorId: string) {
       apiRequest<Senior>(`/seniors/${seniorId}`, { method: 'PATCH', body }),
     onSuccess: (updated) => {
       queryClient.setQueryData(seniorKeys.detail(seniorId), updated);
+      void queryClient.invalidateQueries({ queryKey: seniorKeys.all });
+    },
+  });
+}
+
+/** Deletes an empty managed profile, or archives one that has care history. */
+export function useRemoveSenior(seniorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<SeniorRemovalResponse>(`/seniors/${seniorId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: seniorKeys.detail(seniorId) });
+      queryClient.removeQueries({ queryKey: ['seniors', seniorId] });
       void queryClient.invalidateQueries({ queryKey: seniorKeys.all });
     },
   });

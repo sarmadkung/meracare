@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/genxcare/api/internal/auth"
 	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/database"
 	"github.com/genxcare/api/internal/relationships"
 	"github.com/genxcare/api/internal/seniors"
 	"github.com/genxcare/api/internal/testsupport"
@@ -20,6 +21,7 @@ import (
 // authorization. Skipped unless TEST_DATABASE_URL is set.
 
 type fixture struct {
+	pool          *database.Pool
 	service       *seniors.Service
 	seniors       *seniors.Repository
 	relationships *relationships.Repository
@@ -34,6 +36,7 @@ func newFixture(t *testing.T) fixture {
 	relationshipRepo := relationships.NewRepository(pool)
 
 	return fixture{
+		pool:          pool,
 		service:       seniors.NewService(seniorRepo, relationshipRepo),
 		seniors:       seniorRepo,
 		relationships: relationshipRepo,
@@ -140,9 +143,10 @@ func TestProfessionalCaregiverManagesMultipleSeniors(t *testing.T) {
 		if membership.Relationship.Role != care.RoleProfessionalCaregiver {
 			t.Errorf("role = %q, want professional_caregiver", membership.Relationship.Role)
 		}
-		// docs/02: caregivers carry out care, they do not restructure it.
-		if membership.Relationship.Can(care.PermissionSeniorEdit) {
-			t.Error("a caregiver should not hold senior.edit by default")
+		// This professional created each client and is therefore its initial
+		// coordinator. Invited professionals retain the narrower role defaults.
+		if !membership.Relationship.Can(care.PermissionSeniorEdit) {
+			t.Error("a professional client creator should be able to complete setup")
 		}
 	}
 }
@@ -573,11 +577,11 @@ func TestUserHoldsDifferentRolesInDifferentCircles(t *testing.T) {
 		}
 	}
 
-	// The same account edits its own profile but not the client's.
+	// The same account can fully set up the client it created and its own care.
 	for _, membership := range memberships {
 		canEdit := membership.Relationship.Can(care.PermissionSeniorEdit)
-		if membership.Senior.ID == client.Senior.ID && canEdit {
-			t.Error("should not be able to edit a professional client's profile")
+		if membership.Senior.ID == client.Senior.ID && !canEdit {
+			t.Error("the professional who created a client should be able to edit it")
 		}
 		if membership.Senior.ID == own.Senior.ID && !canEdit {
 			t.Error("should be able to edit their own profile")
@@ -623,7 +627,82 @@ func TestTheCreatorOfACircleCanAdministerIt(t *testing.T) {
 				t.Errorf("the creator cannot administer the circle they created: %v",
 					membership.Relationship.Permissions.Strings())
 			}
+			if testCase.mode == seniors.CreateModeProfessional {
+				for _, permission := range []care.Permission{
+					care.PermissionSeniorEdit, care.PermissionTasksManage,
+					care.PermissionMedicationsManage, care.PermissionAppointmentsManage,
+					care.PermissionMembersInvite,
+				} {
+					if !membership.Relationship.Can(permission) {
+						t.Errorf("professional creator missing %q", permission)
+					}
+				}
+			}
 		})
+	}
+}
+
+func TestRemovingAManagedProfileDeletesEmptyAndArchivesHistory(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	owner := f.newUser(t, "profile-removal@example.com")
+
+	empty, err := f.service.Create(ctx, owner, seniors.CreateInput{
+		Mode: seniors.CreateModeFamily, DisplayName: "Wrong person",
+	})
+	if err != nil {
+		t.Fatalf("create empty: %v", err)
+	}
+	disposition, err := f.service.Remove(ctx, empty.Senior.ID, owner.UserID)
+	if err != nil || disposition != seniors.RemovalDeleted {
+		t.Fatalf("remove empty = %q, %v", disposition, err)
+	}
+	if _, err := f.seniors.GetByID(ctx, empty.Senior.ID); !errors.Is(err, seniors.ErrNotFound) {
+		t.Fatalf("deleted profile GetByID error = %v", err)
+	}
+
+	active, err := f.service.Create(ctx, owner, seniors.CreateInput{
+		Mode: seniors.CreateModeFamily, DisplayName: "Mrs Khan",
+	})
+	if err != nil {
+		t.Fatalf("create active: %v", err)
+	}
+	_, err = f.pool.Exec(ctx, `INSERT INTO care_events
+		(senior_id, actor_user_id, event_type, entity_type, entity_id)
+		VALUES ($1, $2, 'MEMBER_REVOKED', 'relationship', $3)`,
+		active.Senior.ID, owner.UserID, active.Relationship.ID)
+	if err != nil {
+		t.Fatalf("add history: %v", err)
+	}
+	disposition, err = f.service.Remove(ctx, active.Senior.ID, owner.UserID)
+	if err != nil || disposition != seniors.RemovalArchived {
+		t.Fatalf("remove with history = %q, %v", disposition, err)
+	}
+	listed, err := f.service.List(ctx, owner)
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	if len(listed) != 0 {
+		t.Fatalf("archived profile remains listed: %d", len(listed))
+	}
+	var archived bool
+	if err := f.pool.QueryRow(ctx, `SELECT archived_at IS NOT NULL FROM senior_profiles WHERE id=$1`, active.Senior.ID).Scan(&archived); err != nil || !archived {
+		t.Fatalf("archived row = %v, %v", archived, err)
+	}
+}
+
+func TestSelfProfileCannotUseManagedProfileRemoval(t *testing.T) {
+	f := newFixture(t)
+	owner := f.newUser(t, "self-removal@example.com")
+	profile, err := f.service.Create(context.Background(), owner, seniors.CreateInput{
+		Mode: seniors.CreateModeSelf, DisplayName: "Me",
+	})
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	_, err = f.service.Remove(context.Background(), profile.Senior.ID, owner.UserID)
+	if !errors.Is(err, seniors.ErrSelfProfileRemoval) {
+		t.Fatalf("Remove error = %v", err)
 	}
 }
 

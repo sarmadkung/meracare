@@ -72,7 +72,7 @@ func permissionForType(t Type) care.Permission {
 	switch t {
 	case TypeTaskReminder, TypeTaskOverdue:
 		return care.PermissionTasksView
-	case TypeMedicationReminder:
+	case TypeMedicationReminder, TypeMedicationMissed:
 		return care.PermissionMedicationsView
 	case TypeAppointmentReminder:
 		return care.PermissionAppointmentsView
@@ -86,7 +86,7 @@ func entityForType(t Type) EntityType {
 	switch t {
 	case TypeTaskReminder, TypeTaskOverdue:
 		return EntityTaskInstance
-	case TypeMedicationReminder:
+	case TypeMedicationReminder, TypeMedicationMissed:
 		return EntityMedicationDose
 	case TypeAppointmentReminder:
 		return EntityAppointment
@@ -119,6 +119,14 @@ type OverdueSource interface {
 	// in [from, to). The domain decides what outstanding means; this package
 	// must not acquire a second definition of overdue (plans/phase11.md §17).
 	Overdue(ctx context.Context, seniorID uuid.UUID, from, to time.Time) ([]Due, error)
+}
+
+// MissedDoseSource reports dose escalations whose medication-domain grace
+// period expired in the requested window. Due.At is the escalation time, not
+// the original dose time; the adapter owns that distinction so this package
+// never acquires a second definition of when a dose becomes missed.
+type MissedDoseSource interface {
+	Missed(ctx context.Context, seniorID uuid.UUID, from, to time.Time) ([]Due, error)
 }
 
 // ActivityKind is the small set of things worth telling somebody else about.
@@ -209,6 +217,7 @@ type materialiseInput struct {
 	Preferences map[uuid.UUID]Preferences
 	Reminders   map[Type]ScheduleSource
 	Overdue     OverdueSource
+	MissedDoses MissedDoseSource
 	Activity    ActivitySource
 	Now         time.Time
 }
@@ -234,11 +243,49 @@ func materialise(ctx context.Context, in materialiseInput) ([]pending, error) {
 	}
 	found = append(found, overdue...)
 
+	missedDoses, err := materialiseMissedDoses(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	found = append(found, missedDoses...)
+
 	activity, err := materialiseActivity(ctx, in)
 	if err != nil {
 		return nil, err
 	}
 	return append(found, activity...), nil
+}
+
+// materialiseMissedDoses alerts the authorized care circle only after the
+// medication domain says a still-pending dose has exhausted its grace period.
+// This must be server-side: a locally scheduled alert cannot reliably know
+// that somebody else recorded the dose before the deadline.
+func materialiseMissedDoses(ctx context.Context, in materialiseInput) ([]pending, error) {
+	found := make([]pending, 0)
+	if in.MissedDoses == nil {
+		return found, nil
+	}
+
+	from := in.Now.Add(-lookback)
+	for _, membership := range in.Memberships {
+		if !in.allows(membership, TypeMedicationMissed) {
+			continue
+		}
+
+		missed, err := in.MissedDoses.Missed(ctx, membership.Senior.ID, from, in.Now)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range missed {
+			subject := subjectOf(membership.Senior)
+			found = append(found, newPending(
+				membership.UserID, TypeMedicationMissed, membership.Senior, item.EntityID, item.At,
+				Body(TypeMedicationMissed, subject, item.At, item.At),
+			))
+		}
+	}
+	return found, nil
 }
 
 // preferencesFor returns a user's settings, or the defaults they have never

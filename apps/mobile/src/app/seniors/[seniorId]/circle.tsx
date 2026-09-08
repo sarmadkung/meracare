@@ -1,17 +1,19 @@
 import type { CircleMember, Invitation } from '@genxcare/contracts';
 import { can, roleLabel } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
-import { Button, Card, Screen, Text } from '@/components/ui';
+import { Button, Card, Illustration, Screen, Text } from '@/components/ui';
 import {
   useCircleMembers,
   useInvitations,
+  useLeaveCareCircle,
   useRevokeInvitation,
   useRevokeMember,
 } from '@/features/circle/use-circle';
 import { useSenior } from '@/features/seniors/use-seniors';
 import { ApiError } from '@/lib/api-error';
+import { confirmAction } from '@/lib/dialogs';
 import { useTheme } from '@/theme';
 
 /**
@@ -31,6 +33,7 @@ export default function CareCircleScreen() {
   const mayInvite = senior.data ? can(senior.data, 'members.invite') : false;
   const mayManage = senior.data ? can(senior.data, 'members.manage') : false;
   const invitations = useInvitations(seniorId ?? null, senior.data !== undefined);
+  const leave = useLeaveCareCircle(seniorId ?? '');
 
   if (senior.isPending || members.isPending) {
     return (
@@ -59,6 +62,18 @@ export default function CareCircleScreen() {
   }
 
   const pending = (invitations.data ?? []).filter((invitation) => invitation.status === 'pending');
+  const self = members.data.find((member) => member.isSelf);
+  const seniorName = senior.data.displayName;
+
+  function confirmLeave() {
+    confirmAction({
+      title: `Leave ${seniorName}'s care circle?`,
+      message:
+        'You will lose access immediately. Care you already recorded will stay in the history.',
+      confirmLabel: 'Leave',
+      onConfirm: () => leave.mutate(undefined, { onSuccess: () => router.replace('/') }),
+    });
+  }
 
   return (
     <Screen scrollable>
@@ -81,6 +96,16 @@ export default function CareCircleScreen() {
             })
           }
         />
+      ) : null}
+
+      {mayInvite && members.data.length <= 1 ? (
+        <Card>
+          <Illustration name="careCircle" height={150} />
+          <Text variant="sectionHeading">Build a trusted care circle</Text>
+          <Text variant="body" color="secondary">
+            Invite family or professional caregivers when you are ready to coordinate care.
+          </Text>
+        </Card>
       ) : null}
 
       <View style={{ gap: theme.spacing.md }}>
@@ -106,6 +131,29 @@ export default function CareCircleScreen() {
           ))}
         </View>
       ) : null}
+
+      {self && !self.isSenior ? (
+        <Card>
+          <Text variant="sectionHeading">Your access</Text>
+          <Text variant="body" color="secondary">
+            You can leave when another person can manage this care circle. Your past care records
+            will remain attributed to you.
+          </Text>
+          {leave.isError ? (
+            <Text variant="secondary" color="danger">
+              {leave.error instanceof ApiError
+                ? leave.error.message
+                : 'We could not remove your access.'}
+            </Text>
+          ) : null}
+          <Button
+            variant="danger"
+            label="Leave care circle"
+            loading={leave.isPending}
+            onPress={confirmLeave}
+          />
+        </Card>
+      ) : null}
     </Screen>
   );
 }
@@ -127,18 +175,13 @@ function MemberCard({
   const removable = mayManage && !member.isSenior && !member.isSelf;
 
   function confirmRemove() {
-    Alert.alert(
-      `Remove ${member.displayName}?`,
-      'They will lose access straight away. Anything they have already recorded stays in the care history.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => revokeMember.mutate(member.id),
-        },
-      ],
-    );
+    confirmAction({
+      title: `Remove ${member.displayName}?`,
+      message:
+        'They will lose access straight away. Anything they have already recorded stays in the care history.',
+      confirmLabel: 'Remove',
+      onConfirm: () => revokeMember.mutate(member.id),
+    });
   }
 
   return (

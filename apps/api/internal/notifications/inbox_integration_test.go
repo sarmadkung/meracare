@@ -394,7 +394,7 @@ func TestTheInboxNeverExposesDeliveryState(t *testing.T) {
 	}
 }
 
-func TestPreferencesCoverTheTwoNewCategories(t *testing.T) {
+func TestPreferencesCoverTheEscalationAndActivityCategories(t *testing.T) {
 	t.Parallel()
 
 	h := newHarness(t)
@@ -404,7 +404,7 @@ func TestPreferencesCoverTheTwoNewCategories(t *testing.T) {
 	defaults := decodeBody(t,
 		h.do(t, "daughter", http.MethodGet, "/v1/notifications/preferences", nil), http.StatusOK)
 
-	for _, key := range []string{"overdueTaskAlerts", "careActivity"} {
+	for _, key := range []string{"overdueTaskAlerts", "missedMedicationAlerts", "careActivity"} {
 		if defaults[key] != true {
 			t.Errorf("%s defaults to %v, want true", key, defaults[key])
 		}
@@ -417,7 +417,7 @@ func TestPreferencesCoverTheTwoNewCategories(t *testing.T) {
 		t.Errorf("careActivity = %v after switching it off, want false", updated["careActivity"])
 	}
 	// Turning one category off must not silently switch the others off with it.
-	for _, key := range []string{"overdueTaskAlerts", "medicationReminders", "taskReminders"} {
+	for _, key := range []string{"overdueTaskAlerts", "missedMedicationAlerts", "medicationReminders", "taskReminders"} {
 		if updated[key] != true {
 			t.Errorf("%s = %v after an unrelated change, want true", key, updated[key])
 		}

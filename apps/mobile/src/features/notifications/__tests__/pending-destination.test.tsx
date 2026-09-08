@@ -1,10 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 
-import { usePendingDestination, useReminderTaps } from '../use-reminder-sync';
+import {
+  usePendingDestination,
+  usePendingMedicationNotificationAction,
+  useReminderTaps,
+} from '../use-reminder-sync';
 
 import { useUIStore } from '@/stores/ui-store';
 
@@ -16,6 +19,9 @@ import { useUIStore } from '@/stores/ui-store';
  */
 
 const mockPush = jest.fn();
+const mockRecord = jest.fn();
+const mockConfirm = jest.fn();
+const mockSnooze = jest.fn();
 
 jest.mock('expo-router', () => ({ router: { push: (...args: unknown[]) => mockPush(...args) } }));
 
@@ -28,6 +34,21 @@ jest.mock('@/lib/api-client', () => ({ apiRequest: jest.fn(async () => ({ items:
 jest.mock('@/features/notifications/scheduler', () => ({
   syncReminders: jest.fn(),
   clearReminders: jest.fn(),
+  MEDICATION_SKIP_ACTION: 'medication_skip',
+  MEDICATION_SNOOZE_ACTION: 'medication_snooze',
+  MEDICATION_TAKEN_ACTION: 'medication_taken',
+  cancelSnoozedMedicationNotifications: jest.fn(async () => undefined),
+  registerMedicationNotificationActions: jest.fn(),
+  snoozeMedicationNotification: (...args: unknown[]) => mockSnooze(...args),
+}));
+
+jest.mock('@/features/notifications/medication-actions', () => ({
+  recordMedicationNotificationAction: (...args: unknown[]) => mockRecord(...args),
+}));
+
+jest.mock('@/lib/dialogs', () => ({
+  confirmAction: (...args: unknown[]) => mockConfirm(...args),
+  showMessage: jest.fn(),
 }));
 
 jest.mock('@/features/notifications/permission', () => ({
@@ -38,7 +59,7 @@ jest.mock('@/features/notifications/permission', () => ({
 const listen = Notifications.addNotificationResponseReceivedListener as jest.Mock;
 
 /** Fires the listener the hook registered, as the OS would on a tap. */
-function tapNotification() {
+function tapNotification(actionIdentifier?: string) {
   const handler = listen.mock.calls.at(-1)?.[0] as (response: unknown) => void;
   handler({
     notification: {
@@ -54,6 +75,7 @@ function tapNotification() {
         },
       },
     },
+    actionIdentifier,
   });
 }
 
@@ -80,6 +102,9 @@ function wrapper() {
 
 beforeEach(() => {
   mockPush.mockReset();
+  mockRecord.mockReset().mockResolvedValue('recorded');
+  mockConfirm.mockReset();
+  mockSnooze.mockReset().mockResolvedValue(undefined);
   listen.mockClear();
   useUIStore.getState().reset();
 });
@@ -158,4 +183,55 @@ it('ignores a notification whose payload it cannot read', () => {
 
   expect(mockPush).not.toHaveBeenCalled();
   expect(useUIStore.getState().pendingDestination).toBeNull();
+});
+
+it('records Taken directly from a medication notification', async () => {
+  renderHook(() => useReminderTaps(true, false), { wrapper: wrapper() });
+
+  tapNotification('medication_taken');
+
+  await waitFor(() =>
+    expect(mockRecord).toHaveBeenCalledWith(expect.anything(), 'senior-1', 'dose-1', 'take'),
+  );
+});
+
+it('asks for confirmation before skipping a dose', () => {
+  renderHook(() => useReminderTaps(true, false), { wrapper: wrapper() });
+
+  tapNotification('medication_skip');
+
+  expect(mockConfirm).toHaveBeenCalledWith(
+    expect.objectContaining({ title: 'Skip this dose?', confirmLabel: 'Skip dose' }),
+  );
+  expect(mockRecord).not.toHaveBeenCalled();
+});
+
+it('schedules Remind in 10 minutes without recording the dose', async () => {
+  renderHook(() => useReminderTaps(true, false), { wrapper: wrapper() });
+
+  tapNotification('medication_snooze');
+
+  await waitFor(() => expect(mockSnooze).toHaveBeenCalled());
+  expect(mockRecord).not.toHaveBeenCalled();
+});
+
+it('holds Taken until a signed-out user signs in', async () => {
+  const { rerender } = renderHook(
+    ({ signedIn }: { signedIn: boolean }) => {
+      useReminderTaps(signedIn, false);
+      usePendingDestination(signedIn, false);
+      usePendingMedicationNotificationAction(signedIn, false);
+    },
+    { wrapper: wrapper(), initialProps: { signedIn: false } },
+  );
+
+  tapNotification('medication_taken');
+  expect(mockRecord).not.toHaveBeenCalled();
+
+  rerender({ signedIn: true });
+
+  await waitFor(() =>
+    expect(mockRecord).toHaveBeenCalledWith(expect.anything(), 'senior-1', 'dose-1', 'take'),
+  );
+  expect(useUIStore.getState().pendingMedicationNotificationAction).toBeNull();
 });

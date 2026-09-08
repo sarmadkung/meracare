@@ -17,11 +17,6 @@ export interface RequestOptions {
   body?: unknown;
   signal?: AbortSignal;
   /**
-   * Idempotency key for mutations that may be retried, e.g. replaying a queued
-   * offline completion (docs/05-api-and-backend-spec.md).
-   */
-  idempotencyKey?: string;
-  /**
    * Set false for the few endpoints that work without a session — reading an
    * invitation from its token, which someone must be able to do before they
    * have an account. Defaults to true.
@@ -50,14 +45,13 @@ export async function apiRequest<TResponse>(
   path: string,
   options: RequestOptions = {},
 ): Promise<TResponse> {
-  const { method = 'GET', body, signal, idempotencyKey, authenticated = true } = options;
+  const { method = 'GET', body, signal, authenticated = true } = options;
 
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (authenticated) {
     headers.Authorization = `Bearer ${await accessToken()}`;
   }
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
   let response: Response;
   try {

@@ -1,4 +1,10 @@
 import { QueryClientProvider } from '@tanstack/react-query';
+import {
+  Inter_400Regular,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -8,6 +14,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SessionProvider, useSession } from '@/features/auth/session-provider';
 import {
   usePendingDestination,
+  usePendingMedicationNotificationAction,
   useReminderSync,
   useReminderTaps,
 } from '@/features/notifications/use-reminder-sync';
@@ -15,8 +22,15 @@ import { createQueryClient } from '@/lib/query-client';
 import { ThemeProvider, useTheme } from '@/theme';
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
   // One client per app instance; created lazily so it survives Fast Refresh.
   const [queryClient] = useState(createQueryClient);
+
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -49,6 +63,7 @@ function Reminders() {
   useReminderSync(isSignedIn, isRestoring);
   useReminderTaps(isSignedIn, isRestoring);
   usePendingDestination(isSignedIn, isRestoring);
+  usePendingMedicationNotificationAction(isSignedIn, isRestoring);
 
   return null;
 }

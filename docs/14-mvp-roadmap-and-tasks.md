@@ -154,6 +154,8 @@
 -   CRUD.
 -   Schedule.
 -   Completion.
+-   **Implemented:** mistaken-entry deletion before dose history; otherwise
+    stop and retain history.
 
 ### 26. Appointments
 
@@ -165,6 +167,8 @@
 
 -   Create/view notes.
 -   Author and timestamp.
+-   **Implemented:** senior-scoped API and screen, author-only editing,
+    authorization, `NOTE_ADDED` activity, contracts, and automated tests.
 
 ### 28. Activity timeline
 
@@ -182,6 +186,9 @@
 -   Senior-scoped conversation.
 -   Messages.
 -   Read state.
+-   **Implemented:** one senior-scoped stream, cursor pagination, monotonic
+    per-member read state, authorization, contracts, screen, and automated
+    tests.
 
 ### 31. Family dashboard
 
@@ -236,7 +243,12 @@ MVP is complete when:
 -   Medication can be scheduled and completed.
 -   Appointments can be coordinated.
 -   Activity is visible to authorized members.
+-   Authorized members can create and read senior-scoped care notes.
+-   Authorized care-circle members can exchange senior-scoped messages and
+    maintain read state.
 -   Missed work can trigger notifications.
 -   Core workflows work with intermittent connectivity.
 -   Authorization prevents unauthorized access.
 -   Critical flows have automated tests.
+-   Managed profiles can be safely deleted when empty or archived once care
+    history exists, and caregivers can leave without orphaning coordination.

@@ -99,6 +99,9 @@ func lock(ctx context.Context, t *testing.T, pool *database.Pool) {
 // so a new table added in a later phase is a deliberate decision here rather
 // than silently leaking rows between tests.
 var applicationTables = []string{
+	"message_read_states",
+	"messages",
+	"care_notes",
 	"notification_devices",
 	"notification_preferences",
 	"care_events",

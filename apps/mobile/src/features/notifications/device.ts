@@ -23,10 +23,10 @@ let cached: string | null = null;
 /**
  * Returns this installation's identifier, creating it on first use.
  *
- * Stored in the keychain alongside the session rather than in plain storage —
- * not because it is a secret, but because it is the key the server uses to
- * recognise this phone, and a value that survives a reinstall of the app but
- * not a change of device is exactly what the keychain gives.
+ * Native uses the keychain alongside the session. Web uses localStorage through
+ * the platform-specific adapter because the identifier is not a credential and
+ * must survive a tab closing. Auth tokens use the narrower sessionStorage on
+ * web and never share this path.
  */
 export async function deviceId(): Promise<string> {
   if (cached !== null) return cached;
@@ -37,10 +37,31 @@ export async function deviceId(): Promise<string> {
     return existing;
   }
 
-  const created = globalThis.crypto.randomUUID();
+  const created = newDeviceId();
   await secureStorage.setItem(DEVICE_ID_KEY, created);
   cached = created;
   return created;
+}
+
+/**
+ * Mints an identifier for this installation.
+ *
+ * Hermes ships no WebCrypto, so `globalThis.crypto` is undefined on the device
+ * and reaching for `randomUUID` there throws — which happens inside
+ * `describeDevice`, so registration fails on every launch and sign-out, which
+ * deactivates this device first, can never complete.
+ *
+ * This names one installation of the app; it is not a credential and nothing is
+ * authorised by holding it, so a random string is enough. The same reasoning
+ * gave the offline queue its operation ids (src/features/tasks/use-tasks.ts).
+ */
+function newDeviceId(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  const random = () => Math.random().toString(36).slice(2, 12);
+  return `${Date.now().toString(36)}-${random()}-${random()}`;
 }
 
 /** Forgets the cached identifier. Used by tests; the stored value is untouched. */

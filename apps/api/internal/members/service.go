@@ -25,6 +25,8 @@ var (
 	// ErrCannotModifySenior is returned for an attempt to change or remove the
 	// membership of the person the circle exists for.
 	ErrCannotModifySenior = errors.New("the senior's own membership cannot be changed")
+	ErrCannotRemoveSelf   = errors.New("use the leave action to remove your own membership")
+	ErrLastCoordinator    = errors.New("another care-circle manager is required before leaving")
 	// ErrPermissionEscalation is returned when the editor tried to grant
 	// permissions they do not hold.
 	ErrPermissionEscalation = errors.New("cannot grant permissions you do not hold")
@@ -83,13 +85,52 @@ func (s *Service) UpdatePermissions(
 	if target.Role == care.RoleSenior {
 		return relationships.Relationship{}, ErrCannotModifySenior
 	}
-
 	delegation := care.Delegate(editor.Permissions, target.Role, requested)
 	if !delegation.OK() {
 		return relationships.Relationship{}, &EscalationError{Refused: delegation.Refused}
 	}
 
 	return s.relationships.UpdatePermissions(ctx, target.ID, delegation.Granted)
+}
+
+// Leave lets a caregiver remove their own access, provided the senior is not
+// left without somebody who can manage the care circle.
+func (s *Service) Leave(
+	ctx context.Context,
+	member relationships.Relationship,
+) (relationships.Relationship, error) {
+	if member.Role == care.RoleSenior {
+		return relationships.Relationship{}, ErrCannotModifySenior
+	}
+
+	name := s.memberName(ctx, member.SeniorID, member.UserID)
+	var revoked relationships.Relationship
+	err := s.events.InTransaction(ctx, func(tx pgx.Tx, events *careevents.Repository) error {
+		repo := s.relationships.WithTx(tx)
+		hasManager, err := repo.LockSeniorAndHasOtherManager(ctx, member.SeniorID, member.UserID)
+		if err != nil {
+			return err
+		}
+		if !hasManager {
+			return ErrLastCoordinator
+		}
+		updated, err := repo.RevokeMembership(ctx, member.ID)
+		if err != nil {
+			return err
+		}
+		revoked = updated
+		_, err = events.Record(ctx, careevents.RecordParams{
+			SeniorID: member.SeniorID, ActorUserID: &member.UserID,
+			Type: careevents.TypeMemberRevoked, EntityType: careevents.EntityRelationship,
+			EntityID: member.ID,
+			Metadata: careevents.Metadata{
+				careevents.MetaMemberName: name,
+				careevents.MetaRole:       string(member.Role),
+			},
+		})
+		return err
+	})
+	return revoked, err
 }
 
 // Revoke removes a member from the circle.
@@ -110,6 +151,9 @@ func (s *Service) Revoke(
 
 	if target.Role == care.RoleSenior {
 		return relationships.Relationship{}, ErrCannotModifySenior
+	}
+	if target.UserID == actorID {
+		return relationships.Relationship{}, ErrCannotRemoveSelf
 	}
 
 	// The name is read before the revocation so the event can say who was

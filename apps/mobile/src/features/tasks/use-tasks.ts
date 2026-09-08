@@ -189,7 +189,6 @@ function useTaskAction(seniorId: string, operationType: 'complete' | 'skip') {
         return await apiRequest<CareTask>(`/tasks/${taskId}/${operationType}`, {
           method: 'POST',
           body: notes === undefined ? undefined : { notes },
-          idempotencyKey: operationId,
         });
       } catch (error) {
         if (error instanceof ApiError && error.isOffline) {
@@ -273,7 +272,7 @@ async function invalidateTasks(
   ]);
 }
 
-/** A unique id for one user action, used as the idempotency key. */
+/** A unique local queue id for one user action. */
 function newOperationId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

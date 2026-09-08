@@ -55,6 +55,16 @@ Default access:
 Professional caregivers must not automatically see unrelated
 family/private information.
 
+The professional role defaults apply to invited caregivers. A professional who
+creates a client is also the initial coordinator for that specific care circle
+and receives `senior.edit`, `tasks.manage`, `medications.manage`,
+`appointments.manage`, `members.invite`, and `members.manage`. This is stored on
+that relationship; it does not widen the professional role globally.
+
+A caregiver may revoke their own relationship only through the leave action,
+and only when another active relationship holds `members.manage`. This prevents
+an orphaned care circle while still letting a caregiver end access voluntarily.
+
 ### Care Coordinator
 
 Reserved for future organization/agency workflows.

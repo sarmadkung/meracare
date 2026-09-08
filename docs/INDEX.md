@@ -48,4 +48,12 @@
                             20 Google authentication 19-google-authentication.md
 
                             21 Notification delivery  20-notifications-delivery.md
+
+                            22 Release readiness     21-release-readiness.md
+
+                            23 Apple authentication  22-apple-authentication.md
+
+                            24 OpenAPI contract      openapi.yaml
+
+                            25 Privacy policy draft  privacy-policy-draft.md
   -----------------------------------------------------------------------------------------

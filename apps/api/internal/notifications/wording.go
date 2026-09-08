@@ -33,6 +33,7 @@ var titles = map[Type]string{
 	TypeTaskReminder:        "Care task reminder",
 	TypeAppointmentReminder: "Upcoming appointment",
 	TypeTaskOverdue:         "Overdue care task",
+	TypeMedicationMissed:    "Missed medication",
 	TypeCareActivity:        "Care activity",
 }
 
@@ -75,6 +76,8 @@ func Body(t Type, subject Subject, dueAt, readAt time.Time) string {
 		return fmt.Sprintf("%s has an appointment %s.", name, when)
 	case TypeTaskOverdue:
 		return fmt.Sprintf("Something for %s was due %s and has not been recorded yet.", name, when)
+	case TypeMedicationMissed:
+		return fmt.Sprintf("A dose for %s has not been recorded yet.", name)
 	default:
 		return fmt.Sprintf("There is an update in %s's care.", name)
 	}

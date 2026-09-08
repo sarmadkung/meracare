@@ -22,6 +22,8 @@ jest.mock('@/features/auth/use-auth-actions', () => ({
 
 jest.mock('expo-router', () => ({
   Redirect: () => null,
+  router: { push: jest.fn() },
+  useLocalSearchParams: () => ({}),
 }));
 
 function actions(overrides: Record<string, unknown> = {}) {
@@ -29,6 +31,7 @@ function actions(overrides: Record<string, unknown> = {}) {
     signIn: jest.fn(),
     signUp: jest.fn(),
     signInWithGoogle: jest.fn(),
+    signInWithApple: jest.fn(),
     pending: null,
     isSubmitting: false,
     error: null,
@@ -59,6 +62,12 @@ it('offers Continue with Google', () => {
   renderScreen();
 
   expect(screen.getByLabelText('Continue with Google')).toBeTruthy();
+});
+
+it('offers Continue with Apple', () => {
+  mockAuthActions.mockReturnValue(actions());
+  renderScreen();
+  expect(screen.getByLabelText('Continue with Apple')).toBeTruthy();
 });
 
 it('starts Google sign-in when pressed', () => {

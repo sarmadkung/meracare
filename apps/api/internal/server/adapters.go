@@ -295,6 +295,43 @@ func (o overdueSource) Overdue(
 	return due, nil
 }
 
+// missedDoseSource adapts the medication domain's derived missed state to the
+// escalation sweep. The two-hour rule remains owned by medications: this
+// adapter asks for doses whose grace period expired in the scheduler window
+// and returns the resulting alert moment.
+type missedDoseSource struct {
+	service *medications.Service
+}
+
+func (m missedDoseSource) Missed(
+	ctx context.Context,
+	seniorID uuid.UUID,
+	from, to time.Time,
+) ([]notifications.Due, error) {
+	instances, err := m.service.ListDoses(ctx, medications.ListDosesInput{
+		SeniorID: seniorID,
+		Scope:    medications.ScopeWindow,
+		From:     from.Add(-medications.MissedAfter),
+		To:       to.Add(-medications.MissedAfter),
+	}, to)
+	if err != nil {
+		return nil, err
+	}
+
+	missed := make([]notifications.Due, 0, len(instances))
+	for _, instance := range instances {
+		if instance.Status != medications.StatusPending || !instance.Missed(to) {
+			continue
+		}
+		alertAt := instance.ScheduledFor.Add(medications.MissedAfter)
+		if alertAt.Before(from) || !alertAt.Before(to) {
+			continue
+		}
+		missed = append(missed, notifications.Due{EntityID: instance.ID, At: alertAt})
+	}
+	return missed, nil
+}
+
 // activitySource adapts the care-event timeline to activity notifications.
 type activitySource struct {
 	repo *careevents.Repository

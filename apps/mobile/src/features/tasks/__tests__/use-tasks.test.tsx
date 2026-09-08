@@ -159,22 +159,6 @@ describe('useCompleteTask', () => {
     });
     expect(statusInList(queryClient)).toBe('completed');
   });
-
-  // The operation id is the idempotency key, so a mutation that reached the
-  // server before the connection dropped is recognised rather than repeated.
-  it('sends an idempotency key with every attempt', async () => {
-    const { wrapper } = setup();
-    mockApiRequest.mockResolvedValue(task({ status: 'completed' }));
-
-    const { result } = renderHook(() => useCompleteTask('senior-1'), { wrapper });
-    result.current.mutate({ taskId: 'task-1' });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    const [path, options] = mockApiRequest.mock.calls[0] as [string, { idempotencyKey?: string }];
-    expect(path).toBe('/tasks/task-1/complete');
-    expect(options.idempotencyKey).toBeTruthy();
-  });
 });
 
 describe('useSkipTask', () => {

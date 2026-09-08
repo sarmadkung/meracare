@@ -112,6 +112,21 @@ export function useRevokeMember(seniorId: string) {
   });
 }
 
+/** Removes the signed-in caregiver from this care circle. */
+export function useLeaveCareCircle(seniorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<CircleMember>(`/seniors/${seniorId}/members/me`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: seniorKeys.detail(seniorId) });
+      queryClient.removeQueries({ queryKey: ['seniors', seniorId] });
+      void queryClient.invalidateQueries({ queryKey: seniorKeys.all });
+    },
+  });
+}
+
 /** Reads an invitation from its token, before accepting. */
 export function useInvitationPreview(token: string | null) {
   return useQuery({

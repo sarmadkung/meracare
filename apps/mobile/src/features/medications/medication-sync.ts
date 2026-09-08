@@ -37,13 +37,14 @@ export function readDoseEntityId(
 /**
  * Replays one queued dose.
  *
- * The operation id travels as the idempotency key, so a mutation that reached
- * the server before the connection dropped is recognised rather than recording
- * a second dose of the same medicine (plans/phase5.md §21).
+ * The server's terminal transition is semantically idempotent: replaying the
+ * same action returns the original dose and emits no second care event
+ * (plans/phase5.md §21).
  */
 export async function replayMedicationOperation(operation: SyncOperation): Promise<ReplayOutcome> {
   const dose = readDoseEntityId(operation.entityId);
-  if (dose === null) {
+  const directDoseId = readDirectDoseEntityId(operation.entityId);
+  if (dose === null && directDoseId === null) {
     // Nothing can be done with an entry nobody can address. Setting it aside
     // surfaces it rather than retrying it forever.
     return { kind: 'permanent', message: 'This entry could not be sent.' };
@@ -52,16 +53,25 @@ export async function replayMedicationOperation(operation: SyncOperation): Promi
   const notes = readNotes(operation.payload);
 
   try {
-    await apiRequest<MedicationDose>(
-      `/medications/${dose.medicationId}/instances/${dose.doseId}/${operation.operationType}`,
-      {
-        method: 'POST',
-        body: notes === null ? undefined : { notes },
-        idempotencyKey: operation.operationId,
-      },
-    );
+    const path =
+      dose === null
+        ? `/medications/instances/${directDoseId}/${operation.operationType}`
+        : `/medications/${dose.medicationId}/instances/${dose.doseId}/${operation.operationType}`;
+
+    await apiRequest<MedicationDose>(path, {
+      method: 'POST',
+      body: notes === null ? undefined : { notes },
+    });
     return { kind: 'applied' };
   } catch (error) {
     return classify(error);
   }
+}
+
+/** A notification action addresses a dose directly, without medical context. */
+function readDirectDoseEntityId(entityId: string): string | null {
+  const value = entityId.trim();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    ? value
+    : null;
 }

@@ -37,6 +37,8 @@ type PushMessage struct {
 	// medical, and nothing that grants access — the destination is authorized
 	// again when it loads (plans/phase11.md §§31, 58).
 	Data map[string]string
+	// CategoryID attaches the mobile app's registered notification actions.
+	CategoryID string
 }
 
 // PushOutcome is what happened to one message.
@@ -138,6 +140,8 @@ type expoRequest struct {
 	// maintenance window, which for a dose that is due in fifteen minutes is
 	// the difference between useful and pointless.
 	Priority string `json:"priority"`
+	// CategoryID is Expo's wire name for an actionable notification category.
+	CategoryID string `json:"categoryId,omitempty"`
 }
 
 // expoResponse is Expo's reply: one ticket per message, in order.
@@ -167,12 +171,13 @@ func (s *ExpoSender) Send(ctx context.Context, messages []PushMessage) ([]PushOu
 	payload := make([]expoRequest, 0, len(messages))
 	for _, message := range messages {
 		payload = append(payload, expoRequest{
-			To:       message.Token,
-			Title:    message.Title,
-			Body:     message.Body,
-			Data:     message.Data,
-			Sound:    "default",
-			Priority: "high",
+			To:         message.Token,
+			Title:      message.Title,
+			Body:       message.Body,
+			Data:       message.Data,
+			Sound:      "default",
+			Priority:   "high",
+			CategoryID: message.CategoryID,
 		})
 	}
 

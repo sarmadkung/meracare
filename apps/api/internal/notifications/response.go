@@ -4,12 +4,13 @@ import "time"
 
 // PreferencesResponse is the JSON form of one user's settings.
 type PreferencesResponse struct {
-	TaskReminders        bool   `json:"taskReminders"`
-	MedicationReminders  bool   `json:"medicationReminders"`
-	AppointmentReminders bool   `json:"appointmentReminders"`
-	OverdueTaskAlerts    bool   `json:"overdueTaskAlerts"`
-	CareActivity         bool   `json:"careActivity"`
-	UpdatedAt            string `json:"updatedAt"`
+	TaskReminders          bool   `json:"taskReminders"`
+	MedicationReminders    bool   `json:"medicationReminders"`
+	AppointmentReminders   bool   `json:"appointmentReminders"`
+	OverdueTaskAlerts      bool   `json:"overdueTaskAlerts"`
+	MissedMedicationAlerts bool   `json:"missedMedicationAlerts"`
+	CareActivity           bool   `json:"careActivity"`
+	UpdatedAt              string `json:"updatedAt"`
 }
 
 // ToPreferencesResponse converts preferences for the wire.
@@ -24,12 +25,13 @@ func ToPreferencesResponse(preferences Preferences) PreferencesResponse {
 	}
 
 	return PreferencesResponse{
-		TaskReminders:        preferences.TaskReminders,
-		MedicationReminders:  preferences.MedicationReminders,
-		AppointmentReminders: preferences.AppointmentReminders,
-		OverdueTaskAlerts:    preferences.OverdueTaskAlerts,
-		CareActivity:         preferences.CareActivity,
-		UpdatedAt:            updatedAt,
+		TaskReminders:          preferences.TaskReminders,
+		MedicationReminders:    preferences.MedicationReminders,
+		AppointmentReminders:   preferences.AppointmentReminders,
+		OverdueTaskAlerts:      preferences.OverdueTaskAlerts,
+		MissedMedicationAlerts: preferences.MissedMedicationAlerts,
+		CareActivity:           preferences.CareActivity,
+		UpdatedAt:              updatedAt,
 	}
 }
 

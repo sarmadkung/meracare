@@ -21,8 +21,9 @@ const SessionContext = createContext<SessionState>({
 /**
  * Restores the persisted Supabase session at launch and tracks it thereafter.
  *
- * Signing out clears the query cache and client state so no care data outlives
- * the session (docs/09-security-privacy.md).
+ * Signing out clears the query cache and client state. Durable offline data is
+ * drained and removed before Supabase receives the sign-out request; see
+ * prepareForSignOut (docs/09-security-privacy.md).
  */
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);

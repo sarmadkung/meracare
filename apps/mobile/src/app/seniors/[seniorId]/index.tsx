@@ -20,9 +20,10 @@ import { useActivity } from '@/features/activity/use-activity';
 import { useAppointments } from '@/features/appointments/use-appointments';
 import { useCircleMembers } from '@/features/circle/use-circle';
 import { useMedicationDoses } from '@/features/medications/use-medications';
-import { useSenior } from '@/features/seniors/use-seniors';
+import { useRemoveSenior, useSenior } from '@/features/seniors/use-seniors';
 import { useSeniorTasks } from '@/features/tasks/use-tasks';
 import { ApiError } from '@/lib/api-error';
+import { confirmAction, showMessage } from '@/lib/dialogs';
 import { useTheme } from '@/theme';
 
 /**
@@ -87,6 +88,29 @@ export default function SeniorDashboardScreen() {
 
 function Dashboard({ profile }: { profile: Senior }) {
   const theme = useTheme();
+  const removeSenior = useRemoveSenior(profile.id);
+
+  function confirmRemoveProfile() {
+    confirmAction({
+      title: `Remove ${profile.displayName}'s profile?`,
+      message:
+        'If no care has been recorded, this permanently deletes the mistaken profile. Otherwise it archives the profile and removes it from everyone’s list while preserving care history.',
+      confirmLabel: 'Remove profile',
+      onConfirm: () =>
+        removeSenior.mutate(undefined, {
+          onSuccess: (result) => {
+            showMessage({
+              title: result.disposition === 'deleted' ? 'Profile deleted' : 'Profile archived',
+              message:
+                result.disposition === 'deleted'
+                  ? 'The empty profile was permanently deleted.'
+                  : 'The profile was removed from care lists and its history was preserved.',
+              onDismiss: () => router.replace('/home'),
+            });
+          },
+        }),
+    });
+  }
 
   // Everything on this screen is today's, in the senior's own timezone. The
   // queries are declared unconditionally and enabled by permission, because a
@@ -288,6 +312,44 @@ function Dashboard({ profile }: { profile: Senior }) {
         </Card>
       ) : null}
 
+      {can(profile, 'notes.view') ? (
+        <Card>
+          <Text variant="sectionHeading">Care notes</Text>
+          <Text variant="body" color="secondary">
+            Observations shared by the people caring for {profile.displayName}.
+          </Text>
+          <Button
+            variant="secondary"
+            label="View care notes"
+            onPress={() =>
+              router.push({
+                pathname: '/seniors/[seniorId]/notes',
+                params: { seniorId: profile.id },
+              })
+            }
+          />
+        </Card>
+      ) : null}
+
+      {can(profile, 'messages.participate') ? (
+        <Card>
+          <Text variant="sectionHeading">Messages</Text>
+          <Text variant="body" color="secondary">
+            Coordinate privately with this care circle.
+          </Text>
+          <Button
+            variant="secondary"
+            label="Open messages"
+            onPress={() =>
+              router.push({
+                pathname: '/seniors/[seniorId]/messages',
+                params: { seniorId: profile.id },
+              })
+            }
+          />
+        </Card>
+      ) : null}
+
       {can(profile, 'members.view') ? (
         <Card>
           <Text variant="sectionHeading">Care circle</Text>
@@ -328,6 +390,24 @@ function Dashboard({ profile }: { profile: Senior }) {
               })
             }
           />
+        ) : null}
+
+        {!profile.isSelf && can(profile, 'members.manage') ? (
+          <>
+            {removeSenior.isError ? (
+              <Text variant="secondary" color="danger">
+                {removeSenior.error instanceof ApiError
+                  ? removeSenior.error.message
+                  : 'This profile could not be removed.'}
+              </Text>
+            ) : null}
+            <Button
+              variant="danger"
+              label="Remove this profile"
+              loading={removeSenior.isPending}
+              onPress={confirmRemoveProfile}
+            />
+          </>
         ) : null}
       </Card>
     </Screen>

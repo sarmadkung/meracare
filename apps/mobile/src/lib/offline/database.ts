@@ -300,6 +300,15 @@ export async function cachedAppointments(seniorId: string): Promise<Appointment[
   return rows.map((row) => JSON.parse(row.payload) as Appointment);
 }
 
+/** Returns how many care mutations still need attention before local data is erased. */
+export async function queuedOperationCount(): Promise<number> {
+  const database = await openDatabase();
+  const row = await database.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(*) AS count FROM sync_queue`,
+  );
+  return row?.count ?? 0;
+}
+
 /** Clears everything local. Used on sign-out, so care data does not outlive the session. */
 export async function clearOfflineData(): Promise<void> {
   const database = await openDatabase();

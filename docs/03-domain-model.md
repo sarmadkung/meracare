@@ -99,6 +99,11 @@ Statuses:
 -   created_at
 -   updated_at
 
+A medication entered by mistake may be permanently deleted only while it has
+no `taken` or `skipped` instance. The medication, schedules, pending instances,
+and creation activity are removed together. Once any dose outcome exists, the
+medication is stopped (`active = false`) so its clinical history remains.
+
 ### MedicationSchedule
 
 -   id
@@ -141,6 +146,10 @@ A scheduled medication occurrence.
 -   created_at
 -   updated_at
 
+Care notes are senior-scoped. A member with `notes.create` may add a note and a
+member with `notes.view` may read it. Only the original author may edit a note;
+the author must still be an active member with the required permission.
+
 ### CareEvent
 
 Immutable event describing meaningful activity.
@@ -179,9 +188,23 @@ Examples:
 
 ### Conversation / Message
 
-Reserved for care-circle chat.
+The MVP has one conversation stream per senior/care circle rather than a
+separate conversation record.
 
-The MVP can scope conversations to one senior/care circle.
+-   Message
+    -   id
+    -   senior_id
+    -   sender_user_id
+    -   content
+    -   created_at
+-   MessageReadState
+    -   senior_id
+    -   user_id
+    -   last_read_message_id
+    -   last_read_at
+
+Members need `messages.participate` to read, send, or advance their own read
+state. Read state is a monotonic high-water mark and never moves backward.
 
 ## Data Relationships
 
@@ -193,6 +216,8 @@ User
                               ├──< Medication
                               ├──< Appointment
                               ├──< CareNote
+                              ├──< Message
+                              ├──< MessageReadState
                               └──< CareEvent
 ```
 

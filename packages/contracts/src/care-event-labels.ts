@@ -139,7 +139,9 @@ export function careEventDescription(
     case 'MEMBER_JOINED':
       return `${subject} joined the care circle`;
     case 'MEMBER_REVOKED':
-      return `${actorName} removed ${subject} from the care circle`;
+      return actorName === subject
+        ? `${subject} left the care circle`
+        : `${actorName} removed ${subject} from the care circle`;
 
     case 'NOTE_ADDED':
       return `${actorName} added ${subject}`;

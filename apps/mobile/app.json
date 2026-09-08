@@ -10,13 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.genxcare.mobile",
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "app.genxcare.mobile"
     },
     "android": {
       "package": "app.genxcare.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#CCFBF1",
+        "backgroundColor": "#0F766E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -36,7 +35,7 @@
         {
           "backgroundColor": "#0F766E",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 160
         }
       ],
       "expo-sqlite"

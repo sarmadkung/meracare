@@ -90,7 +90,8 @@ export default function NotificationSettingsScreen() {
       <View style={{ gap: theme.spacing.sm }}>
         <Text variant="pageHeading">Notifications</Text>
         <Text variant="body" color="secondary">
-          GenXcare reminds you shortly before care is due. Reminders never say what the medicine is.
+          GenXcare reminds you before care is due and can alert you when care remains unrecorded.
+          Notifications never say what the medicine is.
         </Text>
       </View>
 
@@ -123,8 +124,8 @@ export default function NotificationSettingsScreen() {
       <Card>
         <Text variant="sectionHeading">About reminders</Text>
         <Text variant="body" color="secondary">
-          Reminders are scheduled on this device, so they arrive even without a connection. Open
-          GenXcare now and then so it can keep them up to date.
+          Upcoming reminders are scheduled on this device, so they arrive without a connection.
+          Missed-dose and care-activity alerts come from GenXcare and need a connection.
         </Text>
       </Card>
     </Screen>

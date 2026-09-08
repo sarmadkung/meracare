@@ -45,6 +45,8 @@ type SubRoutes struct {
 	Medications  chi.Router
 	Appointments chi.Router
 	Activity     chi.Router
+	Notes        chi.Router
+	Messages     chi.Router
 }
 
 // Routes mounts the senior endpoints. The caller applies authentication; each
@@ -58,6 +60,7 @@ func (h *Handler) Routes(sub SubRoutes) chi.Router {
 	router.Route("/{"+authz.SeniorIDParam+"}", func(senior chi.Router) {
 		senior.With(h.guard.RequirePermission(care.PermissionSeniorView)).Get("/", h.get)
 		senior.With(h.guard.RequirePermission(care.PermissionSeniorEdit)).Patch("/", h.update)
+		senior.With(h.guard.RequirePermission(care.PermissionMembersManage)).Delete("/", h.remove)
 
 		if sub.Members != nil {
 			senior.Mount("/members", sub.Members)
@@ -76,6 +79,12 @@ func (h *Handler) Routes(sub SubRoutes) chi.Router {
 		}
 		if sub.Activity != nil {
 			senior.Mount("/activity", sub.Activity)
+		}
+		if sub.Notes != nil {
+			senior.Mount("/notes", sub.Notes)
+		}
+		if sub.Messages != nil {
+			senior.Mount("/messages", sub.Messages)
 		}
 	})
 
@@ -180,6 +189,18 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, r, http.StatusOK, ToResponse(senior, relationship))
 }
 
+func (h *Handler) remove(w http.ResponseWriter, r *http.Request) {
+	relationship := authz.MustRelationship(r.Context())
+	disposition, err := h.service.Remove(
+		r.Context(), relationship.SeniorID, relationship.UserID,
+	)
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+	httpx.WriteJSON(w, r, http.StatusOK, map[string]string{"disposition": string(disposition)})
+}
+
 // updateRequest is the `PATCH /v1/seniors/{id}` body. Absent fields are
 // unchanged; an explicit null clears an optional field.
 type updateRequest struct {
@@ -245,6 +266,11 @@ func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) writeError(w http.ResponseWriter, r *http.Request, err error) {
+	if errors.Is(err, ErrSelfProfileRemoval) {
+		httpx.WriteError(w, r, httpx.ErrForbidden(
+			"Your own senior profile is managed through your account, not this client-removal action."))
+		return
+	}
 	if errors.Is(err, ErrNotFound) {
 		httpx.WriteError(w, r, httpx.ErrNotFound("That senior does not exist, or you do not have access."))
 		return

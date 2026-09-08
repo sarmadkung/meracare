@@ -187,6 +187,14 @@ func (s *Service) List(ctx context.Context, seniorID uuid.UUID) ([]Medication, e
 	return s.medications.ListMedications(ctx, seniorID)
 }
 
+// DeleteMistaken permanently removes an entry only before a taken or skipped
+// dose exists. The event and medication delete atomically.
+func (s *Service) DeleteMistaken(ctx context.Context, medicationID uuid.UUID) error {
+	return s.events.InTransaction(ctx, func(tx pgx.Tx, _ *careevents.Repository) error {
+		return s.medications.WithTx(tx).DeleteMistakenMedication(ctx, medicationID)
+	})
+}
+
 // GetSchedule loads one schedule. The handler checks that it belongs to the
 // medication the caller was authorized for.
 func (s *Service) GetSchedule(ctx context.Context, scheduleID uuid.UUID) (Schedule, error) {

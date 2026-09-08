@@ -15,11 +15,13 @@ import { Button, Card, Screen, Text } from '@/components/ui';
 import { useCircleMembers } from '@/features/circle/use-circle';
 import {
   useMedication,
+  useDeleteMedication,
   useMedicationHistory,
   useUpdateMedication,
 } from '@/features/medications/use-medications';
 import { useSenior } from '@/features/seniors/use-seniors';
 import { ApiError } from '@/lib/api-error';
+import { confirmAction } from '@/lib/dialogs';
 import { useTheme } from '@/theme';
 
 /**
@@ -40,6 +42,7 @@ export default function MedicationDetailScreen() {
   const members = useCircleMembers(seniorId);
   const history = useMedicationHistory(medicationId ?? null);
   const update = useUpdateMedication(seniorId ?? '');
+  const deleteMedication = useDeleteMedication(seniorId ?? '');
 
   if (medication.isPending) {
     return (
@@ -76,6 +79,19 @@ export default function MedicationDetailScreen() {
     members.data?.find((member) => member.userId === userId)?.displayName ?? 'Somebody';
 
   const doses = history.data?.pages.flatMap((page) => page.items) ?? [];
+
+  function confirmDelete() {
+    confirmAction({
+      title: 'Delete mistaken medication?',
+      message:
+        'This permanently removes the medication and its unrecorded doses. If anyone has taken or skipped a dose, GenXcare will keep the history and ask you to stop it instead.',
+      confirmLabel: 'Delete',
+      onConfirm: () =>
+        deleteMedication.mutate(detail.id, {
+          onSuccess: () => router.back(),
+        }),
+    });
+  }
 
   return (
     <Screen scrollable>
@@ -154,6 +170,14 @@ export default function MedicationDetailScreen() {
         </Text>
       ) : null}
 
+      {deleteMedication.isError ? (
+        <Text variant="secondary" color="danger">
+          {deleteMedication.error instanceof ApiError
+            ? deleteMedication.error.message
+            : 'This medication could not be deleted. Please try again.'}
+        </Text>
+      ) : null}
+
       {canManage ? (
         <Button
           variant="secondary"
@@ -182,6 +206,15 @@ export default function MedicationDetailScreen() {
           label="Start taking it again"
           loading={update.isPending}
           onPress={() => update.mutate({ medicationId: detail.id, active: true })}
+        />
+      ) : null}
+
+      {canManage ? (
+        <Button
+          variant="danger"
+          label="Delete mistaken medication"
+          loading={deleteMedication.isPending}
+          onPress={confirmDelete}
         />
       ) : null}
     </Screen>

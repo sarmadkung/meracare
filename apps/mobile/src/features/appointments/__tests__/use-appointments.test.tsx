@@ -384,22 +384,6 @@ describe('useCancelAppointment', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(statusInList(queryClient)).toBe('scheduled');
   });
-
-  // The operation id is the idempotency key, so a request that reached the
-  // server before the connection dropped is recognised on retry.
-  it('sends an idempotency key with every attempt', async () => {
-    const { wrapper } = setup();
-    mockApiRequest.mockResolvedValue(appointment({ status: 'cancelled' }));
-
-    const { result } = renderHook(() => useCancelAppointment('senior-1'), { wrapper });
-    result.current.mutate({ appointmentId: 'appointment-1' });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    const [path, options] = mockApiRequest.mock.calls[0] as [string, { idempotencyKey?: string }];
-    expect(path).toBe('/appointments/appointment-1/cancel');
-    expect(options.idempotencyKey).toBeTruthy();
-  });
 });
 
 describe('useCompleteAppointment', () => {

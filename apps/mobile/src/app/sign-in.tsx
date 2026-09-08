@@ -1,8 +1,8 @@
-import { Redirect } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Button, Card, GoogleButton, Screen, Text, TextField } from '@/components/ui';
+import { AppleButton, Button, Card, GoogleButton, Screen, Text, TextField } from '@/components/ui';
 import { useSession } from '@/features/auth/session-provider';
 import { useAuthActions } from '@/features/auth/use-auth-actions';
 import { useTheme } from '@/theme';
@@ -18,8 +18,20 @@ import { useTheme } from '@/theme';
 export default function SignInScreen() {
   const theme = useTheme();
   const { isSignedIn } = useSession();
-  const { signIn, signUp, signInWithGoogle, pending, isSubmitting, error, clearError } =
-    useAuthActions();
+  // Set when sign-in was reached from somewhere that wants the person back
+  // afterwards — an invitation, most of all, which is otherwise lost the moment
+  // they leave it to create an account.
+  const { next } = useLocalSearchParams<{ next?: string }>();
+  const {
+    signIn,
+    signUp,
+    signInWithApple,
+    signInWithGoogle,
+    pending,
+    isSubmitting,
+    error,
+    clearError,
+  } = useAuthActions();
 
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
   const [email, setEmail] = useState('');
@@ -27,7 +39,7 @@ export default function SignInScreen() {
   const [notice, setNotice] = useState<string | null>(null);
 
   if (isSignedIn) {
-    return <Redirect href="/home" />;
+    return <Redirect href={destinationAfterSignIn(next)} />;
   }
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
@@ -35,6 +47,11 @@ export default function SignInScreen() {
   async function handleGoogle() {
     setNotice(null);
     await signInWithGoogle();
+  }
+
+  async function handleApple() {
+    setNotice(null);
+    await signInWithApple();
   }
 
   async function handleSubmit() {
@@ -115,6 +132,13 @@ export default function SignInScreen() {
           onPress={switchMode}
           disabled={isSubmitting}
         />
+
+        <Button
+          variant="ghost"
+          label="Have an invitation code?"
+          onPress={() => router.push('/invitations/join')}
+          disabled={isSubmitting}
+        />
       </Card>
 
       <View style={{ gap: theme.spacing.md }}>
@@ -127,7 +151,20 @@ export default function SignInScreen() {
           loading={pending === 'google'}
           disabled={isSubmitting}
         />
+        <AppleButton onPress={handleApple} loading={pending === 'apple'} disabled={isSubmitting} />
       </View>
     </Screen>
   );
+}
+
+/**
+ * Where to land once a session exists.
+ *
+ * Only an in-app path is honoured. `next` arrives from the URL, so anything
+ * carrying a scheme or host is refused rather than followed — signing in must
+ * not be a way to send somebody somewhere else.
+ */
+function destinationAfterSignIn(next: string | undefined) {
+  const safe = next !== undefined && next.startsWith('/') && !next.startsWith('//');
+  return (safe ? next : '/home') as Parameters<typeof Redirect>[0]['href'];
 }

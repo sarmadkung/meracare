@@ -80,6 +80,8 @@ export interface NotificationPreferences {
   appointmentReminders: boolean;
   /** Phase 11: a task whose time has passed with nothing recorded. */
   overdueTaskAlerts: boolean;
+  /** A dose still unrecorded after its two-hour window. */
+  missedMedicationAlerts: boolean;
   /** Phase 11: something somebody else did. */
   careActivity: boolean;
   updatedAt: string;
@@ -119,6 +121,11 @@ export const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
     key: 'overdueTaskAlerts',
     label: 'Overdue task alerts',
     description: 'A nudge when a care task has passed its time with nothing recorded.',
+  },
+  {
+    key: 'missedMedicationAlerts',
+    label: 'Missed medication alerts',
+    description: 'Alert me when a dose is still unrecorded after two hours.',
   },
   {
     key: 'careActivity',
@@ -161,7 +168,7 @@ export interface RegisteredDevice {
  * The kinds of notification GenXcare delivers and keeps.
  *
  * A superset of `REMINDER_TYPES`: the three a device can schedule for itself,
- * plus the two only a server can know about. Mirrors
+ * plus the categories only a server can know about. Mirrors
  * `internal/notifications.Types` and the CHECK constraint on
  * `notifications.notification_type` (plans/phase11.md §5).
  */
@@ -170,6 +177,7 @@ export const NOTIFICATION_TYPES = [
   'APPOINTMENT_REMINDER',
   'TASK_REMINDER',
   'TASK_OVERDUE',
+  'MEDICATION_MISSED',
   'CARE_ACTIVITY',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

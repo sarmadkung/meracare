@@ -111,6 +111,30 @@ func TestListMembers(t *testing.T) {
 	}
 }
 
+func TestCaregiverCanLeaveOnlyWhenAnotherManagerRemains(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	owner := f.newUser(t, "leave-owner@example.com")
+	circle := f.newCircle(t, owner, "Mrs Khan")
+
+	if _, err := f.members.Revoke(ctx, circle.Senior.ID, circle.Relationship.ID, owner.UserID); !errors.Is(err, members.ErrCannotRemoveSelf) {
+		t.Fatalf("self revoke error = %v", err)
+	}
+	if _, err := f.members.Leave(ctx, circle.Relationship); !errors.Is(err, members.ErrLastCoordinator) {
+		t.Fatalf("last coordinator leave error = %v", err)
+	}
+
+	replacementUser := f.newUser(t, "replacement-manager@example.com")
+	f.addMember(t, circle.Senior.ID, replacementUser, care.RoleFamilyMember, care.PermissionMembersManage)
+	left, err := f.members.Leave(ctx, circle.Relationship)
+	if err != nil {
+		t.Fatalf("Leave: %v", err)
+	}
+	if left.Status != care.StatusRevoked {
+		t.Fatalf("status = %q", left.Status)
+	}
+}
+
 // --- 13. Multiple family members --------------------------------------------
 
 func TestMultipleFamilyMembersInOneCircle(t *testing.T) {

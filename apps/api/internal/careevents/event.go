@@ -49,7 +49,7 @@ const (
 	TypeMedicationCreated Type = "MEDICATION_CREATED"
 	TypeMedicationTaken   Type = "MEDICATION_TAKEN"
 	TypeMedicationSkipped Type = "MEDICATION_SKIPPED"
-	// TypeMedicationMissed is documented but not yet emitted.
+	// TypeMedicationMissed is documented but not emitted as a care event.
 	TypeMedicationMissed Type = "MEDICATION_MISSED"
 
 	// Appointments.
@@ -57,7 +57,7 @@ const (
 	TypeAppointmentCompleted Type = "APPOINTMENT_COMPLETED"
 	TypeAppointmentCancelled Type = "APPOINTMENT_CANCELLED"
 
-	// Notes. Documented in docs/03; the notes domain itself is a later phase.
+	// Notes.
 	TypeNoteAdded Type = "NOTE_ADDED"
 )
 
@@ -82,16 +82,13 @@ func (t Type) Valid() bool { return slices.Contains(Types, t) }
 //   - TASK_MISSED and MEDICATION_MISSED are derived from the clock rather than
 //     performed by a person. Nothing writes "missed" anywhere in the system —
 //     it is computed at read time precisely so that no background sweep has to
-//     be alive for the data to be true (plans/phase4.md §8, plans/phase5.md §8).
-//     Emitting them would mean inventing the sweep those phases refused. They
-//     belong to Phase 8, where a notification is the thing that actually
-//     happens and has a time.
-//   - NOTE_ADDED has no domain to be emitted from yet. Care notes are a later
-//     phase; the name is reserved so that phase does not invent a second one.
+//     be alive for the care data to be true. MEDICATION_MISSED can be emitted
+//     independently as a notification decision after the medication domain
+//     derives it, but it is still never fabricated as a timeline event.
 //
 // A test pins that none of these is produced, so "not yet" cannot quietly
 // become "never noticed".
-var NotYetEmitted = []Type{TypeTaskMissed, TypeMedicationMissed, TypeNoteAdded}
+var NotYetEmitted = []Type{TypeTaskMissed, TypeMedicationMissed}
 
 // EntityType names the kind of thing an event is about, so a client can route
 // to the right screen without parsing the event type.

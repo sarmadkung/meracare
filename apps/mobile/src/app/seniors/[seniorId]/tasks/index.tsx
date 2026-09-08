@@ -4,7 +4,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';
 
-import { Button, Card, Screen, TaskCard, Text } from '@/components/ui';
+import { Button, Card, Illustration, Screen, TaskCard, Text } from '@/components/ui';
 import { useSenior } from '@/features/seniors/use-seniors';
 import { useCompleteTask, useSeniorTasks, useSkipTask } from '@/features/tasks/use-tasks';
 import { ApiError } from '@/lib/api-error';
@@ -137,6 +137,7 @@ export default function SeniorTasksScreen() {
             </Card>
           ) : (
             <Card>
+              <Illustration name="allCaughtUp" height={140} />
               <Text variant="sectionHeading">{emptyHeading(scope)}</Text>
               <Text variant="body" color="secondary">
                 {emptyBody(scope)}

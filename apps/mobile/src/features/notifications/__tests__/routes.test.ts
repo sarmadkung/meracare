@@ -94,6 +94,22 @@ it('routes an overdue task to the task itself', () => {
   ).toEqual({ pathname: '/tasks/[taskId]', params: { taskId: 'task-9' } });
 });
 
+it('routes a missed-dose escalation to today’s medication', () => {
+  const pushed = readPushPayload({
+    notificationId: 'notification-2',
+    type: 'MEDICATION_MISSED',
+    seniorId: 'senior-1',
+    entityType: 'medication_dose',
+    entityId: 'dose-2',
+  });
+
+  expect(pushed).not.toBeNull();
+  expect(notificationDestination(pushed!)).toEqual({
+    pathname: '/seniors/[seniorId]/medications',
+    params: { seniorId: 'senior-1' },
+  });
+});
+
 describe('readPushPayload', () => {
   const valid = {
     notificationId: 'notification-1',
