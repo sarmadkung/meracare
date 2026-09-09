@@ -4,6 +4,7 @@
 //	go run ./cmd/seed                       seed the database in DATABASE_URL
 //	go run ./cmd/seed -dry-run              print what would be written
 //	go run ./cmd/seed -confirm-not-local    required when the target is hosted
+//	go run ./cmd/seed -mailbox you@x.com    address the personas at one inbox
 //
 // It replaces its own previous run and nothing else: every row it writes
 // carries a derived identifier, and the clean-up step deletes only those.
@@ -35,6 +36,7 @@ func main() {
 func run() error {
 	var (
 		domain   = flag.String("domain", "example.com", "email domain for the seeded accounts")
+		mailbox  = flag.String("mailbox", "", "one real address to plus-address every persona at, e.g. you@gmail.com")
 		password = flag.String("password", "MeraCare-Seed-2026!", "password every seeded account shares")
 		anonKey  = flag.String("anon-key", "", "Supabase anon key (defaults to the mobile app's)")
 		confirm  = flag.Bool("confirm-not-local", false, "seed a database that is not local")
@@ -59,7 +61,15 @@ func run() error {
 
 	permitted := seed.Allow(cfg.DatabaseURL, cfg.Env, *confirm)
 
-	plan := seed.NewPlan(*domain)
+	// Supabase creates an account only at a domain that accepts mail, so the
+	// readable default is refused by every hosted project. A real mailbox is
+	// how four personas exist without four inboxes.
+	address := *domain
+	if strings.TrimSpace(*mailbox) != "" {
+		address = *mailbox
+	}
+
+	plan := seed.NewPlan(address)
 	data, err := seed.Build(plan, time.Now())
 	if err != nil {
 		return err

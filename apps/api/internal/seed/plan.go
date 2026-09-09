@@ -3,6 +3,7 @@ package seed
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/meracare/api/internal/care"
 )
@@ -74,9 +75,19 @@ type Plan struct {
 	Circles  []Circle
 }
 
-// NewPlan builds the standard cast, addressed at one email domain.
-func NewPlan(domain string) Plan {
-	at := func(local string) string { return local + "@" + domain }
+// NewPlan builds the standard cast, addressed either at a domain or at one
+// real mailbox.
+//
+// A domain — "example.com" — gives each persona their own address there. That
+// is the readable form, and it is what the tests use, but Supabase creates an
+// account only at a domain that accepts mail: example.com publishes a null MX
+// and is refused, as is any domain this project does not actually own.
+//
+// A full address — "you@gmail.com" — plus-addresses instead, so the four
+// personas become you+zahra, you+sana, you+bilal and you+fatima. Supabase sees
+// four distinct accounts; the person confirming them has one inbox.
+func NewPlan(address string) Plan {
+	at := func(local string) string { return addressed(address, local) }
 
 	personas := []Persona{
 		{Key: "solo", Name: "Zahra Iqbal", Email: at("zahra"), SignsIn: true},
@@ -285,4 +296,19 @@ func (p Plan) Validate() error {
 	}
 
 	return nil
+}
+
+// addressed places one persona at the given domain or mailbox.
+//
+// A local part is what separates the two: "gmail.com" is a domain and
+// "you@gmail.com" is a mailbox. "@gmail.com" is a domain written oddly — it
+// carries no local part to tag, and "+zahra@gmail.com" would be an address
+// nobody can receive.
+func addressed(address, local string) string {
+	mailbox, domain, isMailbox := strings.Cut(address, "@")
+	if !isMailbox || mailbox == "" {
+		return local + "@" + strings.TrimPrefix(address, "@")
+	}
+
+	return mailbox + "+" + local + "@" + domain
 }
