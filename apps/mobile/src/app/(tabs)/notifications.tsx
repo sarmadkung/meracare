@@ -1,6 +1,6 @@
 import type { Notification } from '@meracare/contracts';
 import { dateKeyInTimezone, dayHeading } from '@meracare/contracts';
-import { Redirect, Stack, router } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, SectionList, View } from 'react-native';
 
@@ -30,7 +30,7 @@ import { useTheme } from '@/theme';
  */
 export default function NotificationsScreen() {
   const theme = useTheme();
-  const { isSignedIn, isRestoring } = useSession();
+  const { isSignedIn } = useSession();
 
   const inbox = useNotificationInbox(isSignedIn);
   const markRead = useMarkNotificationRead();
@@ -45,10 +45,6 @@ export default function NotificationsScreen() {
   const unread = inbox.data?.pages[0]?.unreadCount ?? 0;
 
   const sections = useMemo(() => groupByDay(notifications, timezone), [notifications, timezone]);
-
-  if (!isRestoring && !isSignedIn) {
-    return <Redirect href="/sign-in" />;
-  }
 
   function open(notification: Notification) {
     // Marked read as it is opened rather than after the destination loads: the

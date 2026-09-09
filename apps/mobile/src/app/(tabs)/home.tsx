@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import type { Href } from 'expo-router';
-import { Redirect, Stack, router } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -43,7 +43,7 @@ import { useTheme } from '@/theme';
 export default function HomeScreen() {
   const theme = useTheme();
   const queryClient = useQueryClient();
-  const { isSignedIn, isRestoring } = useSession();
+  const { isSignedIn } = useSession();
 
   const today = useToday(isSignedIn);
   const seniors = useSeniors(isSignedIn);
@@ -71,10 +71,6 @@ export default function HomeScreen() {
 
     return buildAgenda(items, { now: new Date(), namePeople: chosen === null });
   }, [today.data, chosen]);
-
-  if (!isRestoring && !isSignedIn) {
-    return <Redirect href="/sign-in" />;
-  }
 
   const slipped = attention(entries);
 

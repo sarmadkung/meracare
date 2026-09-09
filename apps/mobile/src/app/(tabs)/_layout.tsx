@@ -1,3 +1,4 @@
+import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import type { ColorValue } from 'react-native';
 
@@ -19,11 +20,16 @@ import { useTheme } from '@/theme';
  */
 export default function TabsLayout() {
   const theme = useTheme();
-  const { isSignedIn } = useSession();
+  const { isSignedIn, isRestoring } = useSession();
 
   // Read off the inbox itself, so the badge and the list cannot disagree
   // (plans/phase11.md §61).
   const unread = useUnreadCount(isSignedIn);
+
+  // Signing out happens on Settings, which had no guard of its own and so left
+  // a signed-out person looking at their own settings. One guard on the layout
+  // every tab shares beats four screens each remembering to have one.
+  if (!isRestoring && !isSignedIn) return <Redirect href="/sign-in" />;
 
   return (
     <Tabs
