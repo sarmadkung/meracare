@@ -5,6 +5,7 @@
 //	go run ./cmd/seed -dry-run              print what would be written
 //	go run ./cmd/seed -confirm-not-local    required when the target is hosted
 //	go run ./cmd/seed -mailbox you@x.com    address the personas at one inbox
+//	go run ./cmd/seed -me you@x.com         sign in as one of them yourself
 //
 // It replaces its own previous run and nothing else: every row it writes
 // carries a derived identifier, and the clean-up step deletes only those.
@@ -35,12 +36,15 @@ func main() {
 
 func run() error {
 	var (
-		domain   = flag.String("domain", "example.com", "email domain for the seeded accounts")
-		mailbox  = flag.String("mailbox", "", "one real address to plus-address every persona at, e.g. you@gmail.com")
-		password = flag.String("password", "MeraCare-Seed-2026!", "password every seeded account shares")
-		anonKey  = flag.String("anon-key", "", "Supabase anon key (defaults to the mobile app's)")
-		confirm  = flag.Bool("confirm-not-local", false, "seed a database that is not local")
-		dryRun   = flag.Bool("dry-run", false, "print what would be written and stop")
+		domain    = flag.String("domain", "example.com", "email domain for the seeded accounts")
+		mailbox   = flag.String("mailbox", "", "one real address to plus-address every persona at, e.g. you@gmail.com")
+		me        = flag.String("me", "", "your own address, to sign in as one of the personas yourself")
+		asPersona = flag.String("me-persona", "son", "which persona -me becomes: solo, daughter, son or nurse")
+		myName    = flag.String("me-name", "", "your own name, shown wherever the persona's was")
+		password  = flag.String("password", "MeraCare-Seed-2026!", "password every seeded account shares")
+		anonKey   = flag.String("anon-key", "", "Supabase anon key (defaults to the mobile app's)")
+		confirm   = flag.Bool("confirm-not-local", false, "seed a database that is not local")
+		dryRun    = flag.Bool("dry-run", false, "print what would be written and stop")
 	)
 	flag.Parse()
 
@@ -70,6 +74,13 @@ func run() error {
 	}
 
 	plan := seed.NewPlan(address)
+
+	if trimmed := strings.TrimSpace(*me); trimmed != "" {
+		plan, err = plan.SignInAs(*asPersona, trimmed, strings.TrimSpace(*myName))
+		if err != nil {
+			return err
+		}
+	}
 	data, err := seed.Build(plan, time.Now())
 	if err != nil {
 		return err

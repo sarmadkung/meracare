@@ -312,3 +312,74 @@ func addressed(address, local string) string {
 
 	return mailbox + "+" + local + "@" + domain
 }
+
+// SignInAs puts a real account behind one persona.
+//
+// The cast is fiction, but the account signing in as one of them need not be:
+// pointing a persona at an address you hold is how the app opens with a week of
+// care already behind it, rather than as somebody who joined a moment ago.
+//
+// A name, when given, travels with the account — a screen that greets you as
+// somebody else is worse than one that greets you as nobody. Empty keeps the
+// persona's own name, for taking the account without taking the identity.
+//
+// The plan is copied rather than edited. It is passed by value and read more
+// than once, and a slice shared with the plan it came from would rewrite that
+// one too.
+func (p Plan) SignInAs(personaKey, email, name string) (Plan, error) {
+	found := -1
+	for i, persona := range p.Personas {
+		if persona.Key == personaKey {
+			found = i
+			continue
+		}
+		// Two personas at one address is one account holding both sets of
+		// memberships, which silently merges circles that are meant to be
+		// separate views of the app.
+		if strings.EqualFold(persona.Email, email) {
+			return Plan{}, fmt.Errorf("seed: %s already signs in as %s", persona.Key, email)
+		}
+	}
+
+	if found < 0 {
+		return Plan{}, fmt.Errorf("seed: no persona %q; try one of solo, daughter, son, nurse", personaKey)
+	}
+	if !p.Personas[found].SignsIn {
+		return Plan{}, fmt.Errorf("seed: %s has no account to sign in with", personaKey)
+	}
+
+	personas := slices.Clone(p.Personas)
+	personas[found].Email = email
+	p.Personas = personas
+
+	if name == "" {
+		return p, nil
+	}
+
+	was := personas[found].Name
+	personas[found].Name = name
+	p.Circles = renamed(p.Circles, personaKey, was, name)
+
+	return p, nil
+}
+
+// renamed carries a persona's new name into the circles that speak it.
+//
+// Two places do: the circle that *is* them, which would otherwise put a
+// stranger in their own person strip, and the emergency contact line wherever
+// they are somebody's next of kin — a record naming a person the app no longer
+// holds reads as a bug, because it is one.
+func renamed(circles []Circle, personaKey, was, now string) []Circle {
+	updated := slices.Clone(circles)
+
+	for i, circle := range updated {
+		if circle.SelfKey == personaKey {
+			updated[i].Name = now
+		}
+		if was != "" && strings.Contains(circle.Emergency, was) {
+			updated[i].Emergency = strings.ReplaceAll(circle.Emergency, was, now)
+		}
+	}
+
+	return updated
+}
