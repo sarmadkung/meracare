@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Scheduler is the one background process MeraCare runs.
+// Scheduler is the one background process GenXcare runs.
 //
 // It does three things on a fixed tick — decide which notifications should
 // exist, deliver the ones that are due, and forget the ones that are old — and

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/meracare/api/internal/config"
+	"github.com/genxcare/api/internal/config"
 )
 
 // Tests read apps/api/.env, the same file the API itself reads.

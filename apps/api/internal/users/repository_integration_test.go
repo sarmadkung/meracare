@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/testsupport"
-	"github.com/meracare/api/internal/users"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/testsupport"
+	"github.com/genxcare/api/internal/users"
 )
 
 // These tests exercise real SQL. They are skipped unless TEST_DATABASE_URL is

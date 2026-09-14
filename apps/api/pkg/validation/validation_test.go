@@ -3,7 +3,7 @@ package validation_test
 import (
 	"testing"
 
-	"github.com/meracare/api/pkg/validation"
+	"github.com/genxcare/api/pkg/validation"
 )
 
 func TestErrorsAddKeepsFirstMessage(t *testing.T) {

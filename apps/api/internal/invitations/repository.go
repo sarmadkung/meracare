@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/database"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/database"
 )
 
 // ErrNotFound is returned when no invitation matches the lookup.

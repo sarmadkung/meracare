@@ -1,4 +1,4 @@
-import type { SeniorSummaryListResponse } from '@meracare/contracts';
+import type { SeniorSummaryListResponse } from '@genxcare/contracts';
 import { useQuery } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';

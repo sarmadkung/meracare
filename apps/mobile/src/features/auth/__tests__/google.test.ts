@@ -17,11 +17,11 @@ jest.mock('@/lib/supabase', () => ({
 jest.mock('expo-web-browser', () => ({ openAuthSessionAsync: jest.fn() }));
 
 // `createURL` reads the Expo manifest, which does not exist under Jest. The
-// scheme it would produce is `meracare` (app.json), so it is stubbed; `parse`
+// scheme it would produce is `genxcare` (app.json), so it is stubbed; `parse`
 // stays real, because reading the callback back is what these tests check.
 jest.mock('expo-linking', () => ({
   ...jest.requireActual('expo-linking'),
-  createURL: (path: string) => `meracare://${path.replace(/^\//, '')}`,
+  createURL: (path: string) => `genxcare://${path.replace(/^\//, '')}`,
 }));
 
 const signInWithOAuth = supabase.auth.signInWithOAuth as jest.Mock;

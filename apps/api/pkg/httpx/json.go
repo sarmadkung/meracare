@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // maxRequestBody caps decoded request bodies. MVP payloads are small forms and

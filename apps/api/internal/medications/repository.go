@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/paging"
-	"github.com/meracare/api/internal/recurrence"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/paging"
+	"github.com/genxcare/api/internal/recurrence"
 )
 
 // ErrNotFound is returned when no medication, schedule or dose matches.

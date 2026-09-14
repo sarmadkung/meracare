@@ -1,5 +1,5 @@
-import type { CarePermission, InvitableRole } from '@meracare/contracts';
-import { permissionLabelsByGroup, roleLabel } from '@meracare/contracts';
+import type { CarePermission, InvitableRole } from '@genxcare/contracts';
+import { permissionLabelsByGroup, roleLabel } from '@genxcare/contracts';
 import * as Linking from 'expo-linking';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -200,14 +200,14 @@ function InvitationSent({
 }) {
   const theme = useTheme();
 
-  // Resolves to meracare://invitations/<code> in a build and to the exp://
+  // Resolves to genxcare://invitations/<code> in a build and to the exp://
   // equivalent under Expo Go, so the link works wherever this is running.
   const link = Linking.createURL(`/invitations/${token}`);
 
   async function handleShare() {
     await Share.share({
       message: [
-        `You have been invited to help with ${seniorName}'s care on MeraCare.`,
+        `You have been invited to help with ${seniorName}'s care on GenXcare.`,
         '',
         'Your invitation code:',
         formatInvitationCode(token),

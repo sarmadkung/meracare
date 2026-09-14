@@ -5,7 +5,7 @@ import {
   statusLabel,
   taskDateLabel,
   taskTimeLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 

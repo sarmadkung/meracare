@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/seed"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/seed"
 )
 
 /*
@@ -16,7 +16,7 @@ survivable: what it is allowed to point at, and what it says when it refuses.
 const hosted = "postgresql://u:p@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
 
 func TestAllowsALocalDatabaseWithoutCeremony(t *testing.T) {
-	if err := seed.Allow("postgresql://meracare:meracare@localhost:55432/meracare", config.EnvDevelopment, false); err != nil {
+	if err := seed.Allow("postgresql://genxcare:genxcare@localhost:55432/genxcare", config.EnvDevelopment, false); err != nil {
 		t.Fatalf("a local database should need no confirmation: %v", err)
 	}
 }
@@ -44,7 +44,7 @@ func TestRefusesProductionEvenWhenConfirmed(t *testing.T) {
 	if err := seed.Allow(hosted, config.EnvProduction, true); err == nil {
 		t.Fatal("production should be refused whatever the caller confirms")
 	}
-	if err := seed.Allow("postgresql://localhost/meracare", config.EnvProduction, true); err == nil {
+	if err := seed.Allow("postgresql://localhost/genxcare", config.EnvProduction, true); err == nil {
 		t.Fatal("production should be refused even on a local host")
 	}
 }

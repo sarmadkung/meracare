@@ -68,7 +68,7 @@ it('describes the installation for registration', async () => {
 
 it('carries a push token once permission allows delivery', async () => {
   // Only meaningful with an EAS project id configured; without one there is no
-  // token to fetch, which is the state MeraCare is actually in today.
+  // token to fetch, which is the state GenXcare is actually in today.
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
 
   const description = await describeDevice();
@@ -108,7 +108,7 @@ it('registers without a token when the push service cannot be reached', async ()
  * which deactivates this device first, can never complete.
  */
 it('creates an identifier in a runtime without WebCrypto', async () => {
-  await secureStorage.removeItem('meracare.deviceId');
+  await secureStorage.removeItem('genxcare.deviceId');
   resetDeviceIdCache();
 
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');

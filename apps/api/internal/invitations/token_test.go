@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/invitations"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/invitations"
 )
 
 func TestNewTokenIsRandomAndWellFormed(t *testing.T) {

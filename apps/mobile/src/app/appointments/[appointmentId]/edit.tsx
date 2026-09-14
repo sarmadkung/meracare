@@ -2,7 +2,7 @@ import {
   SELECTABLE_APPOINTMENT_KINDS,
   type AppointmentKind,
   type UpdateAppointmentRequest,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';

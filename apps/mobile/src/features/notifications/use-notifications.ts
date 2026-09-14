@@ -5,7 +5,7 @@ import type {
   NotificationPreferences,
   RegisteredDevice,
   ReminderPlan,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';
@@ -103,7 +103,7 @@ export function useRegisterDevice() {
 /**
  * The notification inbox, newest first.
  *
- * Keyset-paged through the same cursor every other history in MeraCare uses, so
+ * Keyset-paged through the same cursor every other history in GenXcare uses, so
  * a professional caregiver with months of notifications loads a screenful
  * rather than all of them (plans/phase11.md §§41, 56).
  *

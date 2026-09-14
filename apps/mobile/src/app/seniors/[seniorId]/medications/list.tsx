@@ -1,4 +1,4 @@
-import { can } from '@meracare/contracts';
+import { can } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 

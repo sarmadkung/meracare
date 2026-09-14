@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "MeraCare",
-    "slug": "meracare",
+    "name": "GenXcare",
+    "slug": "genxcare",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "meracare",
+    "scheme": "genxcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.meracare.mobile"
+      "bundleIdentifier": "app.genxcare.mobile"
     },
     "android": {
-      "package": "app.meracare.mobile",
+      "package": "app.genxcare.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#0F766E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

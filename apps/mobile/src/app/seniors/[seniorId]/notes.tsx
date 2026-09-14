@@ -1,4 +1,4 @@
-import { can, type CareNote } from '@meracare/contracts';
+import { can, type CareNote } from '@genxcare/contracts';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';

@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/meracare/api/internal/config"
+	"github.com/genxcare/api/internal/config"
 )
 
 // localHosts are the databases a seed run may write to without being asked

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
+	"github.com/genxcare/api/internal/care"
 )
 
 // Senior is the little a reminder needs to know about the person being cared

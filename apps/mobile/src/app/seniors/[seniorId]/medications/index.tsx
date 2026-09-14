@@ -1,5 +1,5 @@
-import type { MedicationDose, MedicationDoseScope } from '@meracare/contracts';
-import { can } from '@meracare/contracts';
+import type { MedicationDose, MedicationDoseScope } from '@genxcare/contracts';
+import { can } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';

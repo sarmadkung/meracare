@@ -11,7 +11,7 @@ import { GOOGLE_REDIRECT_PATH, type GoogleSignInResult } from './google-result';
  * Supabase performs the OAuth exchange, so the Google client secret stays in the
  * Supabase project and never ships inside the app (docs/09-security-privacy.md).
  * The app opens Google in an in-app browser session, receives the authorization
- * code on the `meracare://` deep link, and trades it for a Supabase session
+ * code on the `genxcare://` deep link, and trades it for a Supabase session
  * using the PKCE verifier the client stored when the flow began.
  *
  * The web build resolves `google.web.ts` instead.

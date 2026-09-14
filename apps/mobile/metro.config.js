@@ -8,7 +8,7 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-// Watch the workspace so `@meracare/contracts` source is transformed by Metro.
+// Watch the workspace so `@genxcare/contracts` source is transformed by Metro.
 config.watchFolders = [workspaceRoot];
 
 config.resolver.nodeModulesPaths = [

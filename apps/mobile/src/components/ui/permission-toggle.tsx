@@ -1,4 +1,4 @@
-import type { PermissionLabel } from '@meracare/contracts';
+import type { PermissionLabel } from '@genxcare/contracts';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';

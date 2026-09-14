@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/pkg/httpx"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/pkg/httpx"
 )
 
 // Path segments this handler reads.
@@ -151,7 +151,7 @@ func (h *Handler) registerDevice(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, r, http.StatusOK, ToDeviceResponse(device))
 }
 
-// deactivateDevice stops MeraCare reaching one of the caller's installations.
+// deactivateDevice stops GenXcare reaching one of the caller's installations.
 func (h *Handler) deactivateDevice(w http.ResponseWriter, r *http.Request) {
 	principal := auth.MustPrincipal(r.Context())
 

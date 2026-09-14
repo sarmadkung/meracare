@@ -14,7 +14,7 @@ import type {
   MedicationStatus,
   UpdateMedicationRequest,
   UpdateMedicationScheduleRequest,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import {
   useInfiniteQuery,
   useMutation,

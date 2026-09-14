@@ -1,5 +1,5 @@
-import type { CareTask } from '@meracare/contracts';
-import { isOpen, statusLabel, statusTone, taskTimeLabel } from '@meracare/contracts';
+import type { CareTask } from '@genxcare/contracts';
+import { isOpen, statusLabel, statusTone, taskTimeLabel } from '@genxcare/contracts';
 import { Pressable, View } from 'react-native';
 
 import { useTheme } from '@/theme';

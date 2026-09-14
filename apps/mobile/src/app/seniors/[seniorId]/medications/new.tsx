@@ -3,13 +3,13 @@ import type {
   MedicationForm,
   MedicationScheduleInput,
   Weekday,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import {
   MEDICATION_RECURRENCE_PRESETS,
   SELECTABLE_FORMS,
   SELECTABLE_WEEKDAYS,
   recurrenceLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';

@@ -1,4 +1,4 @@
-import type { Senior, SeniorSummary, TodayItem } from '@meracare/contracts';
+import type { Senior, SeniorSummary, TodayItem } from '@genxcare/contracts';
 
 import { attention, buildAgenda, daySummary, peopleInDay } from '../today-agenda';
 

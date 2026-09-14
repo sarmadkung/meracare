@@ -23,7 +23,7 @@ CREATE TABLE medications (
     name                text        NOT NULL,
 
     -- Free text, as docs/03 specifies: "500 mg", "1 tablet", "two puffs". Not
-    -- split into a number and a unit — MeraCare records what the family was
+    -- split into a number and a unit — GenXcare records what the family was
     -- told, and parsing it into quantities would invite arithmetic on a value
     -- nobody asked us to compute (plans/phase5.md §§2, 32).
     dosage              text        NOT NULL DEFAULT '',

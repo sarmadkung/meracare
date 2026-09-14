@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/seed"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/seed"
 )
 
 /*
@@ -38,7 +38,7 @@ func TestEveryPersonaCanBeSignedInAs(t *testing.T) {
 	}
 }
 
-// The four ways of using MeraCare that look different on screen. Losing one of
+// The four ways of using GenXcare that look different on screen. Losing one of
 // them silently is how a layout ships that only ever worked for a daughter.
 func TestTheFourShapesOfUseAreAllPresent(t *testing.T) {
 	p := plan(t)

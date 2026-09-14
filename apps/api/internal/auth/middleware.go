@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/meracare/api/pkg/httpx"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // UserResolver maps a verified Supabase identity onto an application user,
@@ -59,7 +59,7 @@ func RequireAuth(verifier Verifier, resolver UserResolver) func(http.Handler) ht
 }
 
 func unauthenticated(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("WWW-Authenticate", `Bearer realm="meracare"`)
+	w.Header().Set("WWW-Authenticate", `Bearer realm="genxcare"`)
 	httpx.WriteError(w, r, httpx.ErrUnauthenticated("Sign in to continue."))
 }
 

@@ -1,8 +1,8 @@
 {
-  "name": "@meracare/config",
+  "name": "@genxcare/config",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared TypeScript/lint/format configuration for MeraCare workspaces",
+  "description": "Shared TypeScript/lint/format configuration for GenXcare workspaces",
   "files": [
     "tsconfig.base.json",
     "eslint.base.mjs",

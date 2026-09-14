@@ -1,4 +1,4 @@
-import type { Appointment, AppointmentStatus } from '@meracare/contracts';
+import type { Appointment, AppointmentStatus } from '@genxcare/contracts';
 import {
   APPOINTMENT_STATUSES,
   appointmentDateLabel,
@@ -11,7 +11,7 @@ import {
   isAppointmentOpen,
   isAppointmentUpcoming,
   SELECTABLE_APPOINTMENT_KINDS,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 
 /**
  * The wording an older adult reads. Nothing internal may reach a screen, and

@@ -3,7 +3,7 @@ import type {
   CreateMessageRequest,
   MarkMessagesReadRequest,
   MessagePage,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';

@@ -1,4 +1,4 @@
-import type { MedicationDose } from '@meracare/contracts';
+import type { MedicationDose } from '@genxcare/contracts';
 import type { QueryClient } from '@tanstack/react-query';
 
 import { medicationKeys } from '@/features/medications/use-medications';

@@ -1,5 +1,5 @@
-import type { CircleMember, Invitation } from '@meracare/contracts';
-import { can, roleLabel } from '@meracare/contracts';
+import type { CircleMember, Invitation } from '@genxcare/contracts';
+import { can, roleLabel } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 

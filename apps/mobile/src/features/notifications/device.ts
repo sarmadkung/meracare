@@ -6,7 +6,7 @@ import { secureStorage } from '@/lib/secure-storage';
 
 import { notificationPermission, permissionAllowsDelivery } from './permission';
 
-import type { DevicePlatform, DeviceRegistration } from '@meracare/contracts';
+import type { DevicePlatform, DeviceRegistration } from '@genxcare/contracts';
 
 /**
  * This installation's identity, and its push token when it has one.
@@ -16,7 +16,7 @@ import type { DevicePlatform, DeviceRegistration } from '@meracare/contracts';
  * update instead of an accumulation (plans/phase8.md §§7, 25).
  */
 
-const DEVICE_ID_KEY = 'meracare.deviceId';
+const DEVICE_ID_KEY = 'genxcare.deviceId';
 
 let cached: string | null = null;
 
@@ -85,7 +85,7 @@ function platform(): DevicePlatform {
  * Fetches an Expo push token, or nothing.
  *
  * Nothing is the normal answer today: a token requires notification permission
- * and an EAS project id, and MeraCare has no push credentials configured yet.
+ * and an EAS project id, and GenXcare has no push credentials configured yet.
  * The failure is caught rather than propagated because push is not what makes
  * reminders work — those are scheduled on the device — and an app that refused
  * to start because it could not obtain a push token would be broken for a

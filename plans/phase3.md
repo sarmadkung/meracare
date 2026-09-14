@@ -1,5 +1,5 @@
 ````md
-# MeraCare — Phase 3: Care Circle & Invitations
+# GenXcare — Phase 3: Care Circle & Invitations
 
 Phase 2 is complete and merged.
 

@@ -1,4 +1,4 @@
--- 0008_notifications — what MeraCare is allowed to remind each user about, and
+-- 0008_notifications — what GenXcare is allowed to remind each user about, and
 -- which devices it may one day push to.
 --
 -- Two tables, and deliberately no third one for the reminders themselves.

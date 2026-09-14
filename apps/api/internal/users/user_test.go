@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/users"
+	"github.com/genxcare/api/internal/users"
 )
 
 func TestToResponseOmitsEmailAndNullsBlankFields(t *testing.T) {
@@ -67,9 +67,9 @@ func TestDefaultDisplayName(t *testing.T) {
 	cases := map[string]string{
 		"sara@example.com":    "sara",
 		" Ahmed@Example.com ": "Ahmed",
-		"":                    "MeraCare member",
-		"not-an-email":        "MeraCare member",
-		"@example.com":        "MeraCare member",
+		"":                    "GenXcare member",
+		"not-an-email":        "GenXcare member",
+		"@example.com":        "GenXcare member",
 	}
 
 	for email, want := range cases {

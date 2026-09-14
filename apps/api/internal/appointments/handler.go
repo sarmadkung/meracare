@@ -9,11 +9,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/authz"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/pkg/httpx"
-	"github.com/meracare/api/pkg/validation"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/authz"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/validation"
 )
 
 const (

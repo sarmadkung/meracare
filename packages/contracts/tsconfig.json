@@ -1,5 +1,5 @@
 {
-  "extends": "@meracare/config/tsconfig.base.json",
+  "extends": "@genxcare/config/tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true
   },

@@ -2,7 +2,7 @@
 // the times they take it, and the record of each dose (docs/03-domain-model.md,
 // Medication, MedicationSchedule and MedicationInstance).
 //
-// This is a care coordination domain, not a clinical one. MeraCare records what
+// This is a care coordination domain, not a clinical one. GenXcare records what
 // a family or caregiver entered and reminds them of it; it does not reason about
 // whether a medicine or a dose is appropriate (plans/phase5.md §32).
 //
@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/recurrence"
+	"github.com/genxcare/api/internal/recurrence"
 )
 
 // Status is the state of one dose.

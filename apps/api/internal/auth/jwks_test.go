@@ -18,7 +18,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
+	"github.com/genxcare/api/internal/auth"
 )
 
 // signingKey is a key pair plus the JWK the test server publishes for it.

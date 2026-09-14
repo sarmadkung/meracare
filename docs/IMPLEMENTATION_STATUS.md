@@ -12,7 +12,7 @@ the server-side notification system: a persisted inbox, six notification types,
 a scheduler that materialises and delivers, an Expo push provider behind an
 interface, retries, and the mobile inbox with an unread badge. Everything below
 the push provider is built and tested; **no real push has ever been sent**,
-because MeraCare has no EAS project and no push credentials. See Blocker 7 and
+because GenXcare has no EAS project and no push credentials. See Blocker 7 and
 `docs/20-notifications-delivery.md`.
 
 Phase 10's Google sign-in remains code complete and blocked on console
@@ -23,7 +23,7 @@ The documented MVP feature surface is implemented in the repository. On
 added end to end: migration, authorization, API, contracts, mobile screens, read
 state/activity behavior, and automated tests. Apple OAuth, the path-complete
 OpenAPI contract, and bundled Inter typography were added in the same pass.
-The visual pass then adopted the approved MeraCare mark and added five locally
+The visual pass then adopted the approved GenXcare mark and added five locally
 bundled, Deep-Teal unDraw illustrations for onboarding and empty states. Their
 source SVGs, runtime PNGs, modifications, and license records are retained in
 the repository.
@@ -159,7 +159,7 @@ docker-compose.yml         local PostgreSQL for development and tests
 | 2 | Project structure | `apps/`, `packages/` per docs/16 |
 | 3 | pnpm workspace | `pnpm-workspace.yaml`, `.npmrc` (`node-linker=hoisted`) |
 | 4 | Expo application | `apps/mobile` (SDK 57, RN 0.86.2, Expo Router, typed routes) |
-| 5 | Go API | `apps/api`, module `github.com/meracare/api` |
+| 5 | Go API | `apps/api`, module `github.com/genxcare/api` |
 | 6 | TypeScript | `packages/config/tsconfig.base.json`, strict everywhere |
 | 7 | Lint / format | `eslint-config-expo`, Prettier, `gofmt`/`go vet` |
 | 8 | Environment variables | `apps/api/.env.example`, `apps/mobile/.env.example` |
@@ -551,7 +551,7 @@ and sign-out are untouched.
 
 - `src/features/auth/google.ts` (iOS, Android) opens Google with
   `WebBrowser.openAuthSessionAsync`, reads the authorization code off the
-  `meracare://auth/callback` deep link, and exchanges it with the PKCE verifier
+  `genxcare://auth/callback` deep link, and exchanges it with the PKCE verifier
   the client stored. `google.web.ts` navigates the page instead and lets
   `detectSessionInUrl` do the exchange. The two share a result type; the public
   interface is identical, and Metro picks the right file per platform — verified
@@ -1231,7 +1231,7 @@ docs/08 assigns exactly medication, task, and appointment reminders to local
 notifications — "Server schedule → Mobile sync → OS local notification" — and
 remote push to missed work, activity, invitations, and messages, none of which
 Phase 8 covers. Local scheduling also means reminders arrive without a
-connection and without MeraCare holding push credentials it does not have.
+connection and without GenXcare holding push credentials it does not have.
 
 **There is no notifications table for reminders, and that is the design.** A
 reminder is a consequence of care, not a record of it: the dose, the schedule,

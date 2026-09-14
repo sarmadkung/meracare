@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meracare/api/internal/seniors"
+	"github.com/genxcare/api/internal/seniors"
 )
 
 // `/seniors/summary` and `/seniors/{seniorID}` are the same shape to a router.

@@ -1,4 +1,4 @@
-import { isApiErrorBody, type ApiErrorBody } from '@meracare/contracts';
+import { isApiErrorBody, type ApiErrorBody } from '@genxcare/contracts';
 
 /**
  * A failed API call.

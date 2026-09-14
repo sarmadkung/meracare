@@ -1,5 +1,5 @@
-import type { Appointment } from '@meracare/contracts';
-import { appointmentDateLabel, can } from '@meracare/contracts';
+import type { Appointment } from '@genxcare/contracts';
+import { appointmentDateLabel, can } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';

@@ -1,4 +1,4 @@
-// Package notifications decides what MeraCare is allowed to remind each user
+// Package notifications decides what GenXcare is allowed to remind each user
 // about, and when.
 //
 // It is infrastructure, not care. Tasks, medication, and appointments remain
@@ -160,7 +160,7 @@ func (p Preferences) wants(t ReminderType) bool {
 // type.
 //
 // The default is false, not true. A category nobody has decided about is a
-// category MeraCare has not been given permission to use, and an unrecognised
+// category GenXcare has not been given permission to use, and an unrecognised
 // type reaching here at all means the vocabulary has grown without the
 // preferences following it.
 func (p Preferences) wantsType(t Type) bool {
@@ -221,7 +221,7 @@ var reminderNamespace = uuid.MustParse("b7f6b7a2-3a5f-4f0e-9a1d-2c8f0a6d4e11")
 //
 // It carries no wording. The title and body are composed on the device from
 // packages/contracts/src/notification-labels.ts, the same way every other
-// user-visible sentence in MeraCare is — one place where the phrasing lives,
+// user-visible sentence in GenXcare is — one place where the phrasing lives,
 // and no way for the server to accidentally put a medicine's name into
 // something that appears on a lock screen (plans/phase8.md §§17, 47).
 type Reminder struct {

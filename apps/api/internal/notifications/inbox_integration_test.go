@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
+	"github.com/genxcare/api/internal/care"
 )
 
 // The inbox over the real router and the real database. The questions here are

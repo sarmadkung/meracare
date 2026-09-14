@@ -1,4 +1,4 @@
-import type { MedicationDose, MedicationSchedule, MedicationStatus } from '@meracare/contracts';
+import type { MedicationDose, MedicationSchedule, MedicationStatus } from '@genxcare/contracts';
 import {
   doseDateLabel,
   doseStatusLabel,
@@ -10,7 +10,7 @@ import {
   nextDoseLabel,
   scheduleLabel,
   schedulesLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 
 /**
  * What a person actually reads.

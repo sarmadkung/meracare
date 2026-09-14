@@ -1,4 +1,4 @@
-# MeraCare
+# GenXcare
 
 Senior care and family coordination platform.
 
@@ -45,7 +45,7 @@ pnpm db:seed                            # or -confirm-not-local, if hosted
 
 An empty app cannot be designed against: a screen with one task never shows
 what happens at six, and nothing at all shows what a missed dose looks like at
-the top of somebody's morning. The seeder writes four people who use MeraCare
+the top of somebody's morning. The seeder writes four people who use GenXcare
 differently — a senior managing their own care, a daughter with one parent, a
 son with two parents in two countries, and a professional on a round of four
 clients — each with their own sign-in, and each circle holding a day that

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
+	"github.com/genxcare/api/internal/care"
 )
 
 // These tests drive the decision half of the scheduler directly: given a

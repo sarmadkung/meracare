@@ -1,5 +1,5 @@
-import type { CarePermission } from '@meracare/contracts';
-import { permissionLabelsByGroup, roleLabel } from '@meracare/contracts';
+import type { CarePermission } from '@genxcare/contracts';
+import { permissionLabelsByGroup, roleLabel } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';

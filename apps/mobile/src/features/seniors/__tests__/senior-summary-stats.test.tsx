@@ -1,4 +1,4 @@
-import type { SeniorSummary } from '@meracare/contracts';
+import type { SeniorSummary } from '@genxcare/contracts';
 
 import { summaryStats } from '../senior-summary-stats';
 

@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 func TestParseLevel(t *testing.T) {
@@ -31,7 +31,7 @@ func TestParseLevel(t *testing.T) {
 
 func TestNewEmitsJSONWithService(t *testing.T) {
 	var buf bytes.Buffer
-	logger := logging.New(&buf, logging.Options{Level: "info", ServiceName: "meracare-api"})
+	logger := logging.New(&buf, logging.Options{Level: "info", ServiceName: "genxcare-api"})
 
 	logger.Info("started", slog.Int("port", 8080))
 
@@ -39,8 +39,8 @@ func TestNewEmitsJSONWithService(t *testing.T) {
 	if err := json.Unmarshal(buf.Bytes(), &record); err != nil {
 		t.Fatalf("log output is not JSON: %v (%q)", err, buf.String())
 	}
-	if record["service"] != "meracare-api" {
-		t.Errorf("service = %v, want meracare-api", record["service"])
+	if record["service"] != "genxcare-api" {
+		t.Errorf("service = %v, want genxcare-api", record["service"])
 	}
 	if record["msg"] != "started" {
 		t.Errorf("msg = %v, want started", record["msg"])
