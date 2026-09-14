@@ -26,7 +26,7 @@ import {
 import { apiRequest } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-error';
 import { cacheDoses, cachedDoses, sqliteSyncStore } from '@/lib/offline/database';
-import { newOperation } from '@/lib/offline/sync-queue';
+import { newOperation, newOperationId } from '@/lib/offline/sync-queue';
 
 import { doseEntityId } from './medication-sync';
 import { cancelSnoozedMedicationNotifications } from '@/features/notifications/scheduler';
@@ -332,6 +332,7 @@ async function invalidateMedications(queryClient: QueryClient, seniorId: string)
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: medicationKeys.forSenior(seniorId) }),
     queryClient.invalidateQueries({ queryKey: ['seniors', seniorId, 'medicationDoses'] }),
+    queryClient.invalidateQueries({ queryKey: ['today'] }),
   ]);
 }
 
@@ -344,9 +345,4 @@ async function invalidateOneMedication(
     invalidateMedications(queryClient, seniorId),
     queryClient.invalidateQueries({ queryKey: medicationKeys.detail(medicationId) }),
   ]);
-}
-
-/** A unique local queue id for one user action. */
-function newOperationId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

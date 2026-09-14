@@ -36,6 +36,32 @@ read `TEST_DATABASE_URL` from `apps/api/.env`, so they run once the database is
 up; unset, they skip. It must be a local database — the suite truncates every
 application table, and anything else is refused before it connects.
 
+### Seeding a database worth designing against
+
+```bash
+pnpm db:seed:dry                        # what it would write, and where
+pnpm db:seed                            # or -confirm-not-local, if hosted
+```
+
+An empty app cannot be designed against: a screen with one task never shows
+what happens at six, and nothing at all shows what a missed dose looks like at
+the top of somebody's morning. The seeder writes four people who use GenXcare
+differently — a senior managing their own care, a daughter with one parent, a
+son with two parents in two countries, and a professional on a round of four
+clients — each with their own sign-in, and each circle holding a day that
+already has a past.
+
+It creates the Supabase accounts too, because tokens are verified against
+Supabase's published keys and the API cannot mint one. Sign in as any of the
+addresses it prints, with the password it prints.
+
+Re-running replaces the last run and nothing else. Every seeded row carries a
+derived identifier beginning `5eed5eed-`, and the clean-up step deletes only
+those — so a profile somebody created by using the app survives. Nothing is
+truncated, which is what makes it safe to point at a database that is not only
+yours. A database that is not local has to be confirmed on the command line,
+and `ENV=production` is refused outright.
+
 ## Architecture Status
 
 The MVP baseline is **accepted and locked**.

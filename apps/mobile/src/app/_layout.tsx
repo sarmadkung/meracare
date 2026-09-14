@@ -19,7 +19,7 @@ import {
   useReminderTaps,
 } from '@/features/notifications/use-reminder-sync';
 import { createQueryClient } from '@/lib/query-client';
-import { ThemeProvider, useTheme } from '@/theme';
+import { ThemeProvider, headerOptions, useTheme } from '@/theme';
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -40,7 +40,7 @@ export default function RootLayout() {
             <SessionProvider>
               <ThemedStatusBar />
               <Reminders />
-              <Stack screenOptions={{ headerShown: false }} />
+              <ThemedStack />
             </SessionProvider>
           </ThemeProvider>
         </QueryClientProvider>
@@ -66,6 +66,31 @@ function Reminders() {
   usePendingMedicationNotificationAction(isSignedIn, isRestoring);
 
   return null;
+}
+
+/**
+ * Header styling for every screen, declared once.
+ *
+ * Screens set only their title. Twenty-four of them previously repeated the
+ * whole options object — `settings/notifications.tsx` three times over, once
+ * per render branch — which is how headers drifted apart from one another and
+ * from the theme.
+ *
+ * `headerShown` stays false by default because screens opt in individually
+ * today, and flipping it here would put a bar on sign-in and onboarding.
+ */
+function ThemedStack() {
+  const theme = useTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        headerBackButtonDisplayMode: 'minimal',
+        ...headerOptions(theme),
+      }}
+    />
+  );
 }
 
 function ThemedStatusBar() {

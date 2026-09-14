@@ -1,0 +1,138 @@
+package summary
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/pkg/httpx"
+)
+
+// Handler exposes `GET /v1/seniors/summary`.
+type Handler struct {
+	service *Service
+}
+
+// NewHandler builds the handler.
+func NewHandler(service *Service) *Handler {
+	return &Handler{service: service}
+}
+
+// Routes mounts the summary endpoint. The caller applies authentication.
+//
+// No authorization guard: like the senior list it sits beside, this is already
+// scoped to the caller's own active relationships, and each senior's counts are
+// filtered by that senior's permissions inside the service.
+func (h *Handler) Routes() chi.Router {
+	router := chi.NewRouter()
+	router.Get("/", h.list)
+	return router
+}
+
+// CountsResponse is a finished-out-of-total pair.
+type CountsResponse struct {
+	Done  int `json:"done"`
+	Total int `json:"total"`
+}
+
+// Response is one senior's day.
+//
+// Medications and Tasks are null when the caller cannot view that domain,
+// which the client must render as absence rather than as zero.
+type Response struct {
+	SeniorID       string          `json:"seniorId"`
+	Medications    *CountsResponse `json:"medications"`
+	Tasks          *CountsResponse `json:"tasks"`
+	NeedsAttention int             `json:"needsAttention"`
+}
+
+func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
+	principal := auth.MustPrincipal(r.Context())
+
+	summaries, err := h.service.ForUser(r.Context(), principal, time.Now())
+	if err != nil {
+		httpx.WriteError(w, r, httpx.ErrInternal(err))
+		return
+	}
+
+	items := make([]Response, 0, len(summaries))
+	for _, entry := range summaries {
+		items = append(items, Response{
+			SeniorID:       entry.SeniorID.String(),
+			Medications:    toCounts(entry.Medications),
+			Tasks:          toCounts(entry.Tasks),
+			NeedsAttention: entry.NeedsAttention,
+		})
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, map[string]any{"items": items})
+}
+
+func toCounts(counts *Counts) *CountsResponse {
+	if counts == nil {
+		return nil
+	}
+	return &CountsResponse{Done: counts.Done, Total: counts.Total}
+}
+
+// TodayHandler exposes `GET /v1/today`.
+type TodayHandler struct {
+	service *TodayService
+}
+
+// NewTodayHandler builds the handler.
+func NewTodayHandler(service *TodayService) *TodayHandler {
+	return &TodayHandler{service: service}
+}
+
+// Routes mounts the endpoint. The caller applies authentication; the response
+// is already scoped to the reader's own active relationships and filtered by
+// each senior's permissions inside the service.
+func (h *TodayHandler) Routes() chi.Router {
+	router := chi.NewRouter()
+	router.Get("/", h.list)
+	return router
+}
+
+// ItemResponse is one thing happening today.
+type ItemResponse struct {
+	Kind         string `json:"kind"`
+	ID           string `json:"id"`
+	SeniorID     string `json:"seniorId"`
+	SeniorName   string `json:"seniorName"`
+	Timezone     string `json:"timezone"`
+	Title        string `json:"title"`
+	Detail       string `json:"detail"`
+	ScheduledFor string `json:"scheduledFor"`
+	Status       string `json:"status"`
+	AssignedToMe bool   `json:"assignedToMe"`
+}
+
+func (h *TodayHandler) list(w http.ResponseWriter, r *http.Request) {
+	principal := auth.MustPrincipal(r.Context())
+
+	items, err := h.service.ForUser(r.Context(), principal, time.Now())
+	if err != nil {
+		httpx.WriteError(w, r, httpx.ErrInternal(err))
+		return
+	}
+
+	response := make([]ItemResponse, 0, len(items))
+	for _, item := range items {
+		response = append(response, ItemResponse{
+			Kind:         string(item.Kind),
+			ID:           item.ID.String(),
+			SeniorID:     item.SeniorID.String(),
+			SeniorName:   item.SeniorName,
+			Timezone:     item.Timezone,
+			Title:        item.Title,
+			Detail:       item.Detail,
+			ScheduledFor: item.ScheduledFor.UTC().Format(time.RFC3339),
+			Status:       item.Status,
+			AssignedToMe: item.AssignedToMe,
+		})
+	}
+
+	httpx.WriteJSON(w, r, http.StatusOK, map[string]any{"items": response})
+}

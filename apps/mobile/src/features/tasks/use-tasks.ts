@@ -15,7 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-error';
 import { cacheTasks, cachedTasks, sqliteSyncStore } from '@/lib/offline/database';
-import { newOperation } from '@/lib/offline/sync-queue';
+import { newOperation, newOperationId } from '@/lib/offline/sync-queue';
 
 /**
  * Care task data.
@@ -269,10 +269,7 @@ async function invalidateTasks(
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: ['seniors', seniorId, 'tasks'] }),
     queryClient.invalidateQueries({ queryKey: taskKeys.assigned }),
+    // Today reads its own endpoint and none of the keys above reach it.
+    queryClient.invalidateQueries({ queryKey: ['today'] }),
   ]);
-}
-
-/** A unique local queue id for one user action. */
-function newOperationId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

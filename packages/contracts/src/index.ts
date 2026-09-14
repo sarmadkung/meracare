@@ -16,6 +16,7 @@ export * from './pagination';
 export * from './permission-labels';
 export * from './recurrence';
 export * from './senior';
+export * from './today';
 export * from './task';
 export * from './task-labels';
 export * from './user';
