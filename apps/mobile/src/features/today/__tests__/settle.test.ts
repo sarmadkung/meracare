@@ -1,4 +1,4 @@
-import type { TodayItem } from '@meracare/contracts';
+import type { TodayItem } from '@genxcare/contracts';
 import { QueryClient } from '@tanstack/react-query';
 
 import { ApiError } from '@/lib/api-error';

@@ -8,7 +8,7 @@
  */
 
 /**
- * The kinds of reminder MeraCare schedules.
+ * The kinds of reminder GenXcare schedules.
  *
  * Exactly the three docs/08 assigns to device-local scheduled reminders. An
  * event that needs telling somebody about right now — a missed dose, an
@@ -165,7 +165,7 @@ export interface RegisteredDevice {
 }
 
 /**
- * The kinds of notification MeraCare delivers and keeps.
+ * The kinds of notification GenXcare delivers and keeps.
  *
  * A superset of `REMINDER_TYPES`: the three a device can schedule for itself,
  * plus the categories only a server can know about. Mirrors

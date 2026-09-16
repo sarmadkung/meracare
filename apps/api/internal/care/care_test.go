@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/meracare/api/internal/care"
+	"github.com/genxcare/api/internal/care"
 )
 
 func TestRoleValid(t *testing.T) {

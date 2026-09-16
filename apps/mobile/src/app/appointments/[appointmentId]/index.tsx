@@ -4,7 +4,7 @@ import {
   appointmentStatusLabel,
   appointmentWhenLabel,
   can,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';

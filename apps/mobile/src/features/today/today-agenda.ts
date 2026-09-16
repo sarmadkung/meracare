@@ -1,5 +1,5 @@
-import type { Senior, SeniorSummary, TodayItem, TodayItemKind } from '@meracare/contracts';
-import { timeInTimezone } from '@meracare/contracts';
+import type { Senior, SeniorSummary, TodayItem, TodayItemKind } from '@genxcare/contracts';
+import { timeInTimezone } from '@genxcare/contracts';
 
 import type { AgendaTone, IconName } from '@/components/ui';
 

@@ -115,7 +115,7 @@ func (s *Service) RegisterDevice(ctx context.Context, params RegisterParams) (De
 	return s.repository.Register(ctx, params)
 }
 
-// DeactivateDevice stops MeraCare reaching one of the caller's installations.
+// DeactivateDevice stops GenXcare reaching one of the caller's installations.
 func (s *Service) DeactivateDevice(ctx context.Context, userID uuid.UUID, deviceID string) error {
 	return s.repository.Deactivate(ctx, userID, deviceID)
 }

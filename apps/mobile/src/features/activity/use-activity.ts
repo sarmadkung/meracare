@@ -1,4 +1,4 @@
-import type { ActivityResponse } from '@meracare/contracts';
+import type { ActivityResponse } from '@genxcare/contracts';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';

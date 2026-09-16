@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/seniors"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/seniors"
 )
 
 func relationshipFor(role care.Role, userID uuid.UUID) relationships.Relationship {

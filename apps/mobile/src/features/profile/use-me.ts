@@ -1,4 +1,4 @@
-import type { Me, UpdateMeRequest } from '@meracare/contracts';
+import type { Me, UpdateMeRequest } from '@genxcare/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';

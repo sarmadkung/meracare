@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/meracare/api/internal/config"
+	"github.com/genxcare/api/internal/config"
 )
 
 // setValidEnv sets the minimum environment required for Load to succeed.
 func setValidEnv(t *testing.T) {
 	t.Helper()
-	t.Setenv("DATABASE_URL", "postgres://localhost:5432/meracare")
+	t.Setenv("DATABASE_URL", "postgres://localhost:5432/genxcare")
 	t.Setenv("SUPABASE_URL", "https://project.supabase.co")
 	t.Setenv("SUPABASE_JWT_MODE", "")
 	t.Setenv("SUPABASE_JWT_SECRET", "")
@@ -139,14 +139,14 @@ func TestLoadRejectsNonNumericPort(t *testing.T) {
 
 func TestLoadParsesCORSOrigins(t *testing.T) {
 	setValidEnv(t)
-	t.Setenv("CORS_ALLOWED_ORIGINS", " https://meracare.app , ,https://admin.meracare.app ")
+	t.Setenv("CORS_ALLOWED_ORIGINS", " https://genxcare.app , ,https://admin.genxcare.app ")
 
 	cfg, err := config.Load()
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
 	}
 
-	want := []string{"https://meracare.app", "https://admin.meracare.app"}
+	want := []string{"https://genxcare.app", "https://admin.genxcare.app"}
 	if len(cfg.CORSAllowedOrigins) != len(want) {
 		t.Fatalf("CORSAllowedOrigins = %v, want %v", cfg.CORSAllowedOrigins, want)
 	}

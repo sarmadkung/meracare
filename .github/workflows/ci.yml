@@ -23,13 +23,13 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_USER: meracare
-          POSTGRES_PASSWORD: meracare
-          POSTGRES_DB: meracare
+          POSTGRES_USER: genxcare
+          POSTGRES_PASSWORD: genxcare
+          POSTGRES_DB: genxcare
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U meracare -d meracare"
+          --health-cmd "pg_isready -U genxcare -d genxcare"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -58,7 +58,7 @@ jobs:
       # Integration tests run against the service container above.
       - name: Test
         env:
-          TEST_DATABASE_URL: postgres://meracare:meracare@localhost:5432/meracare?sslmode=disable
+          TEST_DATABASE_URL: postgres://genxcare:genxcare@localhost:5432/genxcare?sslmode=disable
         run: go test -race ./...
 
   mobile:
@@ -85,7 +85,7 @@ jobs:
         run: pnpm -r typecheck
 
       - name: Lint
-        run: pnpm --filter @meracare/mobile lint
+        run: pnpm --filter @genxcare/mobile lint
 
       - name: Test
-        run: pnpm --filter @meracare/mobile test
+        run: pnpm --filter @genxcare/mobile test

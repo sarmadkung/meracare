@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/relationships"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/relationships"
 )
 
 // ErrDenied is returned when the caller has no usable relationship to the

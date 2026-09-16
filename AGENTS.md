@@ -1,4 +1,4 @@
-# MeraCare — Agent Instructions
+# GenXcare — Agent Instructions
 
 ## Source of Truth
 
@@ -10,16 +10,16 @@ Do not invent requirements or change documented decisions without approval.
 
 ## Product
 
-MeraCare is a senior care and family coordination platform supporting:
+GenXcare is a senior care and family coordination platform supporting:
 
 - Solo self-care
 - Family care
 - Professional caregivers
 - Mixed family + professional care
 
-MeraCare is one application. Do not create separate applications for these user types.
+GenXcare is one application. Do not create separate applications for these user types.
 
-A senior can use MeraCare without a caregiver.
+A senior can use GenXcare without a caregiver.
 
 A professional caregiver can manage multiple seniors.
 

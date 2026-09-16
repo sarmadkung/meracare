@@ -1,17 +1,17 @@
 package server
 
 import (
-	"github.com/meracare/api/internal/appointments"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/medications"
-	"github.com/meracare/api/internal/notifications"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/seniors"
-	"github.com/meracare/api/internal/tasks"
+	"github.com/genxcare/api/internal/appointments"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/medications"
+	"github.com/genxcare/api/internal/notifications"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/seniors"
+	"github.com/genxcare/api/internal/tasks"
 )
 
-// NewNotificationScheduler wires the one background process MeraCare runs.
+// NewNotificationScheduler wires the one background process GenXcare runs.
 //
 // Built separately from New rather than returned by it, because the two have
 // different lifetimes: the router is a value the HTTP server holds, and the
@@ -62,7 +62,7 @@ func NewNotificationScheduler(deps Dependencies) *notifications.Scheduler {
 
 // newPushSender chooses the push provider.
 //
-// Disabled is the default and the honest one: MeraCare holds no push
+// Disabled is the default and the honest one: GenXcare holds no push
 // credentials, so there is nowhere to send a notification and saying so is
 // better than pretending. The inbox works either way, which is why this is a
 // configuration switch rather than a startup failure (plans/phase11.md §43).

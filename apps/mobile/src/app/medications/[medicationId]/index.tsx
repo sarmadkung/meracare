@@ -1,4 +1,4 @@
-import type { MedicationDose } from '@meracare/contracts';
+import type { MedicationDose } from '@genxcare/contracts';
 import {
   can,
   doseDateLabel,
@@ -7,7 +7,7 @@ import {
   formLabel,
   nextDoseLabel,
   schedulesLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -84,7 +84,7 @@ export default function MedicationDetailScreen() {
     confirmAction({
       title: 'Delete mistaken medication?',
       message:
-        'This permanently removes the medication and its unrecorded doses. If anyone has taken or skipped a dose, MeraCare will keep the history and ask you to stop it instead.',
+        'This permanently removes the medication and its unrecorded doses. If anyone has taken or skipped a dose, GenXcare will keep the history and ask you to stop it instead.',
       confirmLabel: 'Delete',
       onConfirm: () =>
         deleteMedication.mutate(detail.id, {

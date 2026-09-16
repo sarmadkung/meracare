@@ -1,4 +1,4 @@
-# MeraCare — Phase 7: Care Events & Activity Timeline
+# GenXcare — Phase 7: Care Events & Activity Timeline
 
 Phase 6 is complete and merged into `main`.
 

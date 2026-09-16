@@ -1,4 +1,4 @@
-import { can, type Senior } from '@meracare/contracts';
+import { can, type Senior } from '@genxcare/contracts';
 
 /**
  * The client renders actions from the caller's permission list. These tests pin

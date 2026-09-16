@@ -1,4 +1,4 @@
-import type { Reminder, ReminderPlan } from '@meracare/contracts';
+import type { Reminder, ReminderPlan } from '@genxcare/contracts';
 
 /**
  * Working out what the operating system should be told.

@@ -53,7 +53,7 @@ const AppearanceContext = createContext<Appearance>({
   setPreference: () => {},
 });
 
-const PREFERENCE_KEY = 'meracare.themePreference';
+const PREFERENCE_KEY = 'genxcare.themePreference';
 
 function isPreference(value: string | null): value is ThemePreference {
   return value === 'system' || value === 'light' || value === 'dark';

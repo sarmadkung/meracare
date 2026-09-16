@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Give MeraCare a four-tab navigation shell, a Neutral Charcoal dark mode, and a shared component layer so the app looks designed and composes consistently.
+**Goal:** Give GenXcare a four-tab navigation shell, a Neutral Charcoal dark mode, and a shared component layer so the app looks designed and composes consistently.
 
 **Architecture:** Three phases, each independently shippable. Phase 1 builds the token additions and seven UI primitives with no screen changes — consistency comes from shared components, not from repeating work on 30 screens. Phase 2 introduces the `(tabs)` route group, themed header defaults, and the Settings stack that finally houses sign-out. Phase 3 rebuilds Today and Circle on the new primitives. Remaining screens (phase 4 in the spec) get their own plan once the component layer is proven in use.
 
@@ -224,7 +224,7 @@ git commit -m "Give dark mode a neutral ground and name our shadows"
 
 - [ ] **Step 1: Install the icon library**
 
-Run: `pnpm --filter @meracare/mobile add @expo/vector-icons`
+Run: `pnpm --filter @genxcare/mobile add @expo/vector-icons`
 
 It ships bundled fonts and needs no native rebuild.
 
@@ -1863,7 +1863,7 @@ Expected: FAIL — `Cannot find module '../(tabs)/circle'`.
 Create `src/app/(tabs)/circle.tsx`:
 
 ```tsx
-import type { Senior } from '@meracare/contracts';
+import type { Senior } from '@genxcare/contracts';
 import { Stack, router } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -2123,7 +2123,7 @@ function timezoneFor(people: Senior[], seniorId: string): string {
 }
 ```
 
-Imports needed: `statusLabel`, `taskTimeLabel` and `type Senior` from `@meracare/contracts`; `Redirect`, `Stack` from `expo-router`; `View` from `react-native`; `EmptyState`, `ListRow`, `Screen`, `SectionHeader`, `Text` from `@/components/ui`.
+Imports needed: `statusLabel`, `taskTimeLabel` and `type Senior` from `@genxcare/contracts`; `Redirect`, `Stack` from `expo-router`; `View` from `react-native`; `EmptyState`, `ListRow`, `Screen`, `SectionHeader`, `Text` from `@/components/ui`.
 
 - [ ] **Step 4: Run tests to verify they pass**
 

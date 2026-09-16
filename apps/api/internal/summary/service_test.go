@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/medications"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/seniors"
-	"github.com/meracare/api/internal/summary"
-	"github.com/meracare/api/internal/tasks"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/medications"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/seniors"
+	"github.com/genxcare/api/internal/summary"
+	"github.com/genxcare/api/internal/tasks"
 )
 
 // The care circle list answers "who am I looking after". It cannot answer "does

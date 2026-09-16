@@ -1,5 +1,5 @@
-import type { ReminderPayload } from '@meracare/contracts';
-import { readPushPayload } from '@meracare/contracts';
+import type { ReminderPayload } from '@genxcare/contracts';
+import { readPushPayload } from '@genxcare/contracts';
 
 import { notificationDestination, reminderDestination } from '../routes';
 

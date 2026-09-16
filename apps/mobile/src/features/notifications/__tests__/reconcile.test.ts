@@ -1,4 +1,4 @@
-import type { Reminder, ReminderPlan } from '@meracare/contracts';
+import type { Reminder, ReminderPlan } from '@genxcare/contracts';
 
 import { reconcile, type ScheduledNotification } from '../reconcile';
 

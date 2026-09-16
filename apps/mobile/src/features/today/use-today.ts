@@ -1,4 +1,4 @@
-import type { TodayListResponse } from '@meracare/contracts';
+import type { TodayListResponse } from '@genxcare/contracts';
 import { useQuery } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';

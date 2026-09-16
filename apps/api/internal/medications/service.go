@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/recurrence"
-	"github.com/meracare/api/internal/seniors"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/recurrence"
+	"github.com/genxcare/api/internal/seniors"
 )
 
 // SeniorLookup loads the senior a medication belongs to, for their timezone.

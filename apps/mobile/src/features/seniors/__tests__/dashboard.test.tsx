@@ -1,4 +1,4 @@
-import type { Senior } from '@meracare/contracts';
+import type { Senior } from '@genxcare/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';

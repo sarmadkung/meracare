@@ -1,4 +1,4 @@
-import type { CareEvent } from '@meracare/contracts';
+import type { CareEvent } from '@genxcare/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';

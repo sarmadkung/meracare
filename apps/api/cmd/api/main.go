@@ -1,4 +1,4 @@
-// Command api runs the MeraCare HTTP API.
+// Command api runs the GenXcare HTTP API.
 package main
 
 import (
@@ -18,18 +18,18 @@ import (
 	// their tasks at the wrong hour.
 	_ "time/tzdata"
 
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/notifications"
-	"github.com/meracare/api/internal/server"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/notifications"
+	"github.com/genxcare/api/internal/server"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 func main() {
 	if err := run(); err != nil {
 		// The logger may not exist yet, so report to stderr and exit non-zero.
-		fmt.Fprintf(os.Stderr, "meracare-api: %v\n", err)
+		fmt.Fprintf(os.Stderr, "genxcare-api: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -48,7 +48,7 @@ func run() error {
 	logger := logging.New(os.Stdout, logging.Options{
 		Level:       cfg.LogLevel,
 		Development: cfg.Env.IsDevelopment(),
-		ServiceName: "meracare-api",
+		ServiceName: "genxcare-api",
 	})
 	slog.SetDefault(logger)
 

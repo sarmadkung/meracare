@@ -3,7 +3,7 @@ Yes. Since **Phase 8 is the current phase**, the next phase after that is **Phas
 But **don't give this to the agent yet** if Phase 8 isn't complete. Once PR #8 is done/merged, use this as `plans/phase9.md`:
 
 ````md
-# MeraCare — Phase 9: Final MVP Integration & Production Readiness
+# GenXcare — Phase 9: Final MVP Integration & Production Readiness
 
 Phase 8 is complete and merged.
 
@@ -13,7 +13,7 @@ This is the final MVP phase.
 
 Do not introduce new major product domains.
 
-The goal is to bring the existing MeraCare functionality together into a complete, polished, production-ready MVP.
+The goal is to bring the existing GenXcare functionality together into a complete, polished, production-ready MVP.
 
 ---
 
@@ -231,10 +231,10 @@ Verify:
 
 Implement/polish the MVP onboarding flow.
 
-The user must understand the two primary ways to use MeraCare:
+The user must understand the two primary ways to use GenXcare:
 
 ```text
-Use MeraCare for myself
+Use GenXcare for myself
 ```
 
 or:
@@ -1377,7 +1377,7 @@ Phase 9 is complete when:
 * No major MVP placeholders remain.
 * No post-MVP features have been unnecessarily implemented.
 
-When Phase 9 is complete, **the MeraCare MVP is complete**.
+When Phase 9 is complete, **the GenXcare MVP is complete**.
 
 Stop after Phase 9.
 

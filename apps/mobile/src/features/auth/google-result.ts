@@ -9,6 +9,6 @@ export type GoogleSignInResult =
 
 /**
  * Path the OAuth callback returns to. On native it becomes
- * `meracare://auth/callback`; on web it is appended to the current origin.
+ * `genxcare://auth/callback`; on web it is appended to the current origin.
  */
 export const GOOGLE_REDIRECT_PATH = '/auth/callback';

@@ -3,7 +3,7 @@ import type {
   CareNoteListResponse,
   CreateCareNoteRequest,
   UpdateCareNoteRequest,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '@/lib/api-client';

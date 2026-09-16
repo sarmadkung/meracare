@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // RequestLogger attaches a request-scoped logger and records one line per

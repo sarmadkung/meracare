@@ -8,7 +8,7 @@ import type {
   Invitation,
   InvitationListResponse,
   InvitationPreview,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { seniorKeys } from '@/features/seniors/use-seniors';

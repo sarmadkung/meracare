@@ -1,5 +1,5 @@
-import type { AppointmentKind, CreateAppointmentRequest } from '@meracare/contracts';
-import { SELECTABLE_APPOINTMENT_KINDS } from '@meracare/contracts';
+import type { AppointmentKind, CreateAppointmentRequest } from '@genxcare/contracts';
+import { SELECTABLE_APPOINTMENT_KINDS } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';

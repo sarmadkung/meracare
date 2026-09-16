@@ -3,7 +3,7 @@ package seed_test
 import (
 	"testing"
 
-	"github.com/meracare/api/internal/seed"
+	"github.com/genxcare/api/internal/seed"
 )
 
 /*

@@ -1,5 +1,5 @@
-import type { Reminder, ReminderPlan } from '@meracare/contracts';
-import { reminderBody, reminderPayload, reminderTitle } from '@meracare/contracts';
+import type { Reminder, ReminderPlan } from '@genxcare/contracts';
+import { reminderBody, reminderPayload, reminderTitle } from '@genxcare/contracts';
 import * as Notifications from 'expo-notifications';
 
 import { reconcile, type ScheduledNotification } from './reconcile';
@@ -7,7 +7,7 @@ import { reconcile, type ScheduledNotification } from './reconcile';
 /**
  * The only place that talks to the operating system's notification scheduler.
  *
- * Reminders are scheduled by the OS, not by MeraCare: there is no timer, no
+ * Reminders are scheduled by the OS, not by GenXcare: there is no timer, no
  * interval, and no background process kept alive to notice that a dose is due.
  * The device is told once, when the app is open, and the OS delivers whether or
  * not the app is running (docs/08-notifications-and-background.md,
@@ -15,7 +15,7 @@ import { reconcile, type ScheduledNotification } from './reconcile';
  */
 
 /**
- * How a reminder behaves when it fires while MeraCare is open.
+ * How a reminder behaves when it fires while GenXcare is open.
  *
  * It is still shown. A caregiver reading last week's activity when the eight
  * o'clock dose comes due needs telling, and a notification suppressed because
@@ -40,7 +40,7 @@ export const MEDICATION_TAKEN_ACTION = 'medication_taken';
 export const MEDICATION_SKIP_ACTION = 'medication_skip';
 export const MEDICATION_SNOOZE_ACTION = 'medication_snooze';
 
-const SNOOZE_PREFIX = 'meracare-snooze-';
+const SNOOZE_PREFIX = 'genxcare-snooze-';
 const SNOOZE_SECONDS = 10 * 60;
 
 /** Registers the buttons the OS displays on medication notifications. */

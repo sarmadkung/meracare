@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/careevents"
-	"github.com/meracare/api/internal/notes"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/seniors"
-	"github.com/meracare/api/internal/testsupport"
-	"github.com/meracare/api/internal/users"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/careevents"
+	"github.com/genxcare/api/internal/notes"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/seniors"
+	"github.com/genxcare/api/internal/testsupport"
+	"github.com/genxcare/api/internal/users"
 )
 
 func TestANoteKeepsItsAuthorAndWritesActivity(t *testing.T) {

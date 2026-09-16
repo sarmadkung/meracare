@@ -5,7 +5,7 @@ import type {
   AppointmentStatus,
   CreateAppointmentRequest,
   UpdateAppointmentRequest,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import {
   useInfiniteQuery,
   useMutation,

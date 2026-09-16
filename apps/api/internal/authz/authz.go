@@ -20,11 +20,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/pkg/httpx"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // SeniorIDParam is the chi route parameter carrying the senior's ID.

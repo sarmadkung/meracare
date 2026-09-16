@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/paging"
+	"github.com/genxcare/api/internal/paging"
 )
 
 func TestACursorSurvivesTheRoundTrip(t *testing.T) {

@@ -1,4 +1,4 @@
-import type { CareEvent, CareEventType } from '@meracare/contracts';
+import type { CareEvent, CareEventType } from '@genxcare/contracts';
 import {
   CARE_EVENT_TYPES,
   careEventCategory,
@@ -7,7 +7,7 @@ import {
   careEventTone,
   dayHeading,
   groupByDay,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 
 /**
  * The wording somebody actually reads. Two things matter most: no raw

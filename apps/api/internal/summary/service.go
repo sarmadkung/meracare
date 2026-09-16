@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/medications"
-	"github.com/meracare/api/internal/seniors"
-	"github.com/meracare/api/internal/tasks"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/medications"
+	"github.com/genxcare/api/internal/seniors"
+	"github.com/genxcare/api/internal/tasks"
 )
 
 // SeniorLister returns the circles the caller belongs to.

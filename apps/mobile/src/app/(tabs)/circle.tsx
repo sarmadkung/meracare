@@ -1,4 +1,4 @@
-import type { Senior } from '@meracare/contracts';
+import type { Senior } from '@genxcare/contracts';
 import { Stack, router } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 

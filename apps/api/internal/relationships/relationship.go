@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
+	"github.com/genxcare/api/internal/care"
 )
 
 // Relationship is one user's membership of one senior's care circle.

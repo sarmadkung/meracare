@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/meracare/api/pkg/httpx"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 func TestRedactPath(t *testing.T) {

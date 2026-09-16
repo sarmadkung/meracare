@@ -1,4 +1,4 @@
--- 0009_notification_delivery — the notifications MeraCare has actually decided
+-- 0009_notification_delivery — the notifications GenXcare has actually decided
 -- to send, and the state of sending them.
 --
 -- 0008 deliberately stored no reminders, because a reminder is a consequence of
@@ -43,7 +43,7 @@ CREATE TABLE notifications (
     -- no preferences to consult (plans/phase11.md §7).
     recipient_user_id   uuid        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
 
-    -- Who the notification is about. Always present: every type MeraCare sends
+    -- Who the notification is about. Always present: every type GenXcare sends
     -- today concerns one senior's care.
     senior_id           uuid        NOT NULL REFERENCES senior_profiles (id) ON DELETE CASCADE,
 

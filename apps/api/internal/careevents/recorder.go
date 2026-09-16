@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/database"
+	"github.com/genxcare/api/internal/database"
 )
 
 // Recorder is how a domain writes an event alongside the change it describes.

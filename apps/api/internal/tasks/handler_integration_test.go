@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/relationships"
-	"github.com/meracare/api/internal/server"
-	"github.com/meracare/api/internal/testsupport"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/relationships"
+	"github.com/genxcare/api/internal/server"
+	"github.com/genxcare/api/internal/testsupport"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // These tests drive the real router over HTTP against a real database, because

@@ -1,10 +1,10 @@
-import type { CreateTaskRequest, TaskRecurrence, Weekday } from '@meracare/contracts';
+import type { CreateTaskRequest, TaskRecurrence, Weekday } from '@genxcare/contracts';
 import {
   RECURRENCE_PRESETS,
   SELECTABLE_WEEKDAYS,
   recurrenceLabel,
   roleLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';

@@ -26,10 +26,10 @@ export interface GoogleButtonProps {
 /**
  * "Continue with Google" — the neutral light button from Google's sign-in
  * branding guidelines: the unmodified mark on a white surface with a grey
- * border, so it reads as Google's control rather than a MeraCare one.
+ * border, so it reads as Google's control rather than a GenXcare one.
  *
  * It keeps the 48dp minimum touch target and visible pressed state that every
- * MeraCare control has (docs/18-visual-theme-and-illustrations.md).
+ * GenXcare control has (docs/18-visual-theme-and-illustrations.md).
  */
 export function GoogleButton({ onPress, loading = false, disabled, style }: GoogleButtonProps) {
   const theme = useTheme();

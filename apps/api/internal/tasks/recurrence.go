@@ -1,6 +1,6 @@
 package tasks
 
-import "github.com/meracare/api/internal/recurrence"
+import "github.com/genxcare/api/internal/recurrence"
 
 // The repeat rule for a care task is the shared engine in internal/recurrence,
 // named here in the vocabulary this package speaks.

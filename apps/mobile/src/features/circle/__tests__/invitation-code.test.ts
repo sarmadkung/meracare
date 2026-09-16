@@ -21,7 +21,7 @@ describe('parseInvitationCode', () => {
   });
 
   it('extracts the code from a shared app link', () => {
-    expect(parseInvitationCode('meracare://invitations/K7M29XQP4WTZ')).toBe('K7M29XQP4WTZ');
+    expect(parseInvitationCode('genxcare://invitations/K7M29XQP4WTZ')).toBe('K7M29XQP4WTZ');
   });
 
   // Expo Go serves the same route under a development URL.
@@ -34,7 +34,7 @@ describe('parseInvitationCode', () => {
   it('extracts the code from a link pasted inside a longer message', () => {
     const message = [
       "Ahmed invited you to help with Mrs Khan's care.",
-      'meracare://invitations/K7M29XQP4WTZ',
+      'genxcare://invitations/K7M29XQP4WTZ',
     ].join('\n');
 
     expect(parseInvitationCode(message)).toBe('K7M29XQP4WTZ');
@@ -47,7 +47,7 @@ describe('parseInvitationCode', () => {
     ['too long', 'K7M29XQP4WTZ9'],
     ['an excluded letter', 'K7M29XQP4WTU'],
     ['punctuation', 'K7M29XQP4WT!'],
-    ['a link with a malformed code', 'meracare://invitations/nope'],
+    ['a link with a malformed code', 'genxcare://invitations/nope'],
   ])('rejects a code that is %s', (_label, raw) => {
     expect(parseInvitationCode(raw)).toBeNull();
   });

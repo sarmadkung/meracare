@@ -1,4 +1,4 @@
-import type { CareMessage } from '@meracare/contracts';
+import type { CareMessage } from '@genxcare/contracts';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';

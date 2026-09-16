@@ -1,5 +1,5 @@
-import type { MedicationSchedule } from '@meracare/contracts';
-import { scheduleLabel } from '@meracare/contracts';
+import type { MedicationSchedule } from '@genxcare/contracts';
+import { scheduleLabel } from '@genxcare/contracts';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';

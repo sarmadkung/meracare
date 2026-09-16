@@ -32,7 +32,7 @@ const FOLDED: Record<string, string> = { I: '1', L: '1', O: '0' };
 
 /** Pulls the last path segment out of an invitation link, if that is what this is. */
 function segmentFromLink(raw: string): string | null {
-  // Matches meracare://invitations/<code> and the exp://…/--/invitations/<code>
+  // Matches genxcare://invitations/<code> and the exp://…/--/invitations/<code>
   // form Expo Go serves, anywhere within a longer message.
   const match = /invitations\/([^\s/?#]+)/i.exec(raw);
   return match?.[1] ?? null;

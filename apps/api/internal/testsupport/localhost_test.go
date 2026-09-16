@@ -12,19 +12,19 @@ func TestLocalDatabasesAreAllowed(t *testing.T) {
 	cases := []string{
 		// What docker-compose.yml and docs/IMPLEMENTATION_STATUS.md tell people
 		// to use.
-		"postgres://meracare:meracare@localhost:55432/meracare?sslmode=disable",
+		"postgres://genxcare:genxcare@localhost:55432/genxcare?sslmode=disable",
 		// What CI uses, so restoring the workflow needs no exception.
-		"postgres://meracare:meracare@localhost:5432/meracare?sslmode=disable",
-		"postgresql://meracare@127.0.0.1:5432/meracare",
-		"postgres://meracare@[::1]:5432/meracare",
-		"postgres://meracare@LOCALHOST:5432/meracare",
+		"postgres://genxcare:genxcare@localhost:5432/genxcare?sslmode=disable",
+		"postgresql://genxcare@127.0.0.1:5432/genxcare",
+		"postgres://genxcare@[::1]:5432/genxcare",
+		"postgres://genxcare@LOCALHOST:5432/genxcare",
 		// No port.
-		"postgres://meracare@localhost/meracare",
+		"postgres://genxcare@localhost/genxcare",
 		// Keyword form, which libpq also accepts.
-		"host=localhost port=5432 dbname=meracare",
-		"dbname=meracare host=127.0.0.1",
+		"host=localhost port=5432 dbname=genxcare",
+		"dbname=genxcare host=127.0.0.1",
 		// No host at all: a Unix socket, which is local by definition.
-		"dbname=meracare user=meracare",
+		"dbname=genxcare user=genxcare",
 	}
 
 	for _, url := range cases {
@@ -54,11 +54,11 @@ func TestHostedDatabasesAreRefused(t *testing.T) {
 		},
 		{
 			"any other remote host",
-			"postgres://meracare@10.0.0.7:5432/meracare",
+			"postgres://genxcare@10.0.0.7:5432/genxcare",
 		},
 		{
 			"a hostname that merely looks local",
-			"postgres://meracare@localhost.example.com:5432/meracare",
+			"postgres://genxcare@localhost.example.com:5432/genxcare",
 		},
 		{
 			"a remote host in keyword form",
@@ -93,7 +93,7 @@ func TestHostedDatabasesAreRefused(t *testing.T) {
 // Anything unreadable is refused rather than assumed local: failing a test run
 // is recoverable, and truncating a hosted database is not.
 func TestUnreadableConnectionStringsAreRefused(t *testing.T) {
-	for _, url := range []string{"nonsense", "mysql://localhost/meracare", ""} {
+	for _, url := range []string{"nonsense", "mysql://localhost/genxcare", ""} {
 		t.Run(url, func(t *testing.T) {
 			if err := RequireLocalHost(url); err == nil {
 				t.Errorf("RequireLocalHost(%q) was trusted", url)

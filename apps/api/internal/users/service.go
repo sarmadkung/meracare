@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/meracare/api/internal/auth"
+	"github.com/genxcare/api/internal/auth"
 )
 
 // Service holds the user-facing behaviour that sits above the repository.

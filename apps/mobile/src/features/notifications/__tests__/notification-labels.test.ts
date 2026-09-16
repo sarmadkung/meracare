@@ -1,10 +1,10 @@
-import type { Reminder } from '@meracare/contracts';
+import type { Reminder } from '@genxcare/contracts';
 import {
   readReminderPayload,
   reminderBody,
   reminderPayload,
   reminderTitle,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 
 /**
  * A notification appears on a locked phone, in front of whoever happens to be

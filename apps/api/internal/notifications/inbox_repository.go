@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/meracare/api/internal/paging"
+	"github.com/genxcare/api/internal/paging"
 )
 
 // ErrBadCursor is returned when a page cursor cannot be read. The same sentinel

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/seed"
-	"github.com/meracare/api/internal/testsupport"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/seed"
+	"github.com/genxcare/api/internal/testsupport"
 )
 
 /*

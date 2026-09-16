@@ -3,7 +3,7 @@
 //
 // docs/05-api-and-backend-spec.md asks for cursor pagination and specifically
 // against OFFSET for large timelines. The position is always the same shape —
-// an instant and a tie-breaking id — because every history MeraCare pages is
+// an instant and a tie-breaking id — because every history GenXcare pages is
 // ordered by when something was due and then by row, so one implementation
 // covers medication doses, appointments, and the activity timeline to come.
 //

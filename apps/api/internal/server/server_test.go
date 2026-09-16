@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/server"
-	"github.com/meracare/api/pkg/httpx"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/server"
+	"github.com/genxcare/api/pkg/httpx"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // rejectingVerifier stands in for Supabase; these tests never present a valid

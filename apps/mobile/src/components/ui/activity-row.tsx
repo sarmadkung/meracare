@@ -1,10 +1,10 @@
-import type { CareEvent } from '@meracare/contracts';
+import type { CareEvent } from '@genxcare/contracts';
 import {
   careEventCategory,
   careEventDescription,
   careEventTimeLabel,
   careEventTone,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';

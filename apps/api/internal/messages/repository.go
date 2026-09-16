@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/paging"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/paging"
 )
 
 var ErrNotFound = errors.New("message not found")

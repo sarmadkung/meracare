@@ -1,4 +1,4 @@
-import type { Reminder, ReminderPlan } from '@meracare/contracts';
+import type { Reminder, ReminderPlan } from '@genxcare/contracts';
 import * as Notifications from 'expo-notifications';
 
 import {
@@ -136,19 +136,19 @@ it('snoozes a medication notification for ten minutes', async () => {
 it('cancels a snoozed follow-up after that dose is recorded', async () => {
   pending.mockResolvedValue([
     {
-      identifier: 'meracare-snooze-1',
+      identifier: 'genxcare-snooze-1',
       content: { data: { entityId: 'dose-1' } },
     },
     {
-      identifier: 'meracare-snooze-2',
+      identifier: 'genxcare-snooze-2',
       content: { data: { entityId: 'dose-2' } },
     },
   ]);
 
   await cancelSnoozedMedicationNotifications('dose-1');
 
-  expect(cancel).toHaveBeenCalledWith('meracare-snooze-1');
-  expect(cancel).not.toHaveBeenCalledWith('meracare-snooze-2');
+  expect(cancel).toHaveBeenCalledWith('genxcare-snooze-1');
+  expect(cancel).not.toHaveBeenCalledWith('genxcare-snooze-2');
 });
 
 it('schedules nothing on a second run', async () => {

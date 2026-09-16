@@ -11,14 +11,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "meracare-migrate: %v\n", err)
+		fmt.Fprintf(os.Stderr, "genxcare-migrate: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -40,7 +40,7 @@ func run() error {
 	logger := logging.New(os.Stdout, logging.Options{
 		Level:       cfg.LogLevel,
 		Development: cfg.Env.IsDevelopment(),
-		ServiceName: "meracare-migrate",
+		ServiceName: "genxcare-migrate",
 	})
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

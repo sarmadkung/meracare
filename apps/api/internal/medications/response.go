@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/recurrence"
+	"github.com/genxcare/api/internal/recurrence"
 )
 
 // MedicationResponse is the JSON representation of a medication.

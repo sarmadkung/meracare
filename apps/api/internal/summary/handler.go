@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/pkg/httpx"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/pkg/httpx"
 )
 
 // Handler exposes `GET /v1/seniors/summary`.

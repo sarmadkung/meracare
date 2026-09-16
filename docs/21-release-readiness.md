@@ -15,11 +15,11 @@ work. A checked item must have evidence; configuration must never be inferred.
       missed-medication caregiver escalation implementation.
 - [x] Five locally bundled, Deep-Teal unDraw onboarding/empty-state illustrations
       with source and license records in `ASSET_LICENSES.md`.
-- [x] Bundle identifiers: `app.meracare.mobile`.
+- [x] Bundle identifiers: `app.genxcare.mobile`.
 
 ## Product approval required
 
-- [x] Approve `apps/mobile/assets/images/brand-mark.png` as the MeraCare mark.
+- [x] Approve `apps/mobile/assets/images/brand-mark.png` as the GenXcare mark.
 - [x] Produce deterministic runtime icon, adaptive-icon, monochrome, favicon, and
       splash exports from the approved source artwork.
 - [ ] Produce and approve store artwork and a social-card export from the

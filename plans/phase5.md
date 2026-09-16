@@ -1,4 +1,4 @@
-# MeraCare — Phase 5: Medication Management
+# GenXcare — Phase 5: Medication Management
 
 Phase 4 is complete and merged.
 
@@ -8,7 +8,7 @@ Do not start Phase 6 or implement unrelated features.
 
 ## Objective
 
-Build MeraCare's medication management system.
+Build GenXcare's medication management system.
 
 The system must support:
 
@@ -126,7 +126,7 @@ Do not add unnecessary clinical information.
 
 Do not attempt to create a medical-record system.
 
-MeraCare is a care coordination application, not a clinical EMR.
+GenXcare is a care coordination application, not a clinical EMR.
 
 ---
 
@@ -861,7 +861,7 @@ Avoid unnecessary medical imagery.
 
 # 32. Safety
 
-MeraCare is a care coordination application.
+GenXcare is a care coordination application.
 
 Do not present the app as a medical professional.
 

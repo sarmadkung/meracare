@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/auth"
-	"github.com/meracare/api/pkg/httpx"
+	"github.com/genxcare/api/internal/auth"
+	"github.com/genxcare/api/pkg/httpx"
 )
 
 type stubResolver struct {

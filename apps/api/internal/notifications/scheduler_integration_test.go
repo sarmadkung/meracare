@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/care"
-	"github.com/meracare/api/internal/notifications"
-	"github.com/meracare/api/pkg/logging"
+	"github.com/genxcare/api/internal/care"
+	"github.com/genxcare/api/internal/notifications"
+	"github.com/genxcare/api/pkg/logging"
 )
 
 // The delivery half of the scheduler, against a real database.
@@ -310,7 +310,7 @@ func TestADueNotificationIsPushedWithItsOwnWords(t *testing.T) {
 		t.Errorf("title = %q", sent[0].Title)
 	}
 	// The payload is identifiers only. Anything else would be information
-	// travelling outside MeraCare's authorization (plans/phase11.md §58).
+	// travelling outside GenXcare's authorization (plans/phase11.md §58).
 	for _, key := range []string{"notificationId", "type", "seniorId", "entityType", "entityId"} {
 		if sent[0].Data[key] == "" {
 			t.Errorf("payload is missing %q: %v", key, sent[0].Data)

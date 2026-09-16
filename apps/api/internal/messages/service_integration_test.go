@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/messages"
-	"github.com/meracare/api/internal/testsupport"
+	"github.com/genxcare/api/internal/messages"
+	"github.com/genxcare/api/internal/testsupport"
 )
 
 func TestUnreadStateAdvancesOnlyThroughTheChosenMessage(t *testing.T) {

@@ -5,7 +5,7 @@ import {
   permissionLabelsByGroup,
   roleLabel,
   type CarePermission,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 
 /**
  * The invite and access screens must never show a raw permission identifier.

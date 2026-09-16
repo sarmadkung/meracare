@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/relationships"
+	"github.com/genxcare/api/internal/relationships"
 )
 
 // Senior is a senior profile.

@@ -22,14 +22,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/meracare/api/internal/config"
-	"github.com/meracare/api/internal/database"
-	"github.com/meracare/api/internal/seed"
+	"github.com/genxcare/api/internal/config"
+	"github.com/genxcare/api/internal/database"
+	"github.com/genxcare/api/internal/seed"
 )
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "meracare-seed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "genxcare-seed: %v\n", err)
 		os.Exit(1)
 	}
 }

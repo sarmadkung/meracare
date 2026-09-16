@@ -1,4 +1,4 @@
-import type { CareTask, TaskStatus } from '@meracare/contracts';
+import type { CareTask, TaskStatus } from '@genxcare/contracts';
 import {
   RECURRENCE_PRESETS,
   TASK_STATUSES,
@@ -9,7 +9,7 @@ import {
   statusTone,
   taskDateLabel,
   taskTimeLabel,
-} from '@meracare/contracts';
+} from '@genxcare/contracts';
 
 /**
  * Nothing internal may reach a screen: not the rule the server stores, not a

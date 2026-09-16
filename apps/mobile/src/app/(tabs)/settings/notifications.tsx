@@ -1,4 +1,4 @@
-import { NOTIFICATION_CATEGORIES } from '@meracare/contracts';
+import { NOTIFICATION_CATEGORIES } from '@genxcare/contracts';
 import { Stack } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, Switch, View } from 'react-native';
@@ -22,7 +22,7 @@ import { useTheme } from '@/theme';
  * Notification settings (docs/13-mvp-screen-map.md, screen 25).
  *
  * Two independent things decide whether a phone makes a sound, and the screen
- * shows both: what MeraCare has been asked to send, and what the operating
+ * shows both: what GenXcare has been asked to send, and what the operating
  * system allows. Showing only the first is how an app ends up insisting
  * reminders are on while the user hears nothing (plans/phase8.md §6).
  */
@@ -90,7 +90,7 @@ export default function NotificationSettingsScreen() {
       <View style={{ gap: theme.spacing.sm }}>
         <Text variant="pageHeading">Notifications</Text>
         <Text variant="body" color="secondary">
-          MeraCare reminds you before care is due and can alert you when care remains unrecorded.
+          GenXcare reminds you before care is due and can alert you when care remains unrecorded.
           Notifications never say what the medicine is.
         </Text>
       </View>
@@ -125,7 +125,7 @@ export default function NotificationSettingsScreen() {
         <Text variant="sectionHeading">About reminders</Text>
         <Text variant="body" color="secondary">
           Upcoming reminders are scheduled on this device, so they arrive without a connection.
-          Missed-dose and care-activity alerts come from MeraCare and need a connection.
+          Missed-dose and care-activity alerts come from GenXcare and need a connection.
         </Text>
       </Card>
     </Screen>
@@ -149,7 +149,7 @@ function PermissionCard({ state, onAsk }: { state: PermissionState | null; onAsk
       <Card>
         <Text variant="sectionHeading">Turn on notifications</Text>
         <Text variant="body" color="secondary">
-          MeraCare needs your phone&apos;s permission before it can remind you. You can change this
+          GenXcare needs your phone&apos;s permission before it can remind you. You can change this
           at any time.
         </Text>
         {/* Asked here, in context, rather than on first launch: somebody who
@@ -165,7 +165,7 @@ function PermissionCard({ state, onAsk }: { state: PermissionState | null; onAsk
       <Card>
         <Text variant="sectionHeading">Reminders arrive quietly</Text>
         <Text variant="body" color="secondary">
-          Your phone is delivering MeraCare reminders silently, to the notification centre. Allow
+          Your phone is delivering GenXcare reminders silently, to the notification centre. Allow
           notifications in Settings to hear them.
         </Text>
         <Button variant="secondary" label="Open Settings" onPress={() => Linking.openSettings()} />
@@ -179,7 +179,7 @@ function PermissionCard({ state, onAsk }: { state: PermissionState | null; onAsk
         Notifications are turned off
       </Text>
       <Text variant="body" color="secondary">
-        Your phone is blocking MeraCare reminders, so nothing below will reach you. You can turn
+        Your phone is blocking GenXcare reminders, so nothing below will reach you. You can turn
         them back on in your phone&apos;s settings.
       </Text>
       <Button variant="secondary" label="Open Settings" onPress={() => Linking.openSettings()} />

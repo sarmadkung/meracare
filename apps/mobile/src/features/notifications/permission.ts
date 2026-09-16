@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications';
 /**
  * The operating system's half of notification permission.
  *
- * Two separate things decide whether a reminder appears: what MeraCare has been
+ * Two separate things decide whether a reminder appears: what GenXcare has been
  * asked to send, and what the OS allows. A user can have every category
  * switched on in settings and still see nothing because they declined the
  * system prompt a year ago, and an app that conflates the two will insist
