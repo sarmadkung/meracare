@@ -21,7 +21,7 @@ export default function Index() {
         >
           <ActivityIndicator color={theme.colors.primary} size="large" />
           <Text variant="secondary" color="secondary">
-            Loading GenXcare…
+            Loading GenxCare…
           </Text>
         </View>
       </Screen>

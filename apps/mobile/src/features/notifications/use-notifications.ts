@@ -103,7 +103,7 @@ export function useRegisterDevice() {
 /**
  * The notification inbox, newest first.
  *
- * Keyset-paged through the same cursor every other history in GenXcare uses, so
+ * Keyset-paged through the same cursor every other history in GenxCare uses, so
  * a professional caregiver with months of notifications loads a screenful
  * rather than all of them (plans/phase11.md §§41, 56).
  *

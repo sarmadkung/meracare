@@ -42,7 +42,7 @@ func Title(t Type) string {
 	if title, ok := titles[t]; ok {
 		return title
 	}
-	return "GenXcare"
+	return "GenxCare"
 }
 
 // Subject is who a notification is about, and the clock its times are read in.

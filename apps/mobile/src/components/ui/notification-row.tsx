@@ -18,7 +18,7 @@ export interface NotificationRowProps {
  *
  * The title and body are the server's, unchanged. They are the words that were
  * sent, and re-writing them here would mean the inbox and the lock screen could
- * disagree about what GenXcare said (plans/phase11.md §6).
+ * disagree about what GenxCare said (plans/phase11.md §6).
  *
  * Unread is marked twice over — a dot and a heavier title — because a state
  * carried by colour alone is a state some readers cannot see

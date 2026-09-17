@@ -1,4 +1,4 @@
-# GenXcare — Phase 7: Care Events & Activity Timeline
+# GenxCare — Phase 7: Care Events & Activity Timeline
 
 Phase 6 is complete and merged into `main`.
 

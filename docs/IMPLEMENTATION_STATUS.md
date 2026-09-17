@@ -12,7 +12,7 @@ the server-side notification system: a persisted inbox, six notification types,
 a scheduler that materialises and delivers, an Expo push provider behind an
 interface, retries, and the mobile inbox with an unread badge. Everything below
 the push provider is built and tested; **no real push has ever been sent**,
-because GenXcare has no EAS project and no push credentials. See Blocker 7 and
+because GenxCare has no EAS project and no push credentials. See Blocker 7 and
 `docs/20-notifications-delivery.md`.
 
 Phase 10's Google sign-in remains code complete and blocked on console
@@ -23,7 +23,7 @@ The documented MVP feature surface is implemented in the repository. On
 added end to end: migration, authorization, API, contracts, mobile screens, read
 state/activity behavior, and automated tests. Apple OAuth, the path-complete
 OpenAPI contract, and bundled Inter typography were added in the same pass.
-The visual pass then adopted the approved GenXcare mark and added five locally
+The visual pass then adopted the approved GenxCare mark and added five locally
 bundled, Deep-Teal unDraw illustrations for onboarding and empty states. Their
 source SVGs, runtime PNGs, modifications, and license records are retained in
 the repository.
@@ -1231,7 +1231,7 @@ docs/08 assigns exactly medication, task, and appointment reminders to local
 notifications — "Server schedule → Mobile sync → OS local notification" — and
 remote push to missed work, activity, invitations, and messages, none of which
 Phase 8 covers. Local scheduling also means reminders arrive without a
-connection and without GenXcare holding push credentials it does not have.
+connection and without GenxCare holding push credentials it does not have.
 
 **There is no notifications table for reminders, and that is the design.** A
 reminder is a consequence of care, not a record of it: the dose, the schedule,

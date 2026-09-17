@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Give GenXcare a four-tab navigation shell, a Neutral Charcoal dark mode, and a shared component layer so the app looks designed and composes consistently.
+**Goal:** Give GenxCare a four-tab navigation shell, a Neutral Charcoal dark mode, and a shared component layer so the app looks designed and composes consistently.
 
 **Architecture:** Three phases, each independently shippable. Phase 1 builds the token additions and seven UI primitives with no screen changes — consistency comes from shared components, not from repeating work on 30 screens. Phase 2 introduces the `(tabs)` route group, themed header defaults, and the Settings stack that finally houses sign-out. Phase 3 rebuilds Today and Circle on the new primitives. Remaining screens (phase 4 in the spec) get their own plan once the component layer is proven in use.
 

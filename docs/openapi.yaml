@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: GenXcare API
+  title: GenxCare API
   version: 1.0.0
-  description: REST contract for the GenXcare modular monolith.
+  description: REST contract for the GenxCare modular monolith.
 servers:
   - url: http://localhost:8080
 security:

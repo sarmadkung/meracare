@@ -38,7 +38,7 @@ func TestEveryPersonaCanBeSignedInAs(t *testing.T) {
 	}
 }
 
-// The four ways of using GenXcare that look different on screen. Losing one of
+// The four ways of using GenxCare that look different on screen. Losing one of
 // them silently is how a layout ships that only ever worked for a daughter.
 func TestTheFourShapesOfUseAreAllPresent(t *testing.T) {
 	p := plan(t)

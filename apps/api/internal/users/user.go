@@ -63,5 +63,5 @@ func DefaultDisplayName(email string) string {
 	if found && strings.TrimSpace(local) != "" {
 		return strings.TrimSpace(local)
 	}
-	return "GenXcare member"
+	return "GenxCare member"
 }

@@ -1,4 +1,4 @@
-# GenXcare — Agent Instructions
+# GenxCare — Agent Instructions
 
 ## Source of Truth
 
@@ -10,16 +10,16 @@ Do not invent requirements or change documented decisions without approval.
 
 ## Product
 
-GenXcare is a senior care and family coordination platform supporting:
+GenxCare is a senior care and family coordination platform supporting:
 
 - Solo self-care
 - Family care
 - Professional caregivers
 - Mixed family + professional care
 
-GenXcare is one application. Do not create separate applications for these user types.
+GenxCare is one application. Do not create separate applications for these user types.
 
-A senior can use GenXcare without a caregiver.
+A senior can use GenxCare without a caregiver.
 
 A professional caregiver can manage multiple seniors.
 

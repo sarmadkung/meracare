@@ -10,7 +10,7 @@ import { useUIStore } from '@/stores/ui-store';
 import { useTheme } from '@/theme';
 
 /**
- * Onboarding: choose how you will use GenXcare, then create the first profile.
+ * Onboarding: choose how you will use GenxCare, then create the first profile.
  *
  * The three choices are the product's care modes (docs/01). They set the
  * creator's role in the new care circle — they do not select a different app.
@@ -65,7 +65,7 @@ export default function OnboardingScreen() {
       <Illustration name="welcome" height={180} />
 
       <View style={{ gap: theme.spacing.sm }}>
-        <Text variant="pageHeading">Welcome to GenXcare</Text>
+        <Text variant="pageHeading">Welcome to GenxCare</Text>
         <Text variant="body" color="secondary">
           How would you like to start? You can change this later, and you never have to invite
           anyone.

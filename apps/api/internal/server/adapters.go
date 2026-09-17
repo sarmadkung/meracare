@@ -258,7 +258,7 @@ type overdueSource struct {
 //
 // It asks the tasks domain what is still pending rather than computing overdue
 // itself. tasks.Instance.EffectiveStatus is the single definition of overdue in
-// GenXcare and stays that way: a still-stored-pending occurrence whose time has
+// GenxCare and stays that way: a still-stored-pending occurrence whose time has
 // passed is exactly what that method calls overdue, and a second definition
 // here is how two parts of an app start disagreeing about whether Amma took her
 // tablets (plans/phase11.md §17).

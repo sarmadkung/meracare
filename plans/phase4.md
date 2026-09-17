@@ -1,4 +1,4 @@
-# GenXcare — Phase 4: Tasks & Daily Care
+# GenxCare — Phase 4: Tasks & Daily Care
 
 Phase 3 is complete and merged.
 

@@ -25,7 +25,7 @@ const sources: Record<IllustrationName, ImageSourcePropType> = {
   welcome: require('../../../assets/illustrations/undraw/welcome-team.png'),
 };
 
-/** A locally bundled, consistently framed GenXcare illustration. */
+/** A locally bundled, consistently framed GenxCare illustration. */
 export function Illustration({ name, height = 180, accessibilityLabel, style }: IllustrationProps) {
   const theme = useTheme();
 

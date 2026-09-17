@@ -1,4 +1,4 @@
-# GenXcare — Phase 6: Appointments & Care Schedule
+# GenxCare — Phase 6: Appointments & Care Schedule
 
 Phase 5 is complete and merged.
 
@@ -10,7 +10,7 @@ Do not start Phase 7 or implement unrelated features.
 
 Build the appointment and care-schedule system.
 
-GenXcare must allow authorized users to:
+GenxCare must allow authorized users to:
 
 - create appointments
 - view appointments
@@ -647,7 +647,7 @@ Do not create a parallel event system.
 
 # 28. Safety
 
-GenXcare is a care coordination application.
+GenxCare is a care coordination application.
 
 Do not provide:
 

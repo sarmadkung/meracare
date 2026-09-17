@@ -1,4 +1,4 @@
-# GenXcare — Phase 2: User & Senior Foundation
+# GenxCare — Phase 2: User & Senior Foundation
 
 > **Archived brief:** this historical prompt was captured incompletely and ends
 > mid-section. It is retained as implementation history, not as a current or

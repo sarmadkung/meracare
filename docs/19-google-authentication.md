@@ -10,7 +10,7 @@ in an environment file, or in a chat message.
 ## Shape
 
 ```text
-GenXcare → Google → Supabase Auth → Supabase session → Go API → GenXcare user
+GenxCare → Google → Supabase Auth → Supabase session → Go API → GenxCare user
 ```
 
 Supabase is the authentication authority. It holds the Google client secret and
@@ -42,12 +42,12 @@ One **Web application** client covers all three platforms. iOS and Android use
 the same client because the OAuth exchange happens on Supabase, not on the
 device — the app only opens a browser and receives a deep link back. Separate
 Android and iOS OAuth clients are needed only for the native Google Sign-In SDKs
-(`@react-native-google-signin/google-signin`), which GenXcare deliberately does
+(`@react-native-google-signin/google-signin`), which GenxCare deliberately does
 not use: they would require the app to handle Google credentials directly and
 add a dependency outside the locked stack in `AGENTS.md`.
 
 The consent screen needs the `email`, `profile`, and `openid` scopes — nothing
-more. GenXcare asks Google for identity only, never for Gmail, Calendar, Drive,
+more. GenxCare asks Google for identity only, never for Gmail, Calendar, Drive,
 or Contacts access.
 
 Record in the project's own notes (not here): the Google Cloud project id, the
@@ -66,7 +66,7 @@ client id, and which account owns them. Never the client secret.
 
 **Authentication → URL Configuration → Redirect URLs** must allow-list every
 origin the app returns to. A redirect that is not listed is rejected and the
-person lands back on a Supabase error page instead of in GenXcare:
+person lands back on a Supabase error page instead of in GenxCare:
 
 ```text
 genxcare://auth/callback          # iOS and Android (the app.json scheme)
@@ -142,7 +142,7 @@ production.
 
 ## Accounts and Linking
 
-GenXcare application users are keyed to `auth.users.id`
+GenxCare application users are keyed to `auth.users.id`
 (`users.auth_user_id`), never to an email address. What happens when someone
 uses Google with the address of an existing email/password account is therefore
 decided entirely by Supabase:
@@ -154,7 +154,7 @@ decided entirely by Supabase:
   circles, tasks, medications, appointments, activity, and notification
   preferences. Nothing is copied or recreated.
 - **If linking is disabled** in the project, Supabase creates a second
-  `auth.users` row and GenXcare gets a second application user with its own
+  `auth.users` row and GenxCare gets a second application user with its own
   empty care data. `EnsureByAuthUserID` tolerates the duplicate address (it
   stores the second user without an email rather than refusing the sign-in), but
   the two accounts stay separate. Leave automatic linking enabled unless there is

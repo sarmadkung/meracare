@@ -85,7 +85,7 @@ function platform(): DevicePlatform {
  * Fetches an Expo push token, or nothing.
  *
  * Nothing is the normal answer today: a token requires notification permission
- * and an EAS project id, and GenXcare has no push credentials configured yet.
+ * and an EAS project id, and GenxCare has no push credentials configured yet.
  * The failure is caught rather than propagated because push is not what makes
  * reminders work — those are scheduled on the device — and an app that refused
  * to start because it could not obtain a push token would be broken for a
