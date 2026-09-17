@@ -1,4 +1,4 @@
-// Command api runs the GenXcare HTTP API.
+// Command api runs the GenxCare HTTP API.
 package main
 
 import (

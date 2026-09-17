@@ -9,7 +9,7 @@
 // recurrence engine they have no use for, or asking a task to carry a provider
 // and a location it has no meaning for (plans/phase6.md, objective).
 //
-// This is care coordination, not clinical software. GenXcare records that a
+// This is care coordination, not clinical software. GenxCare records that a
 // visit is on Thursday at half past nine; it never reasons about whether the
 // visit is needed (plans/phase6.md §28).
 //
@@ -61,7 +61,7 @@ func (s Status) Settled() bool { return s == StatusCompleted || s == StatusCance
 //
 // A short recognised list, matching plans/phase6.md §2, so the create screen
 // can offer choices instead of asking somebody to type. Deliberately not a
-// medical taxonomy: GenXcare coordinates appointments and does not classify
+// medical taxonomy: GenxCare coordinates appointments and does not classify
 // care. The database CHECK on appointments.kind mirrors it.
 type Kind string
 

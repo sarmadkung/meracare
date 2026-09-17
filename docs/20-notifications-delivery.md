@@ -1,6 +1,6 @@
 # Notifications and Delivery
 
-How GenXcare decides what to tell each person, when to tell them, and how it
+How GenxCare decides what to tell each person, when to tell them, and how it
 reaches their phone. Implemented in Phase 11 (`plans/phase11.md`), on top of the
 device-scheduled reminders of Phase 8.
 
@@ -13,7 +13,7 @@ says which one and where it belongs — never its value.
 
 ## Two Ways a Reminder Reaches a Phone
 
-GenXcare has both, and that is deliberate.
+GenxCare has both, and that is deliberate.
 
 **Device-scheduled reminders** (Phase 8) — the app fetches a plan from
 `GET /v1/notifications/reminders` and schedules local notifications with the
@@ -32,7 +32,7 @@ delivering and the app clears its local schedule; otherwise the app schedules
 locally. Two would announce every dose twice, which is the kind of bug that
 teaches people to ignore the app.
 
-Because GenXcare holds no push credentials yet, `pushTokenRegistered` is false
+Because GenxCare holds no push credentials yet, `pushTokenRegistered` is false
 everywhere and local scheduling is what actually runs. The server path is
 complete and dormant.
 
@@ -180,10 +180,10 @@ Push payloads carry five identifiers and nothing else.
 Medication reminders and missed-dose alerts use the `medication_actions` OS
 category. It offers **Taken**, **Skip**, and **Remind in 10 min**.
 
-- **Taken** opens GenXcare, re-authorizes the user against the dose's senior,
+- **Taken** opens GenxCare, re-authorizes the user against the dose's senior,
   and records the idempotent action. If offline, it is stored in the existing
   SQLite mutation queue and replayed later.
-- **Skip** opens GenXcare and shows a confirmation before using the same
+- **Skip** opens GenxCare and shows a confirmation before using the same
   authorization and offline path. A lock-screen mis-tap must not silently
   create an intentional skip.
 - **Remind in 10 min** schedules a one-off local notification with the same
@@ -282,7 +282,7 @@ settings rather than offering a button that does nothing.
 
 With permission denied the app works: the inbox, history, read state, and every
 care screen are unaffected. Only the buzz is missing. The settings screen shows
-both halves — what GenXcare will send, and what the OS allows — because an app
+both halves — what GenxCare will send, and what the OS allows — because an app
 that conflates them insists reminders are on while the phone stays silent.
 
 ## Configuration
@@ -322,7 +322,7 @@ reminders with pushes that go nowhere.
   Push needs a service worker and VAPID keys, which is its own piece of work.
   This is a deliberate Phase 11 limitation.
 - **The roster is unpaged.** One pass reads every active membership at once. At
-  GenXcare's scale that is a few thousand rows; the first deployment where it is
+  GenxCare's scale that is a few thousand rows; the first deployment where it is
   not will need the sweep sharded by senior.
 - **Care activity is polled, not pushed.** Each pass re-reads the last fifteen
   minutes of care events. Redundant, and self-healing after downtime; a

@@ -11,7 +11,7 @@ services:
       POSTGRES_USER: genxcare
       POSTGRES_PASSWORD: genxcare
       POSTGRES_DB: genxcare
-    # Host port 55432 keeps GenXcare clear of any default Postgres on 5432.
+    # Host port 55432 keeps GenxCare clear of any default Postgres on 5432.
     ports:
       - '55432:5432'
     volumes:

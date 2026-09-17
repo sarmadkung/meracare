@@ -91,7 +91,7 @@ const (
 	DeliverySkipped DeliveryStatus = "skipped"
 )
 
-// Notification is one thing GenXcare has decided to tell one person.
+// Notification is one thing GenxCare has decided to tell one person.
 //
 // It is a record of a decision, not a projection of care. Once written it stops
 // tracking the thing it describes: an appointment that moves does not rewrite

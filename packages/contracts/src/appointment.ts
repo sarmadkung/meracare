@@ -47,7 +47,7 @@ export function isAppointmentUpcoming(
  * The sort of visit an appointment is.
  *
  * A short list, matching what the API accepts. Deliberately not a medical
- * taxonomy: GenXcare coordinates appointments and does not classify care
+ * taxonomy: GenxCare coordinates appointments and does not classify care
  * (plans/phase6.md §2).
  */
 export const APPOINTMENT_KINDS = [

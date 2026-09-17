@@ -7,7 +7,7 @@ import {
 } from '../permission';
 
 /**
- * The operating system's permission is separate from GenXcare's preferences,
+ * The operating system's permission is separate from GenxCare's preferences,
  * and confusing the two is how an app ends up insisting reminders are on while
  * the phone stays silent (plans/phase8.md §6).
  */

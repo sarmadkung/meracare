@@ -1,8 +1,8 @@
-# GenXcare — Phase 10: Google Social Authentication
+# GenxCare — Phase 10: Google Social Authentication
 
 Implement **Phase 10 only**.
 
-The goal is to add **Continue with Google** authentication to GenXcare while
+The goal is to add **Continue with Google** authentication to GenxCare while
 preserving the existing authentication architecture.
 
 This phase must support:
@@ -22,8 +22,8 @@ this phase.
 Add `Continue with Google` to the existing authentication UI:
 
 ```text
-GenXcare → Continue with Google → Google → Supabase Auth → Supabase session
-        → existing Go API → authenticated GenXcare user
+GenxCare → Continue with Google → Google → Supabase Auth → Supabase session
+        → existing Go API → authenticated GenxCare user
 ```
 
 The Go API must continue treating the Supabase JWT as the source of
@@ -33,10 +33,10 @@ authentication. Do not implement Google token verification inside the Go API.
 
 ```text
                     ┌── Email / Password
-GenXcare Client ────┼── Google
+GenxCare Client ────┼── Google
                     └── Future providers
                             ↓
-                       Supabase Auth → Supabase session → Go API JWT → GenXcare
+                       Supabase Auth → Supabase session → Go API JWT → GenxCare
 ```
 
 The application should not need to know which provider was used.
@@ -73,12 +73,12 @@ The application should not need to know which provider was used.
 13. **User creation.** First Google sign-in flows through the existing
     application-user provisioning. No duplicate application users.
 14. **Existing user with Google.** Signing in with Google using the email of an
-    existing account must not silently create a second GenXcare account. If
+    existing account must not silently create a second GenxCare account. If
     linking is required, use the supported Supabase mechanism. Do not match users
     by email inside the Go API.
-15. **Account linking.** One person → one GenXcare user with both identities.
+15. **Account linking.** One person → one GenxCare user with both identities.
     Do not create custom identity-linking tables. Document the final behaviour.
-16. **New Google user.** Enters the existing GenXcare onboarding; no
+16. **New Google user.** Enters the existing GenxCare onboarding; no
     Google-specific onboarding.
 17. **Existing care data.** A correctly linked identity keeps its senior
     profile, care circles, tasks, medications, appointments, activity, and

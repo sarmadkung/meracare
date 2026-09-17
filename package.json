@@ -2,7 +2,7 @@
   "name": "genxcare",
   "version": "0.0.0",
   "private": true,
-  "description": "GenXcare — senior care and family coordination platform",
+  "description": "GenxCare — senior care and family coordination platform",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20"

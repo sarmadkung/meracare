@@ -18,7 +18,7 @@ import { useTheme } from '@/theme';
 /**
  * The notification inbox.
  *
- * A history of what GenXcare has told this person, in the device's own
+ * A history of what GenxCare has told this person, in the device's own
  * timezone. That is the one place in the app where the reader's clock is the
  * right one: a reminder's *content* is about a senior's day and reads in their
  * zone, but "when did I get this?" is a question about the reader

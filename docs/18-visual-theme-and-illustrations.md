@@ -167,7 +167,7 @@ flow.
     for every shipped asset.
 -   Maintain an `ASSET_LICENSES.md` file once production assets are
     selected.
--   `apps/mobile/assets/images/brand-mark.png` is the product-approved GenXcare
+-   `apps/mobile/assets/images/brand-mark.png` is the product-approved GenxCare
     mark. Runtime icon, adaptive-icon, monochrome, splash, and favicon exports
     derive from it. `brand-mark-v2.png` is an unselected concept and is not used
     by the application. Store and social-card exports still require final review.

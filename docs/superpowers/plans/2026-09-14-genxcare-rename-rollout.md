@@ -1,6 +1,6 @@
-# GenXcare Rename Rollout
+# GenxCare Rename Rollout
 
-**Goal:** Finish the MeraCare → GenXcare rename outside the repository, once PR #16 is merged.
+**Goal:** Finish the MeraCare → GenxCare rename outside the repository, once PR #16 is merged.
 
 **Why this exists:** the PR renames every identifier in the code, but several things that carry the old name live somewhere the code can't reach: a developer's local environment, the apps already installed on test phones, and third-party dashboards. None of them fail loudly. Each one below either breaks quietly or leaves something stale behind, so work through them in order.
 

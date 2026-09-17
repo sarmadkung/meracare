@@ -151,7 +151,7 @@ func (h *Handler) registerDevice(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, r, http.StatusOK, ToDeviceResponse(device))
 }
 
-// deactivateDevice stops GenXcare reaching one of the caller's installations.
+// deactivateDevice stops GenxCare reaching one of the caller's installations.
 func (h *Handler) deactivateDevice(w http.ResponseWriter, r *http.Request) {
 	principal := auth.MustPrincipal(r.Context())
 

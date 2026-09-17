@@ -207,7 +207,7 @@ function InvitationSent({
   async function handleShare() {
     await Share.share({
       message: [
-        `You have been invited to help with ${seniorName}'s care on GenXcare.`,
+        `You have been invited to help with ${seniorName}'s care on GenxCare.`,
         '',
         'Your invitation code:',
         formatInvitationCode(token),

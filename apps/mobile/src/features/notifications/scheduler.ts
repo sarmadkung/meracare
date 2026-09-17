@@ -7,7 +7,7 @@ import { reconcile, type ScheduledNotification } from './reconcile';
 /**
  * The only place that talks to the operating system's notification scheduler.
  *
- * Reminders are scheduled by the OS, not by GenXcare: there is no timer, no
+ * Reminders are scheduled by the OS, not by GenxCare: there is no timer, no
  * interval, and no background process kept alive to notice that a dose is due.
  * The device is told once, when the app is open, and the OS delivers whether or
  * not the app is running (docs/08-notifications-and-background.md,
@@ -15,7 +15,7 @@ import { reconcile, type ScheduledNotification } from './reconcile';
  */
 
 /**
- * How a reminder behaves when it fires while GenXcare is open.
+ * How a reminder behaves when it fires while GenxCare is open.
  *
  * It is still shown. A caregiver reading last week's activity when the eight
  * o'clock dose comes due needs telling, and a notification suppressed because

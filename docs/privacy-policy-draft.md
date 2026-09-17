@@ -1,4 +1,4 @@
-# GenXcare Privacy Notice — Draft for Review
+# GenxCare Privacy Notice — Draft for Review
 
 > Not approved for publication. The product owner and qualified counsel must
 > replace every bracketed field and confirm the actual deployment, retention,
@@ -6,13 +6,13 @@
 
 Last reviewed: 2026-08-24
 
-GenXcare helps seniors, family members, and professional caregivers coordinate
+GenxCare helps seniors, family members, and professional caregivers coordinate
 care. [LEGAL OPERATOR NAME] is responsible for the service and can be contacted
 at [PRIVACY CONTACT EMAIL AND POSTAL ADDRESS].
 
 ## Information handled
 
-Depending on how the service is used, GenXcare handles account identity and
+Depending on how the service is used, GenxCare handles account identity and
 contact information; senior profiles and emergency-contact information; care
 relationships and permissions; tasks, medication schedules and completion
 records; appointments; care notes; care-circle messages and read state; activity
@@ -23,7 +23,7 @@ history; notification preferences and device push tokens; and operational logs.
 The information is used to authenticate accounts, provide authorized care
 coordination, synchronize records, send requested reminders and notifications,
 protect the service, diagnose failures, and satisfy applicable legal duties.
-GenXcare does not use care information for advertising.
+GenxCare does not use care information for advertising.
 
 ## Sharing and processors
 
@@ -43,7 +43,7 @@ Account access, correction, export, and deletion requests can be made through
 
 ## Security
 
-GenXcare uses Supabase authentication, relationship-based authorization,
+GenxCare uses Supabase authentication, relationship-based authorization,
 encrypted transport, native secure storage for mobile sessions, tab-scoped web
 sessions, and server-side validation. No system can guarantee absolute security.
 

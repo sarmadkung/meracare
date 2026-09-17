@@ -84,7 +84,7 @@ export default function MedicationDetailScreen() {
     confirmAction({
       title: 'Delete mistaken medication?',
       message:
-        'This permanently removes the medication and its unrecorded doses. If anyone has taken or skipped a dose, GenXcare will keep the history and ask you to stop it instead.',
+        'This permanently removes the medication and its unrecorded doses. If anyone has taken or skipped a dose, GenxCare will keep the history and ask you to stop it instead.',
       confirmLabel: 'Delete',
       onConfirm: () =>
         deleteMedication.mutate(detail.id, {

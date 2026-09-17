@@ -4,7 +4,7 @@ import type { Reminder, ReminderType } from './notification';
 /**
  * The words a notification says.
  *
- * One place, as with every other user-visible sentence in GenXcare. It matters
+ * One place, as with every other user-visible sentence in GenxCare. It matters
  * more here than elsewhere: a notification appears on a locked phone, in front
  * of whoever happens to be holding it, so the wording is a privacy decision
  * rather than a copy decision (plans/phase8.md §§17, 47).

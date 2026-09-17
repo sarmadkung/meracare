@@ -1,6 +1,6 @@
 # Apple Authentication — Setup and Behaviour
 
-GenXcare uses Supabase's Apple OAuth provider. The client contains no Apple
+GenxCare uses Supabase's Apple OAuth provider. The client contains no Apple
 private key or client secret; those remain in Apple Developer and Supabase.
 
 ## Repository implementation

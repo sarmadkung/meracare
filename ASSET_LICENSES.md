@@ -36,8 +36,8 @@ preview still require final export and review.
 
 - Creator: Katerina Limpitsouni / unDraw
 - License: [unDraw license](https://undraw.co/license), reviewed 2026-08-24
-- Usage: bundled GenXcare onboarding and empty-state artwork
-- Modifications: the primary `#6C63FF` accent was changed to GenXcare Deep Teal
+- Usage: bundled GenxCare onboarding and empty-state artwork
+- Modifications: the primary `#6C63FF` accent was changed to GenxCare Deep Teal
   `#0F766E`; transparent PNG runtime exports were rendered from the retained SVG
   sources
 - Attribution: not required by the license; provenance is recorded here
@@ -51,5 +51,5 @@ preview still require final export and review.
 | `communication` | Chat                  | https://undraw.co/illustration/chat_qmyo               |
 
 The files live under `apps/mobile/assets/illustrations/undraw/`. They are part of
-GenXcare's interface and must not be redistributed as an illustration pack or
+GenxCare's interface and must not be redistributed as an illustration pack or
 used for AI/ML training. Recheck the linked license before release.

@@ -67,9 +67,9 @@ func TestDefaultDisplayName(t *testing.T) {
 	cases := map[string]string{
 		"sara@example.com":    "sara",
 		" Ahmed@Example.com ": "Ahmed",
-		"":                    "GenXcare member",
-		"not-an-email":        "GenXcare member",
-		"@example.com":        "GenXcare member",
+		"":                    "GenxCare member",
+		"not-an-email":        "GenxCare member",
+		"@example.com":        "GenxCare member",
 	}
 
 	for email, want := range cases {

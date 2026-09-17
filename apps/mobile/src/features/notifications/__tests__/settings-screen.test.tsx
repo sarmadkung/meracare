@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/theme';
 
 /**
  * The settings screen has to tell the truth about two separate things: what
- * GenXcare will send, and what the phone will allow. Most of what is asserted
+ * GenxCare will send, and what the phone will allow. Most of what is asserted
  * here is that the second one is never hidden (plans/phase8.md §§6, 19).
  */
 

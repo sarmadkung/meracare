@@ -1,6 +1,6 @@
-You are the lead software engineer responsible for building the GenXcare MVP.
+You are the lead software engineer responsible for building the GenxCare MVP.
 
-GenXcare is a Senior Care and Family Coordination application.
+GenxCare is a Senior Care and Family Coordination application.
 
 The repository already contains the product and engineering specifications under:
 
@@ -112,7 +112,7 @@ If you encounter a genuine architectural blocker, stop and explain it before cha
 3. PRODUCT MODES
 ==================================================
 
-GenXcare is ONE application.
+GenxCare is ONE application.
 
 Do NOT build separate applications for:
 
@@ -276,11 +276,11 @@ Offline
 
 The product name is:
 
-GenXcare
+GenxCare
 
 Domain:
 
-GenXcare.app
+GenxCare.app
 
 Use the approved visual system in:
 
@@ -915,7 +915,7 @@ For ordinary implementation details that do not change the documented architectu
 
 The MVP is complete only when:
 
-- Solo users can use GenXcare without a caregiver.
+- Solo users can use GenxCare without a caregiver.
 - Families can create/manage a senior.
 - Family members can invite caregivers.
 - Professional caregivers can manage multiple seniors.
@@ -943,7 +943,7 @@ The MVP is complete only when:
 23. FINAL PRINCIPLE
 ==================================================
 
-Build GenXcare as a real production-quality foundation, not as a disposable prototype.
+Build GenxCare as a real production-quality foundation, not as a disposable prototype.
 
 But do not over-engineer it.
 

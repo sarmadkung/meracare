@@ -59,7 +59,7 @@ export function useReminderSync(isSignedIn: boolean, isRestoring: boolean) {
   // The server wins when it can: a push reflects the care as it is at the
   // moment it is sent, where a locally scheduled reminder reflects the plan as
   // it was when the app was last open. Local scheduling remains the fallback,
-  // and today it is the only path that works at all, because GenXcare holds no
+  // and today it is the only path that works at all, because GenxCare holds no
   // push credentials yet.
   const registrationSettled = register.isSuccess || register.isError;
   const serverCanPush = register.data?.pushTokenRegistered === true;
@@ -311,7 +311,7 @@ async function recordAndReport(
       title: pending.action === 'take' ? 'Dose recorded' : 'Dose skipped',
       message:
         outcome === 'queued'
-          ? 'Saved on this device. GenXcare will send it when you are back online.'
+          ? 'Saved on this device. GenxCare will send it when you are back online.'
           : 'The medication record is up to date.',
     });
   } catch {

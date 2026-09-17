@@ -12,7 +12,7 @@ import (
 )
 
 // The push boundary, tested against a stand-in for the provider rather than
-// against the provider. What matters is how GenXcare reads each answer: a
+// against the provider. What matters is how GenxCare reads each answer: a
 // rejected token has to be retired, a rate limit has to be retried, and an
 // outage must not look like success (plans/phase11.md §§38, 39).
 

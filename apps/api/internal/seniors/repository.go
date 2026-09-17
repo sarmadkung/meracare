@@ -171,7 +171,7 @@ type UpdateParams struct {
 // they are revoked (plans/phase11.md §§12, 31).
 //
 // Unpaged, and that is a deliberate MVP decision rather than an oversight: one
-// pass needs the whole roster at once to decide anything, and at GenXcare's
+// pass needs the whole roster at once to decide anything, and at GenxCare's
 // scale the whole roster is a few thousand rows. The first deployment where
 // that stops being true will need the sweep sharded by senior, which is a
 // change to the scheduler rather than to this query.

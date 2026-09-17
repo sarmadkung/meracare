@@ -310,7 +310,7 @@ func TestADueNotificationIsPushedWithItsOwnWords(t *testing.T) {
 		t.Errorf("title = %q", sent[0].Title)
 	}
 	// The payload is identifiers only. Anything else would be information
-	// travelling outside GenXcare's authorization (plans/phase11.md §58).
+	// travelling outside GenxCare's authorization (plans/phase11.md §58).
 	for _, key := range []string{"notificationId", "type", "seniorId", "entityType", "entityId"} {
 		if sent[0].Data[key] == "" {
 			t.Errorf("payload is missing %q: %v", key, sent[0].Data)

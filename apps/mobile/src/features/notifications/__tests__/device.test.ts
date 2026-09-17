@@ -68,7 +68,7 @@ it('describes the installation for registration', async () => {
 
 it('carries a push token once permission allows delivery', async () => {
   // Only meaningful with an EAS project id configured; without one there is no
-  // token to fetch, which is the state GenXcare is actually in today.
+  // token to fetch, which is the state GenxCare is actually in today.
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
 
   const description = await describeDevice();

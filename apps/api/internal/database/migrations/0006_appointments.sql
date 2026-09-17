@@ -25,7 +25,7 @@ CREATE TABLE appointments (
 
     -- NULL when nobody said what sort of visit it is. A short recognised list
     -- rather than free text, so the create screen can offer choices — and
-    -- deliberately not a medical taxonomy: GenXcare coordinates appointments,
+    -- deliberately not a medical taxonomy: GenxCare coordinates appointments,
     -- it does not classify care (plans/phase6.md §§2, 28).
     kind                text,
 

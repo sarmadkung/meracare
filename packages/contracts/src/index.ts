@@ -21,5 +21,5 @@ export * from './task';
 export * from './task-labels';
 export * from './user';
 
-/** API version prefix for every GenXcare endpoint. */
+/** API version prefix for every GenxCare endpoint. */
 export const API_VERSION_PREFIX = '/v1';

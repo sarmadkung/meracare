@@ -1,6 +1,6 @@
 # @genxcare/marketing
 
-The GenXcare marketing site. One page: what the app does, who it is for, and the
+The GenxCare marketing site. One page: what the app does, who it is for, and the
 App Store / Google Play links.
 
 Plain HTML and CSS with no build step and no dependencies, so it deploys as
