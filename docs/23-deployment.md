@@ -6,7 +6,7 @@ Supabase, so the droplet holds no data: losing it costs a rebuild, not records.
 | | |
 |---|---|
 | Host | Ubuntu 26.04 LTS, 1 vCPU, 1 GB RAM, `134.209.103.131` |
-| Public address | `https://api.genxcare.app` (Caddy terminates TLS) |
+| Public address | `https://api.rest-api-mock.online` (Caddy terminates TLS) |
 | API | `genxcare-api.service`, listening on `127.0.0.1:8090` |
 | Database | Supabase session pooler, `DATABASE_MAX_CONNS=5` |
 | Deploy | `genxcare-deploy.timer`, every two minutes |
@@ -45,7 +45,7 @@ merging a bump.
 The version that is live is visible from outside: `/healthz` reports it.
 
 ```bash
-curl -s https://api.genxcare.app/healthz     # {"status":"ok","version":"0.1.0"}
+curl -s https://api.rest-api-mock.online/healthz     # {"status":"ok","version":"0.1.0"}
 ```
 
 **Rollback restores the binary, not the schema.** Migrations are forward-only,
@@ -109,4 +109,4 @@ broken one again on its next tick.
   plus 1 GB of swap. If the API starts competing with builds for memory, the
   next step is building elsewhere — not a bigger droplet.
 - **Mobile builds need the production URL.** Set
-  `EXPO_PUBLIC_API_URL=https://api.genxcare.app` for release builds.
+  `EXPO_PUBLIC_API_URL=https://api.rest-api-mock.online` for release builds.
