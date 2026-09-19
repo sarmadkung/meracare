@@ -26,6 +26,11 @@ import (
 	"github.com/genxcare/api/pkg/logging"
 )
 
+// version is the release this binary was built from. The deploy script sets it
+// from apps/api/VERSION with -ldflags "-X main.version=...", so /healthz can
+// report which release is actually running. A local build leaves it empty.
+var version string
+
 func main() {
 	if err := run(); err != nil {
 		// The logger may not exist yet, so report to stderr and exit non-zero.
@@ -75,6 +80,7 @@ func run() error {
 		Logger:   logger,
 		Pool:     pool,
 		Verifier: verifier,
+		Version:  version,
 	}
 	handler := server.New(deps)
 
@@ -107,6 +113,7 @@ func run() error {
 		logger.Info("api listening",
 			slog.String("addr", httpServer.Addr),
 			slog.String("env", string(cfg.Env)),
+			slog.String("version", version),
 		)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErrors <- err

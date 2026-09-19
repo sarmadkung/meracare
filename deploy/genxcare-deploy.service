@@ -1,0 +1,15 @@
+[Unit]
+Description=Deploy the GenxCare API when apps/api/VERSION changes
+Documentation=https://github.com/sarmadkung/meracare/blob/main/docs/23-deployment.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/genxcare/src/deploy/deploy.sh
+
+# Building is the expensive part of a deploy and the API is serving while it
+# runs. Leave the single CPU to the API when the two compete.
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=30min
