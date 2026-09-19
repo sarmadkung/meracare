@@ -1,0 +1,40 @@
+[Unit]
+Description=GenxCare API
+Documentation=https://github.com/sarmadkung/meracare/blob/main/docs/23-deployment.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=genxcare
+Group=genxcare
+WorkingDirectory=/var/lib/genxcare
+EnvironmentFile=/etc/genxcare/api.env
+ExecStart=/opt/genxcare/bin/api-current
+
+# The API stops on SIGTERM: it finishes in-flight requests and lets the
+# notification scheduler complete the pass it is in, which leaves no
+# notification leased. Give it more than the 15s it allows itself.
+KillSignal=SIGTERM
+TimeoutStopSec=45
+Restart=always
+RestartSec=2
+
+# The service reads one binary and one environment file and writes nothing.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_INET AF_INET6
+LockPersonality=true
+ReadWritePaths=/var/lib/genxcare
+
+[Install]
+WantedBy=multi-user.target

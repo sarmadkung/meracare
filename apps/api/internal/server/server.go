@@ -36,6 +36,12 @@ type Dependencies struct {
 	Logger   *slog.Logger
 	Pool     *database.Pool
 	Verifier auth.Verifier
+
+	// Version is the release this binary was built from, reported by /healthz
+	// so a deploy can be confirmed from outside the server. It is set at build
+	// time from apps/api/VERSION and is empty in a local `go run`, which then
+	// omits the field rather than reporting a version it does not have.
+	Version string
 }
 
 // New builds the fully wired HTTP handler.
@@ -113,7 +119,7 @@ func New(deps Dependencies) http.Handler {
 	router.Use(middleware.Timeout(deps.Config.RequestTimeout))
 
 	// Unauthenticated operational endpoints.
-	router.Get("/healthz", healthHandler)
+	router.Get("/healthz", healthHandler(deps.Version))
 	router.Get("/readyz", readyHandler(deps.Pool))
 
 	// Invitations are mounted outside the authenticated group: previewing an
@@ -150,8 +156,14 @@ func New(deps Dependencies) http.Handler {
 
 // healthHandler reports that the process is running. It performs no dependency
 // checks so a liveness probe never restarts the API over a database blip.
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	httpx.WriteJSON(w, r, http.StatusOK, map[string]string{"status": "ok"})
+func healthHandler(version string) http.HandlerFunc {
+	body := map[string]string{"status": "ok"}
+	if version != "" {
+		body["version"] = version
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		httpx.WriteJSON(w, r, http.StatusOK, body)
+	}
 }
 
 // readyHandler reports whether the API can serve traffic, i.e. the database is
