@@ -1,10 +1,11 @@
 # Caddy terminates TLS for the GenxCare API and forwards to it on localhost.
 #
-# The certificate is obtained and renewed automatically once api.genxcare.app
-# resolves to this droplet. Until the DNS record exists, Caddy retries in the
-# background and the API is still reachable on the server itself.
+# The certificate is obtained and renewed automatically once
+# api.rest-api-mock.online resolves to this droplet. Until the DNS record
+# exists, Caddy retries in the background and the API is still reachable on the
+# server itself.
 
-api.genxcare.app {
+api.rest-api-mock.online {
 	encode zstd gzip
 
 	# The client's real address, for the API's request log.
@@ -13,7 +14,7 @@ api.genxcare.app {
 	}
 
 	log {
-		output file /var/log/caddy/api.genxcare.app.log {
+		output file /var/log/caddy/api.rest-api-mock.online.log {
 			roll_size 10MiB
 			roll_keep 5
 		}
