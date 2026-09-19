@@ -16,6 +16,10 @@ REPO_DIR=/opt/genxcare/src
 ENV_FILE=/etc/genxcare/api.env
 GO_VERSION=1.24.5
 
+# Overridable only to rehearse an install from a branch before it is merged.
+# The deploy timer still follows main unless told otherwise.
+BRANCH="${GENXCARE_DEPLOY_BRANCH:-main}"
+
 [[ $EUID -eq 0 ]] || { echo "run as root" >&2; exit 1; }
 
 echo "==> packages"
@@ -60,8 +64,9 @@ echo "==> checkout"
 if [[ ! -d $REPO_DIR/.git ]]; then
 	git clone --quiet "$REPO_URL" "$REPO_DIR"
 fi
-git -C "$REPO_DIR" fetch --quiet origin main
-git -C "$REPO_DIR" reset --quiet --hard origin/main
+git -C "$REPO_DIR" config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git -C "$REPO_DIR" fetch --quiet origin "$BRANCH"
+git -C "$REPO_DIR" reset --quiet --hard "origin/$BRANCH"
 
 echo "==> caddy"
 if ! command -v caddy >/dev/null; then
